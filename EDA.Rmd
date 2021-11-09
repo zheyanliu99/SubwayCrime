@@ -1,0 +1,27 @@
+---
+title: "EDA"
+author: "Zheyan"
+date: "11/9/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(leaflet)
+library(tidyverse)
+```
+
+## Where crime?
+
+```{r}
+df = read_csv('data/subwaycrime.csv')
+
+df %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(~Longitude, ~Latitude,radius= 3, weight= 0.01)
+
+
+```
+
+
+
