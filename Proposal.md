@@ -1,0 +1,55 @@
+Proposal
+================
+Zheyan
+11/11/2021
+
+## Group Members
+
+Zexu Yuan (zy2392), Zheyan Liu (zl3119), Baode Gao (bg2715), Keviant
+Kong (yk2960), Chaoqi Wu (cw3370)
+
+## The tentative project title: Crime on NYC subway
+
+## The motivation for this project:
+
+-   Investigate the safety magnitude at different subway stations on
+    various time points
+-   Help citizens to plan their routes avoiding crime events and assist
+    residents in guarding themselves.
+
+## The intended final products:
+
+-   Dashboards to show where and when the crime will take place;
+    estimate the crime rate at subway stations
+-   Build a shiny app to guide citizens on a safer route to their
+    destination.
+
+## The anticipated data sources:
+
+-   [Subway crime
+    data](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243)
+-   [Subway passengers
+    data](http://web.mta.info/developers/turnstile.html)
+
+## The planned analyses/visualization/coding:
+
+### Data Analyses:
+
+-   Most dangerous train and subway stations and most dangerous time
+    slots in NYC
+-   Most frequent crime events
+-   The relationship between type of crime rate and the number of
+    passengers on various time points
+-   Most vulnerable group of citizens in NYC
+-   Factors influence crime rates
+
+### Data Visualization:
+
+-   New York Map of Subway, the depth of color referring to the crime
+    rate, and the width of the line referring to people fluent
+-   Crime type distribution by place and time
+
+### Coding:
+
+-   Model Analysis
+-   Data Visualization(leaflet)
