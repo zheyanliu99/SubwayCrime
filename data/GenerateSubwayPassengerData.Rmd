@@ -1,0 +1,46 @@
+---
+title: "GenerateSubwayPassengerData"
+author: "Zheyan"
+date: "11/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rvest)
+library(httr)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Read data from online txt
+
+```{r}
+# first try
+url = "http://web.mta.info/developers/data/nyct/turnstile/turnstile_211106.txt"
+drug_use_html = read_html(url)
+
+drug_use_html
+drug_use_html
+
+df = read_csv2("http://web.mta.info/developers/data/nyct/turnstile/turnstile_211106.txt")
+```
+```{r}
+df
+```
+
+
