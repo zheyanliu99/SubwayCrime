@@ -1,0 +1,115 @@
+---
+title: "GenerateSubwayPassengerData"
+author: "Zheyan"
+date: "11/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(data.table)
+library(rvest)
+library(httr)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Merge subway info data
+
+Every station is one obervation, merge line names and company names.
+
+```{r}
+Booth_df = read_excel('Remote-Booth-Station.xls') 
+
+Booth_df %>%
+  janitor::clean_names() %>%
+  # mutate(line_name = paste(stringr::str_sort(strsplit(line_name, split = "")[[1]]), collapse = '')) %>% 
+  group_by(station,line_name,division) %>% 
+  summarise(remote_cnt = n_distinct(remote),
+            booth_cnt = n_distinct(booth)) 
+
+
+Booth_df_g = 
+  Booth_df %>%
+    janitor::clean_names() %>%
+    # mutate(line_name = paste(stringr::str_sort(strsplit(line_name, split = "")[[1]]), collapse = '')) %>% 
+    group_by(station) %>% 
+    summarise(remote_cnt = n_distinct(remote),
+              booth_cnt = n_distinct(booth),
+              line_name_all = paste0(line_name, collapse = ""),
+              division_all =  paste0(division, collapse = ",")) %>% 
+    ungroup()
+
+
+# function to drop duplicates in str (linename, divisionname)
+getdistinct_str = function(str, sep){
+  d <- unlist(strsplit(str, split=sep))
+  paste(unique(d), collapse = ',')[[1]]
+}
+
+# try demo
+str1 = "662323BCBC"
+getdistinct_str(str1, '')[[1]]
+
+Booth_df_g$line_name_all = map(Booth_df_g$line_name_all, ~getdistinct_str(.x, ''))
+Booth_df_g$division_all = map(Booth_df_g$division_all, ~getdistinct_str(.x, ','))
+
+```
+
+Get subway coordinates
+
+```{r}
+coordinates_df = read_csv('DOITT_SUBWAY_STATION_01_13SEPT2010.csv')
+
+extract_coordinate = function(str, index){
+  coordinates = str_split(substr(str, 8, nchar(str) -1), ' ')[[1]]
+  as.double(coordinates[index])
+}
+
+coordinates_df$long = map_dbl(coordinates_df$the_geom, ~extract_coordinate(.x, 1))
+coordinates_df$lat = map_dbl(coordinates_df$the_geom, ~extract_coordinate(.x, 2))
+coordinates_df = 
+  coordinates_df %>% 
+  mutate(station = toupper(NAME)) %>% 
+  select(station, long, lat)
+
+coordinates_df
+```
+
+
+
+Left Join coordinates and out put final
+
+```{r}
+Booth_df_g %>% 
+  left_join(coordinates_df, by = 'station') %>% fwrite('station_info.csv')
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
