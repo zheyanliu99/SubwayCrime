@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(data.table)
 library(rvest)
 library(httr)
 
@@ -29,18 +30,39 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ## Read data from online txt
 
+Generate date series in format like '211106'
+
+```{r}
+beginDate = as.Date('2019-01-05')
+endDate = as.Date('2021-11-06')
+
+DateSeries = seq(beginDate,endDate,by = 7)
+
+DateSeries = map(DateSeries, ~substr(str_replace_all(.x, "-", ""), 3, 99))
+
+DateSeries[[1]]
+```
+
+
 ```{r}
 # first try
-url = "http://web.mta.info/developers/data/nyct/turnstile/turnstile_211106.txt"
-drug_use_html = read_html(url)
+read_onlinedf = function(date){
+  url = paste0("http://web.mta.info/developers/data/nyct/turnstile/turnstile_", date, '.txt')
+  df = read_delim(url, delim = ',')
+  df
+}
 
-drug_use_html
-drug_use_html
 
-df = read_csv2("http://web.mta.info/developers/data/nyct/turnstile/turnstile_211106.txt")
+df_all = map_df(DateSeries, read_onlinedf)
+# df = read_delim("http://web.mta.info/developers/data/nyct/turnstile/turnstile_211106.txt", delim = ',')
+
+
+fwrite(df_all, 'passenger.csv')
 ```
 ```{r}
-df
+df %>% 
+  group_by(LINENAME) %>% 
+  summarise(n = n())
 ```
 
 
