@@ -6,6 +6,7 @@ Subway passengers:http://web.mta.info/developers/turnstile.html
 
 Subway crime data: in data folder
 
+Subway station coordinates: https://data.cityofnewyork.us/Transportation/Subway-Stations/arq3-7z49
 
 Demo dashboard:https://data.torontopolice.on.ca/pages/major-crime-indicators
 
