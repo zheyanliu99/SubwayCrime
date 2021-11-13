@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(data.table)
+library(readxl)
 library(rvest)
 library(httr)
 
@@ -133,4 +134,41 @@ passenger_df_final =
 fwrite(passenger_df_final, 'passenger_cleaned.csv')
 passenger_df_final
 ```
+The diff contains some error, some super big some negative!!!
+
+
+
+
+Left join some station info such as which line? which company?
+
+```{r}
+passenger_df_final = read_csv('passenger_cleaned.csv')
+passenger_df_final %>% 
+  group_by(station)
+passenger_df_final
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
