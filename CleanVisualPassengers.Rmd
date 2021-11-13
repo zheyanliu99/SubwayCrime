@@ -1,5 +1,5 @@
 ---
-title: "GenerateSubwayPassengerData"
+title: "CleanVisualPassengers"
 author: "Zheyan"
 date: "11/12/2021"
 output: html_document
@@ -8,8 +8,8 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(data.table)
-library(rvest)
-library(httr)
+library(leaflet)
+library(plotly)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -28,45 +28,12 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-## Read data from online txt
-
-Generate date series in format like '211106'
-
-```{r}
-beginDate = as.Date('2019-01-05')
-endDate = as.Date('2021-11-06')
-
-DateSeries = seq(beginDate,endDate,by = 7)
-
-DateSeries = map(DateSeries, ~substr(str_replace_all(.x, "-", ""), 3, 99))
-
-DateSeries[[1]]
-```
-
-
-```{r}
-# first try
-read_onlinedf = function(date){
-  url = paste0("http://web.mta.info/developers/data/nyct/turnstile/turnstile_", date, '.txt')
-  df = read_delim(url, delim = ',')
-  df
-}
-
-
-df_all = map_df(DateSeries, read_onlinedf)
-# df = read_delim("http://web.mta.info/developers/data/nyct/turnstile/turnstile_211106.txt", delim = ',')
-
-
-fwrite(df_all, 'passenger.csv')
-```
-
-
 ## Clean data
 
 Read data
 
 ```{r cars}
-passenger_df = read_csv('passenger.csv')
+passenger_df = read_csv('data/passenger.csv')
 ```
 
 First Groupby
@@ -132,5 +99,26 @@ passenger_df_final =
 
 fwrite(passenger_df_final, 'passenger_cleaned.csv')
 passenger_df_final
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
