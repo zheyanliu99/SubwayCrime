@@ -1,0 +1,164 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rvest)
+library(httr)
+library(lubridate)
+```
+
+# Get data from Website
+```{r}
+
+url_base <-  "http://web.mta.info/developers/data/nyct/turnstile/turnstile_"
+
+subway <- 
+  read_csv("http://web.mta.info/developers/data/nyct/turnstile/turnstile_211106.txt") %>% 
+  janitor::clean_names()
+
+
+for (i in 1:1) {
+  date <- date-7*i
+  base <- (year(date)-2000)*10000+month(date)*100+day(date)
+  url <- str_c(url_base, base,".txt")
+  subway =  bind_rows(subway,read_csv(url))
+  output[i+1]=base
+}
+```
+
+
+```{r}
+subway_cleaned <-
+  subway %>% 
+  mutate(
+    date = mdy(date),
+    time = case_when(
+      hms("00:00:00")<=time&time<hms("02:00:00") ~hms("00:00:00"),
+      hms("02:00:00")<=time&time<hms("04:00:00") ~hms("04:00:00"),
+      hms("04:00:00")<=time&time<hms("06:00:00") ~hms("04:00:00"),
+      hms("06:00:00")<=time&time<hms("08:00:00") ~hms("08:00:00"),
+      hms("08:00:00")<=time&time<hms("10:00:00") ~hms("08:00:00"),
+      hms("10:00:00")<=time&time<hms("12:00:00") ~hms("12:00:00"),
+      hms("12:00:00")<=time&time<hms("14:00:00") ~hms("12:00:00"),
+      hms("14:00:00")<=time&time<hms("16:00:00") ~hms("16:00:00"),
+      hms("16:00:00")<=time&time<hms("18:00:00") ~hms("16:00:00"),
+      hms("18:00:00")<=time&time<hms("20:00:00") ~hms("20:00:00"),
+      hms("20:00:00")<=time&time<hms("23:59:59") ~hms("20:00:00"),
+    ),
+    entries = as.numeric(entries),
+    exits = as.numeric(exits),
+    linename
+  )
+```
+
+
+```{r}
+getdistinct_str = function(str, sep){
+  d <- str_sort(unlist(strsplit(str, split=sep)))
+  paste(unique(d), collapse = '')[[1]]
+}
+subway_cleaned$linename = map_chr(subway_cleaned$linename,~getdistinct_str(.x, ''))
+```
+
+
+```{r}
+subway_cleaned1 <- 
+  subway_cleaned %>% 
+  filter(
+    !station %in% c("City/Bus","PATH NEW WTC","14TH STREET","EXCHANGE PLACE","123ACE")
+  ) %>% 
+  group_by(station,linename,date,time) %>% 
+  summarize(
+    total_entry = sum(entries),
+    total_exit = sum(exits)
+  ) %>% 
+  ungroup() %>% 
+  filter(
+    date  == "2021-10-30"
+  ) %>% 
+  mutate(
+    linename = case_when(
+      station == "BOTANIC GARDEN" ~"S",
+      station == "FRANKLIN AV" ~"2345",
+      station == "74 ST-BROADWAY" ~"7",
+      station == "JKSN HT-ROOSVLT" ~"EFMR",
+      station == "COURT SQ"&linename =="EGM" ~"G",
+      station == "COURT SQ-23 ST" ~"EM",
+      station == "149/GRAND CONC" ~"4",
+      station == "42 ST-BRYANT PK" ~"BDFM",
+      station == "5 AVE" ~"7",
+      station == "42 ST-PORT AUTH" ~"ACE",
+      station == "TIMES SQ-42 ST" ~"1237NQRSW",
+      station == "6 AV" ~"FM",
+      station == "14 ST"&linename =="123FLM" ~"123L",
+      station == "CHAMBERS ST"&linename =="23ACE" ~"AC",
+      station == "PARK PLACE" ~"23",
+      station == "WORLD TRADE CTR" ~"E",
+      station == "SOUTH FERRY" ~"1",
+      station == "WHITEHALL S-FRY" ~"RW",
+      station == "BROOKLYN BRIDGE" ~"456",
+      station == "CHAMBERS ST"&linename =="456JZ" ~"JZ",
+      station == "4AV-9 ST" ~"DFGNR",
+      station == "LEXINGTON AV/53" ~"EM",
+      station == "5 AV/59 ST" ~"NRW",
+      station == "LEXINGTON AV/63" ~"FQ",
+      station == "59 ST"&linename =="456NQRW" ~"456NRW",
+      station == "59 ST"&linename =="NRW" ~"NR",
+      station == "QUEENSBORO PLZ" ~"7NW",
+      linename =="NQW" ~"NW",
+      linename =="7NQW" ~"7NW",
+      TRUE ~linename
+    )
+  ) %>% 
+  arrange(station,linename,date,time)
+
+
+
+```
+
+
+```{r}
+subway_number <- 
+  subway_cleaned1 %>% 
+  group_by(station,linename) %>% 
+  summarize(
+    number = n()
+  )
+```
+
+
+```{r}
+subway_difference <- 
+  subway_cleaned %>% 
+  mutate(
+    entry_difference = "first",
+    exit_difference = "first"
+  )
+
+
+for (i in 1:nrow(subway_difference)) {
+  if (subway_difference$station[i] == subway_difference$station[i + 1]&
+      subway_difference$linename[i] == subway_difference$linename[i + 1]){
+    subway_difference$entry_difference[i+1] = 
+      subway_difference$total_entry[i+1] - subway_difference$total_entry[i]
+    subway_difference$exit_difference[i+1] = 
+      subway_difference$total_exit[i+1]-subway_difference$total_exit[i]
+  } else{
+  subway_difference$entry_difference[i+1] = "first"
+  subway_difference$exit_difference[i+1] = "first"
+  }
+}
+
+subway_difference_unnormal <- 
+  subway_difference %>% 
+  filter(entry_difference<0|entry_difference<10000)
+
+
+
+```
+
+
