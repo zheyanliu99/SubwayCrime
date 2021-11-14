@@ -30,7 +30,7 @@ for (i in 1:1) {
 }
 ```
 
-
+# 修改时间，归到最近的4小时
 ```{r}
 subway_cleaned <-
   subway %>% 
@@ -55,7 +55,7 @@ subway_cleaned <-
   )
 ```
 
-
+# 重复string
 ```{r}
 getdistinct_str = function(str, sep){
   d <- str_sort(unlist(strsplit(str, split=sep)))
@@ -64,12 +64,13 @@ getdistinct_str = function(str, sep){
 subway_cleaned$linename = map_chr(subway_cleaned$linename,~getdistinct_str(.x, ''))
 ```
 
-
+# 去除不合理的站点名，拆分站点，重新调整line
 ```{r}
 subway_cleaned1 <- 
   subway_cleaned %>% 
   filter(
-    !station %in% c("City/Bus","PATH NEW WTC","14TH STREET","EXCHANGE PLACE","123ACE")
+    !station %in% c("City/Bus","PATH NEW WTC","14TH STREET","EXCHANGE PLACE"),
+    linename != "123ACE"
   ) %>% 
   group_by(station,linename,date,time) %>% 
   summarize(
@@ -130,7 +131,7 @@ subway_number <-
   )
 ```
 
-
+# 计算差值
 ```{r}
 subway_difference <- 
   subway_cleaned %>% 
