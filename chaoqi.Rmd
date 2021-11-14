@@ -68,6 +68,13 @@ subway_cleaned$linename = map_chr(subway_cleaned$linename,~getdistinct_str(.x, '
 ```{r}
 subway_cleaned1 <- 
   subway_cleaned %>% 
+   mutate(
+    linename = case_when(
+      station == "42 ST-PORT AUTH" ~"ACE",
+      station == "TIMES SQ-42 ST" ~"1237NQRSW",
+      TRUE ~linename
+    ) 
+    ) %>% 
   filter(
     !station %in% c("City/Bus","PATH NEW WTC","14TH STREET","EXCHANGE PLACE"),
     linename != "123ACE"
@@ -84,7 +91,8 @@ subway_cleaned1 <-
   mutate(
     linename = case_when(
       station == "BOTANIC GARDEN" ~"S",
-      station == "FRANKLIN AV" ~"2345",
+      station == "FRANKLIN AV"&linename =="2345S" ~"2345",
+      station == "FRANKLIN AV"&linename =="ACS" ~"CS",
       station == "74 ST-BROADWAY" ~"7",
       station == "JKSN HT-ROOSVLT" ~"EFMR",
       station == "COURT SQ"&linename =="EGM" ~"G",
@@ -92,12 +100,10 @@ subway_cleaned1 <-
       station == "149/GRAND CONC" ~"4",
       station == "42 ST-BRYANT PK" ~"BDFM",
       station == "5 AVE" ~"7",
-      station == "42 ST-PORT AUTH" ~"ACE",
-      station == "TIMES SQ-42 ST" ~"1237NQRSW",
       station == "6 AV" ~"FM",
       station == "14 ST"&linename =="123FLM" ~"123L",
       station == "CHAMBERS ST"&linename =="23ACE" ~"AC",
-      station == "PARK PLACE" ~"23",
+      station == "PARK PLACE"&linename =="23ACE" ~"23",
       station == "WORLD TRADE CTR" ~"E",
       station == "SOUTH FERRY" ~"1",
       station == "WHITEHALL S-FRY" ~"RW",
