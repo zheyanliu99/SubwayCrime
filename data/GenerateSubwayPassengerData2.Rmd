@@ -1,0 +1,292 @@
+---
+title: "GenerateSubwayPassengerData"
+author: "Zheyan"
+date: "11/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(data.table)
+library(readxl)
+library(rvest)
+library(httr)
+library(lubridate)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Read data from online txt
+
+Generate date series in format like '211106'
+
+```{r}
+beginDate = as.Date('2019-01-05')
+endDate = as.Date('2021-11-06')
+
+DateSeries = seq(beginDate,endDate,by = 7)
+
+DateSeries = map(DateSeries, ~substr(str_replace_all(.x, "-", ""), 3, 99))
+
+DateSeries[[1]]
+```
+
+
+```{r, show_col_types = FALSE}
+# first try
+read_onlinedf = function(date){
+  url = paste0("http://web.mta.info/developers/data/nyct/turnstile/turnstile_", date, '.txt')
+  df = read_delim(url, delim = ',',show_col_types = FALSE)
+  df
+}
+
+df_all = map_df(DateSeries, read_onlinedf)
+# df = read_delim("http://web.mta.info/developers/data/nyct/turnstile/turnstile_211106.txt", delim = ',')
+
+fwrite(df_all, 'passenger.csv')
+```
+
+
+## Clean data
+
+Read data
+
+```{r cars}
+passenger_df = read_csv('passenger.csv')
+passenger_df 
+```
+Change line and time format (code by Chaoqi)
+
+
+```{r}
+# Change time format
+passenger_df =
+  passenger_df %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    date = mdy(date),
+    time = floor((time + 2*60*60-1)/(4*60*60))*4*60*60,
+    entries = as.numeric(entries),
+    exits = as.numeric(exits),
+    linename
+  )
+
+
+# change line name
+passenger_df <- 
+  passenger_df %>% 
+   mutate(
+    linename = case_when(
+      station == "42 ST-PORT AUTH" ~"ACE",
+      station == "TIMES SQ-42 ST" ~"1237NQRSW",
+      TRUE ~linename
+    ) 
+    ) %>% 
+  filter(
+    !station %in% c("City/Bus","PATH NEW WTC","14TH STREET","EXCHANGE PLACE"),
+    linename != "123ACE"
+  ) %>% 
+  mutate(
+    linename = case_when(
+      station == "BOTANIC GARDEN" ~"S",
+      station == "FRANKLIN AV"&linename =="2345S" ~"2345",
+      station == "FRANKLIN AV"&linename =="ACS" ~"CS",
+      station == "74 ST-BROADWAY" ~"7",
+      station == "JKSN HT-ROOSVLT" ~"EFMR",
+      station == "COURT SQ"&linename =="EGM" ~"G",
+      station == "COURT SQ-23 ST" ~"EM",
+      station == "149/GRAND CONC" ~"4",
+      station == "42 ST-BRYANT PK" ~"BDFM",
+      station == "5 AVE" ~"7",
+      station == "6 AV" ~"FM",
+      station == "14 ST"&linename =="123FLM" ~"123L",
+      station == "CHAMBERS ST"&linename =="23ACE" ~"AC",
+      station == "PARK PLACE"&linename =="23ACE" ~"23",
+      station == "WORLD TRADE CTR" ~"E",
+      station == "SOUTH FERRY" ~"1",
+      station == "WHITEHALL S-FRY" ~"RW",
+      station == "BROOKLYN BRIDGE" ~"456",
+      station == "CHAMBERS ST"&linename =="456JZ" ~"JZ",
+      station == "4AV-9 ST" ~"DFGNR",
+      station == "LEXINGTON AV/53" ~"EM",
+      station == "5 AV/59 ST" ~"NRW",
+      station == "LEXINGTON AV/63" ~"FQ",
+      station == "59 ST"&linename =="456NQRW" ~"456NRW",
+      station == "59 ST"&linename =="NRW" ~"NR",
+      station == "QUEENSBORO PLZ" ~"7NW",
+      linename =="NQW" ~"NW",
+      linename =="7NQW" ~"7NW",
+      TRUE ~linename
+    )
+  ) %>% 
+  group_by(station,linename,date,time) %>% 
+  summarize(
+    total_entry = sum(entries),
+    total_exit = sum(exits)
+  ) %>% 
+  ungroup() %>% 
+  arrange(station,linename,date,time)
+
+passenger_df
+```
+
+
+First clean 
+
+```{r}
+# clean linename 1BD and BD1 should be the same 
+getdistinct_str = function(str, sep){
+  d = unlist(strsplit(str, split=sep))
+  d = str_sort(d)
+  paste(d, collapse = '')[[1]]
+}
+
+passenger_df1 = 
+  passenger_df %>% 
+  janitor::clean_names()
+
+# cannot run, use py!
+# passenger_df1$linename = map_chr(passenger_df1$linename, ~getdistinct_str(.x, sep = ''))
+# passenger_df1
+
+linename_df = 
+  passenger_df1 %>% 
+    distinct(station, linename)
+
+linename_df$linename = map_chr(linename_df$linename, ~getdistinct_str(.x, sep = ''))
+
+linename_df = linename_df %>% distinct()
+
+passenger_df1 = 
+  passenger_df1 %>% 
+  select(-linename) %>% 
+  left_join(linename_df, by = 'station')
+
+passenger_df1
+linename_df
+```
+
+
+First Groupby
+
+```{r}
+
+# group by station and time (neglect infomation about unit/scp and ca)
+passenger_df_cleaned = 
+  passenger_df1 %>% 
+    janitor::clean_names() %>% 
+    # mutate(entries = as.integer(entries),
+    #        exits = as.integer(exits)) %>% 
+    group_by(station, linename, date, time) %>% 
+    
+    # summarise(entries_sum = sum(entries),
+    #           exits_sum = sum(exits),
+              # ca_distinct = n_distinct(c_a),
+              # unit_distinct = n_distinct(unit),
+              # scp_distinct = n_distinct(scp))
+             # ) %>% 
+    mutate(date = as.Date(date, "%m/%d/%Y")) %>% 
+    arrange(station, linename, date, time) %>% 
+    ungroup()
+    
+passenger_df_cleaned
+```
+
+Functions to give time period and passenger difference
+
+```{r}
+give_diff_period = function(df){
+  df %>% 
+    mutate(entry_diff = total_entry - lag(total_entry),
+           exit_diff = total_exit - lag(total_exit),
+           time_period = paste0(lag(time), '-', time)
+           ) 
+}
+
+# try if Station '59 ST' work
+df = 
+  passenger_df_cleaned %>% 
+    filter(station == '59 ST')
+
+give_diff_period(df)
+
+passenger_df_cleaned
+
+  passenger_df_cleaned %>% 
+    filter(station == '59 ST')
+```
+
+Nest data and map through all stations
+
+
+```{r}
+passenger_df_cleaned = 
+  passenger_df_cleaned %>% 
+  relocate(station, linename)
+
+passenger_df_nested = 
+  nest(passenger_df_cleaned, data = date:total_exit)
+
+passenger_df_final = 
+  map_df(passenger_df_nested$data, ~give_diff_period(.x)) %>% 
+  mutate(station = passenger_df_cleaned %>% pull(station)) %>% 
+  relocate(station, linename, date, time_period)
+  
+
+fwrite(passenger_df_final, 'passenger_cleaned.csv')
+passenger_df_final
+```
+The diff contains some error, some super big some negative!!!
+
+
+
+
+Left join some station info such as which line? which company?
+
+```{r}
+passenger_df_final = read_csv('passenger_cleaned.csv')
+passenger_df_final %>% 
+  filter(entries_diff > 0, entries_diff < 100000)
+
+
+passenger_df_final
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
