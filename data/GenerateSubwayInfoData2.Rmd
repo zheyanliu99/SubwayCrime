@@ -1,0 +1,148 @@
+---
+title: "GenerateSubwayPassengerData"
+author: "Zheyan"
+date: "11/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(data.table)
+library(readxl)
+library(rvest)
+library(httr)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Merge subway info data
+
+Every station is one obervation, merge line names and company names.
+
+```{r}
+passenger_df = read_csv('passenger.csv')
+
+Booth_df_g = 
+  passenger_df %>% 
+    janitor::clean_names() %>% 
+    distinct(station)
+
+```
+
+## Get subway coordinates
+
+### First join
+
+```{r}
+coordinates_df = read_csv('DOITT_SUBWAY_STATION_01_13SEPT2010.csv')
+
+extract_coordinate = function(str, index){
+  coordinates = str_split(substr(str, 8, nchar(str) -1), ' ')[[1]]
+  as.double(coordinates[index])
+}
+
+coordinates_df$long = map_dbl(coordinates_df$the_geom, ~extract_coordinate(.x, 1))
+coordinates_df$lat = map_dbl(coordinates_df$the_geom, ~extract_coordinate(.x, 2))
+coordinates_df = 
+  coordinates_df %>% 
+  mutate(station = toupper(NAME)) %>% 
+  select(station, long, lat)
+
+coordinates_df %>% fwrite('coordinates.csv')
+```
+arrange(station)
+
+
+Left Join coordinates and out put final
+
+```{r}
+Booth_df_g = 
+  Booth_df_g %>% 
+    left_join(coordinates_df, by = 'station') %>% 
+    arrange(station)
+
+Booth_df_g %>% 
+  fwrite('station_info.csv')
+
+Booth_df_g %>% 
+  
+```
+
+
+
+### Second join
+
+remove th from coordinates df (65TH ST to 65 ST)
+
+```{r}
+coordinates_df2 = coordinates_df
+
+fancy_left_join = function(df, lookup){
+  nomatch = df[is.na(df$long),] %>% select(-long, -lat)
+  matched = 
+    df %>% 
+    drop_na()
+  nomatch = 
+    nomatch %>% 
+    left_join(lookup, by='station')
+  bind_rows(nomatch, matched)
+}
+
+coordinates_df2$station = str_replace_all(coordinates_df2$station, "TH|ND|RD", "")
+Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df2)
+
+# Remove ST like (1ST ST)
+coordinates_df2$station = str_replace(coordinates_df2$station, "ST", "")
+Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df2)
+
+```
+
+
+## Third join
+
+Replace AVE with AV
+
+```{r}
+coordinates_df3 = coordinates_df
+coordinates_df3$station = str_replace_all(coordinates_df3$station, "AVE", "AV")
+
+Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df3)
+
+Booth_df_g %>% fwrite('machinesuccess_subway_info.csv')
+Booth_df_g[is.na(Booth_df_g$long),] %>% fwrite('manual_subway_info.csv')
+
+# try second and third together
+coordinates_df33 = coordinates_df
+coordinates_df33$station = str_replace_all(coordinates_df33$station, "TH|ND|RD", "")
+coordinates_df33$station = str_replace_all(coordinates_df33$station, "AVE", "AV")
+
+Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df33)
+
+Booth_df_g %>% fwrite('machinesuccess_subway_info.csv')
+Booth_df_g[is.na(Booth_df_g$long),] %>% fwrite('manual_subway_info.csv')
+```
+
+
+
+
+
+
+
+
+
+
+
