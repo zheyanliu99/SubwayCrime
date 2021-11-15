@@ -12,6 +12,7 @@ library(rvest)
 library(httr)
 library(lubridate)
 library(flexdashboard)
+library(plotly)
 ```
 
 ## Import dataset
@@ -26,7 +27,7 @@ raw_sub_station =
   janitor::clean_names()
 ```
 
-## Tidy data: add time interval
+## Tidy data: add time intervals
 
 ```{r}
 sub_crime = 
@@ -48,9 +49,77 @@ sub_crime =
       hms("18:00:00") <= time & time < hms("20:00:00") ~hms("20:00:00"),
       hms("20:00:00") <= time & time < hms("23:59:59") ~hms("20:00:00"),
     )
+  ) %>% 
+  mutate(time = as.character(time)) %>% 
+  mutate(date = substring(as.character(as.Date(date, "%m/%d/%y")),1,7))
+```
+
+```{r}
+sub_crime %>% 
+  group_by(time, crime_event) %>% 
+  summarise(event_num = n()) %>% 
+  filter(event_num > 50)
+```
+
+
+## Crime events number by time
+
+```{r}
+bar_plot = 
+  sub_crime %>% 
+  mutate(time = as.factor(time)) %>% 
+  ggplot(aes(x = time, fill = crime_event)) + 
+  geom_histogram(stat = "count", width = 0.8) + 
+  labs(
+    title = "Frequency of crime events v.s. Time points", 
+    x = "Occurrence time", 
+    y = "Frequency of crime events") + 
+  theme_bw() + 
+  theme(
+    plot.title = element_text(hjust = 1), 
+    legend.position = "bottom",
+    legend.text = element_text(size = 8)) + 
+  guides(col = guide_legend(nrow = 2))
+
+ggplotly(bar_plot) %>%
+  layout(legend = list(
+      orientation = "h",
+      xanchor = "center",
+      yanchor = "top",
+      x = 0.5,
+      y = - 0.1
+    )
   )
 ```
 
-## Dashboard
+## The number of crime events trends over month
+
+```{r}
+spaghetti_plot1 = 
+  sub_crime %>% 
+  group_by(date, time) %>% 
+  count() %>% 
+  filter(!(date %in% ("2019-09"))) %>% 
+  ggplot(aes(x = date, y = n, color = time)) +
+  geom_line() +
+  xlab("Month") +
+  ylab("Number of crime events") +
+  theme_light() + 
+  theme(
+    plot.title = element_text(hjust = 0.5), 
+    legend.position = "bottom",
+    legend.text = element_text(size = 8)) + 
+  guides(col = guide_legend(nrow = 2))
+
+ggplotly(spaghetti_plot1) %>%
+  layout(legend = list(
+      orientation = "h",
+      xanchor = "center",
+      yanchor = "top",
+      x = 0.5,
+      y = -0.2
+    )
+  )
+```
 
 
