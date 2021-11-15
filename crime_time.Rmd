@@ -61,7 +61,6 @@ sub_crime %>%
   filter(event_num > 50)
 ```
 
-
 ## Crime events number by time
 
 ```{r}
