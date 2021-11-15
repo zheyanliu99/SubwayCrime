@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(data.table)
+library(readxl)
 library(rvest)
 library(httr)
 
@@ -33,11 +34,10 @@ scale_fill_discrete = scale_fill_viridis_d
 Every station is one obervation, merge line names and company names.
 
 ```{r}
-Booth_df = read_excel('Remote-Booth-Station.xls') 
+Booth_df = read_csv('Remote-Booth-Station.xls') 
 
 Booth_df %>%
   janitor::clean_names() %>%
-  # mutate(line_name = paste(stringr::str_sort(strsplit(line_name, split = "")[[1]]), collapse = '')) %>% 
   group_by(station,line_name,division) %>% 
   summarise(remote_cnt = n_distinct(remote),
             booth_cnt = n_distinct(booth)) 
@@ -46,7 +46,6 @@ Booth_df %>%
 Booth_df_g = 
   Booth_df %>%
     janitor::clean_names() %>%
-    # mutate(line_name = paste(stringr::str_sort(strsplit(line_name, split = "")[[1]]), collapse = '')) %>% 
     group_by(station) %>% 
     summarise(remote_cnt = n_distinct(remote),
               booth_cnt = n_distinct(booth),
@@ -65,12 +64,14 @@ getdistinct_str = function(str, sep){
 str1 = "662323BCBC"
 getdistinct_str(str1, '')[[1]]
 
-Booth_df_g$line_name_all = map(Booth_df_g$line_name_all, ~getdistinct_str(.x, ''))
-Booth_df_g$division_all = map(Booth_df_g$division_all, ~getdistinct_str(.x, ','))
+Booth_df_g$line_name_all = map_chr(Booth_df_g$line_name_all, ~getdistinct_str(.x, ''))
+Booth_df_g$division_all = map_chr(Booth_df_g$division_all, ~getdistinct_str(.x, ','))
 
 ```
 
-Get subway coordinates
+## Get subway coordinates
+
+### First join
 
 ```{r}
 coordinates_df = read_csv('DOITT_SUBWAY_STATION_01_13SEPT2010.csv')
@@ -87,7 +88,7 @@ coordinates_df =
   mutate(station = toupper(NAME)) %>% 
   select(station, long, lat)
 
-coordinates_df
+coordinates_df %>% fwrite('coordinates.csv')
 ```
 
 
@@ -95,13 +96,54 @@ coordinates_df
 Left Join coordinates and out put final
 
 ```{r}
+Booth_df_g = 
+  Booth_df_g %>% 
+    left_join(coordinates_df, by = 'station') 
+
 Booth_df_g %>% 
-  left_join(coordinates_df, by = 'station') %>% fwrite('station_info.csv')
+  fwrite('station_info.csv')
 
 ```
 
 
 
+### Second join
+
+remove th from coordinates df (65TH ST to 65 ST)
+
+```{r}
+coordinates_df2 = coordinates_df
+
+fancy_left_join = function(df, lookup){
+  nomatch = df[is.na(df$long),] %>% select(-long, -lat)
+  matched = 
+    df %>% 
+    drop_na()
+  nomatch = 
+    nomatch %>% 
+    left_join(lookup, by='station')
+  bind_rows(nomatch, matched)
+}
+
+coordinates_df2$station = str_replace_all(coordinates_df2$station, "TH|ND|RD", "")
+Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df2)
+
+# Remove ST like (1ST ST)
+coordinates_df2$station = str_replace(coordinates_df2$station, "ST", "")
+Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df2)
+Booth_df_g[is.na(Booth_df_g$long),] %>% fwrite('manual194_subway_info.csv')
+```
+
+
+## Third join
+
+Try subway crime data
+```{r}
+
+subwaycrime_df = read_csv('subwaycrime.csv')
+
+subwaycrime_df
+```
 
 
 
