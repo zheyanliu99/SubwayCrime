@@ -177,110 +177,110 @@ char_zips =
 #               opacity = 1,
 #               color = "white",
 #               dashArray = "3",
-#               fillOpacity = 0.7)
+#               fillOpacity = 0.7) 
 
   
 
 ```
 
-```{r}
-# packages required
-library(geojsonio)
-library(leaflet)
-library(magrittr)
-library(htmlwidgets)
- 
- 
- 
-#######################
-## READ POLYGON DATA ##
-#######################
- 
-# Read shapefile: Spatial Polygon DB
-neighborhoods_utrecht <- geojson_read("data/NY/10001.geojson", method= "local", what = "sp")
-
-
-neighborhoods_utrecht
-# What kind of data does this spatial object contain
-head(neighborhoods_utrecht@data)
- 
-# Show the neighborhoods of Utrecht on a Leaflet map
-leaflet(neighborhoods_utrecht) %>%
-  #addProviderTiles("nlmaps.standaard") %>% 
-  addProviderTiles("Esri.WorldGrayCanvas") %>%
-  addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, fillOpacity = 0.7, fillColor = "lightblue")
- 
- 
- 
-##################################
-## LOAD DATA TO PLOT ON POLYGON ##
-##################################
- 
-# Import data to be displayed on the map 
-utrecht_data <- read.csv("data_utrecht.csv", header = TRUE, sep = ";", quote = "\"", dec = ".", fill = TRUE)
- 
-# Create merge ID and merge data
-neighborhoods_utrecht@data$gwb_buurt_code <- 344 * 10000 + as.numeric(levels(neighborhoods_utrecht@data$KODE))[neighborhoods_utrecht@data$KODE] 
-neighborhoods_utrecht@data <- merge(neighborhoods_utrecht@data, utrecht_data, by.x="gwb_buurt_code", by.y="gwb_buurt_code")
- 
- 
- 
-#########################
-## DISPLAY DATA ON MAP ##
-#########################
- 
-# Define cut points for the colorbins
-cuts <- c(0.0, 0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 1)
- 
-# Choose a color palette and assign it to the values
-colorbins <- colorBin("YlOrRd", domain = neighborhoods_utrecht$p_65_inf, bins = cuts)
- 
-# Display data on elderly people on the map 
-map <-  leaflet(neighborhoods_utrecht) %>%
-                addTiles() %>%
-                addProviderTiles("Esri.WorldGrayCanvas") %>%
-                addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, 
-                            fillOpacity = 0.7, fillColor = ~colorbins(neighborhoods_utrecht$p_65_inf))  
- 
-map
- 
-# Add a legend
-map_with_legend <- map %>% addLegend(pal = colorbins, 
-                                      values = neighborhoods_utrecht$p_65_inf,
-                                      labFormat = labelFormat(suffix = " %", transform = function(p_65_inf) 100 * p_65_inf),
-                                      opacity = 0.7, title = "Residents of age 65 and older", position = "topright")
- 
-map_with_legend
- 
- 
- 
-###########################################
-## ADD MOUSE-OVER HIGHLIGHTS AND TOOLTIP ##
-###########################################
- 
-# Create HTML labels for tooltip
-tooltip <- sprintf("<strong>%s</strong><br/>%.1f%% elderly residents"
-                   ,neighborhoods_utrecht$gwb_buurt_naam
-                   ,neighborhoods_utrecht$p_65_inf*100
-                  ) %>% lapply(htmltools::HTML)
- 
- 
-# Display map
-map_with_tooltip <- map_with_legend %>% addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, fillOpacity = 0.7, 
-                                        fillColor = ~colorbins(neighborhoods_utrecht$p_65_inf), 
-                                        highlight = highlightOptions(weight = 5, color = "grey", fillOpacity = 0.7, bringToFront = TRUE),
-                                        label = tooltip
-                                                   )
-map_with_tooltip
- 
- 
- 
-###########################
-## SAVE OUTPUT HTML FILE ##
-###########################
- 
-# Save output as HTML widget (or incorporate into Shiny / Flexdashboard)
-saveWidget(map_with_tooltip, file="Elderly residents in Utrecht.html")
+```{r, include=FALSE}
+# # packages required
+# library(geojsonio)
+# library(leaflet)
+# library(magrittr)
+# library(htmlwidgets)
+#  
+#  
+#  
+# #######################
+# ## READ POLYGON DATA ##
+# #######################
+#  
+# # Read shapefile: Spatial Polygon DB
+# neighborhoods_utrecht <- geojson_read("data/NY/10001.geojson", method= "local", what = "sp")
+# 
+# 
+# neighborhoods_utrecht
+# # What kind of data does this spatial object contain
+# head(neighborhoods_utrecht@data)
+#  
+# # Show the neighborhoods of Utrecht on a Leaflet map
+# leaflet(neighborhoods_utrecht) %>%
+#   #addProviderTiles("nlmaps.standaard") %>% 
+#   addProviderTiles("Esri.WorldGrayCanvas") %>%
+#   addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, fillOpacity = 0.7, fillColor = "lightblue")
+#  
+#  
+#  
+# ##################################
+# ## LOAD DATA TO PLOT ON POLYGON ##
+# ##################################
+#  
+# # Import data to be displayed on the map 
+# utrecht_data <- read.csv("data_utrecht.csv", header = TRUE, sep = ";", quote = "\"", dec = ".", fill = TRUE)
+#  
+# # Create merge ID and merge data
+# neighborhoods_utrecht@data$gwb_buurt_code <- 344 * 10000 + as.numeric(levels(neighborhoods_utrecht@data$KODE))[neighborhoods_utrecht@data$KODE] 
+# neighborhoods_utrecht@data <- merge(neighborhoods_utrecht@data, utrecht_data, by.x="gwb_buurt_code", by.y="gwb_buurt_code")
+#  
+#  
+#  
+# #########################
+# ## DISPLAY DATA ON MAP ##
+# #########################
+#  
+# # Define cut points for the colorbins
+# cuts <- c(0.0, 0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 1)
+#  
+# # Choose a color palette and assign it to the values
+# colorbins <- colorBin("YlOrRd", domain = neighborhoods_utrecht$p_65_inf, bins = cuts)
+#  
+# # Display data on elderly people on the map 
+# map <-  leaflet(neighborhoods_utrecht) %>%
+#                 addTiles() %>%
+#                 addProviderTiles("Esri.WorldGrayCanvas") %>%
+#                 addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, 
+#                             fillOpacity = 0.7, fillColor = ~colorbins(neighborhoods_utrecht$p_65_inf))  
+#  
+# map
+#  
+# # Add a legend
+# map_with_legend <- map %>% addLegend(pal = colorbins, 
+#                                       values = neighborhoods_utrecht$p_65_inf,
+#                                       labFormat = labelFormat(suffix = " %", transform = function(p_65_inf) 100 * p_65_inf),
+#                                       opacity = 0.7, title = "Residents of age 65 and older", position = "topright")
+#  
+# map_with_legend
+#  
+#  
+#  
+# ###########################################
+# ## ADD MOUSE-OVER HIGHLIGHTS AND TOOLTIP ##
+# ###########################################
+#  
+# # Create HTML labels for tooltip
+# tooltip <- sprintf("<strong>%s</strong><br/>%.1f%% elderly residents"
+#                    ,neighborhoods_utrecht$gwb_buurt_naam
+#                    ,neighborhoods_utrecht$p_65_inf*100
+#                   ) %>% lapply(htmltools::HTML)
+#  
+#  
+# # Display map
+# map_with_tooltip <- map_with_legend %>% addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, fillOpacity = 0.7, 
+#                                         fillColor = ~colorbins(neighborhoods_utrecht$p_65_inf), 
+#                                         highlight = highlightOptions(weight = 5, color = "grey", fillOpacity = 0.7, bringToFront = TRUE),
+#                                         label = tooltip
+#                                                    )
+# map_with_tooltip
+#  
+#  
+#  
+# ###########################
+# ## SAVE OUTPUT HTML FILE ##
+# ###########################
+#  
+# # Save output as HTML widget (or incorporate into Shiny / Flexdashboard)
+# saveWidget(map_with_tooltip, file="Elderly residents in Utrecht.html")
 ```
 
 
