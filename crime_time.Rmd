@@ -169,7 +169,6 @@ crime_response_time =
 crime_response_time %>% 
   mutate(crime_event = fct_reorder(crime_event, response_time)) %>% 
   plot_ly(y = ~ response_time, color = ~ crime_event, type = "box", colors = "viridis")
-
 ```
 
 
