@@ -79,7 +79,7 @@ passenger_df =
   janitor::clean_names() %>% 
   mutate(
     date = mdy(date),
-    time = floor((time + 2*60*60-1)/(4*60*60))*4*60*60,
+    time = floor((time + 2*60*60)/(4*60*60))*4*60*60,
     entries = as.numeric(entries),
     exits = as.numeric(exits),
     linename
@@ -141,11 +141,13 @@ passenger_df <-
   ungroup() %>% 
   arrange(station,linename,date,time)
 
-passenger_df
+passenger_df %>% distinct(time)
+fwrite(passenger_df, 'passenger_cleaned1.csv')
+
 ```
 
 
-First clean 
+Clean 
 
 ```{r}
 # clean linename 1BD and BD1 should be the same 
@@ -155,43 +157,46 @@ getdistinct_str = function(str, sep){
   paste(d, collapse = '')[[1]]
 }
 
-passenger_df1 = 
-  passenger_df %>% 
-  janitor::clean_names()
-
 # cannot run, use py!
 # passenger_df1$linename = map_chr(passenger_df1$linename, ~getdistinct_str(.x, sep = ''))
 # passenger_df1
 
-linename_df = 
-  passenger_df1 %>% 
-    distinct(station, linename)
+# linename_df = 
+#   passenger_df1 %>% 
+#     distinct(station, linename)
+# 
+# linename_df$linename = map_chr(linename_df$linename, ~getdistinct_str(.x, sep = ''))
+# 
+# linename_df = linename_df %>% distinct()
 
-linename_df$linename = map_chr(linename_df$linename, ~getdistinct_str(.x, sep = ''))
 
-linename_df = linename_df %>% distinct()
+# passenger_df1 = 
+#   passenger_df1 %>% 
+#   select(-linename) %>% 
+#   left_join(linename_df, by = 'station')
 
-passenger_df1 = 
-  passenger_df1 %>% 
-  select(-linename) %>% 
-  left_join(linename_df, by = 'station')
-
-passenger_df1
-linename_df
+passenger_df$linename =  map_chr(passenger_df$linename, ~getdistinct_str(.x, sep = ''))
+fwrite(passenger_df, 'passenger_cleaned.csv')
+passenger_df %>% 
+  filter(station == '1 AV') %>% 
+  distinct(linename)
 ```
 
 
-First Groupby
+Second Groupby
 
 ```{r}
 
 # group by station and time (neglect infomation about unit/scp and ca)
 passenger_df_cleaned = 
-  passenger_df1 %>% 
+  passenger_df %>% 
     janitor::clean_names() %>% 
     # mutate(entries = as.integer(entries),
     #        exits = as.integer(exits)) %>% 
     group_by(station, linename, date, time) %>% 
+    summarize(
+    total_entry = sum(total_entry),
+    total_exit = sum(total_exit)) %>% 
     
     # summarise(entries_sum = sum(entries),
     #           exits_sum = sum(exits),
@@ -226,7 +231,7 @@ give_diff_period(df)
 
 passenger_df_cleaned
 
-  passenger_df_cleaned %>% 
+passenger_df_cleaned %>% 
     filter(station == '59 ST')
 ```
 
@@ -236,6 +241,7 @@ Nest data and map through all stations
 ```{r}
 passenger_df_cleaned = 
   passenger_df_cleaned %>% 
+  # mutate(time = ifelse(time == 0, 86400, time)) %>% 
   relocate(station, linename)
 
 passenger_df_nested = 
@@ -243,11 +249,12 @@ passenger_df_nested =
 
 passenger_df_final = 
   map_df(passenger_df_nested$data, ~give_diff_period(.x)) %>% 
-  mutate(station = passenger_df_cleaned %>% pull(station)) %>% 
+  mutate(station = passenger_df_cleaned %>% pull(station),
+         linename = passenger_df_cleaned %>% pull(linename)) %>% 
   relocate(station, linename, date, time_period)
   
 
-fwrite(passenger_df_final, 'passenger_cleaned.csv')
+fwrite(passenger_df_final, 'passenger_final.csv')
 passenger_df_final
 ```
 The diff contains some error, some super big some negative!!!
@@ -257,14 +264,6 @@ The diff contains some error, some super big some negative!!!
 
 Left join some station info such as which line? which company?
 
-```{r}
-passenger_df_final = read_csv('passenger_cleaned.csv')
-passenger_df_final %>% 
-  filter(entries_diff > 0, entries_diff < 100000)
-
-
-passenger_df_final
-```
 
 
 

@@ -1,0 +1,56 @@
+---
+title: "Crime_time"
+author: "Zexu Yuan"
+date: "11/14/2021"
+output: html_document
+---
+
+```{r setup}
+library(tidyverse)
+library(readxl)
+library(rvest)
+library(httr)
+library(lubridate)
+library(flexdashboard)
+```
+
+## Import dataset
+
+```{r}
+raw_sub_crime = 
+  read_csv("./data/subwaycrime.csv") %>% 
+  janitor::clean_names()
+
+raw_sub_station = 
+  read_xlsx("./data/subway_info_final.xlsx") %>% 
+  janitor::clean_names()
+```
+
+## Tidy data: add time interval
+
+```{r}
+sub_crime = 
+  raw_sub_crime %>% 
+  select(cmplnt_fr_dt, cmplnt_fr_tm, ofns_desc, station_name, latitude, longitude) %>% 
+  rename("date" = "cmplnt_fr_dt", "time" = "cmplnt_fr_tm", "crime_event" = "ofns_desc") %>% 
+  drop_na(time) %>% 
+  mutate(
+    time = case_when(
+      hms("00:00:00") <= time & time < hms("02:00:00") ~hms("00:00:00"),
+      hms("02:00:00") <= time & time < hms("04:00:00") ~hms("04:00:00"),
+      hms("04:00:00") <= time & time < hms("06:00:00") ~hms("04:00:00"),
+      hms("06:00:00") <= time & time < hms("08:00:00") ~hms("08:00:00"),
+      hms("08:00:00") <= time & time < hms("10:00:00") ~hms("08:00:00"),
+      hms("10:00:00") <= time & time < hms("12:00:00") ~hms("12:00:00"),
+      hms("12:00:00") <= time & time < hms("14:00:00") ~hms("12:00:00"),
+      hms("14:00:00") <= time & time < hms("16:00:00") ~hms("16:00:00"),
+      hms("16:00:00") <= time & time < hms("18:00:00") ~hms("16:00:00"),
+      hms("18:00:00") <= time & time < hms("20:00:00") ~hms("20:00:00"),
+      hms("20:00:00") <= time & time < hms("23:59:59") ~hms("20:00:00"),
+    )
+  )
+```
+
+## Dashboard
+
+

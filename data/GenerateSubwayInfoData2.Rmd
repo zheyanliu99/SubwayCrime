@@ -34,38 +34,12 @@ scale_fill_discrete = scale_fill_viridis_d
 Every station is one obervation, merge line names and company names.
 
 ```{r}
-Booth_df = read_csv('Remote-Booth-Station.xls') 
-
-Booth_df %>%
-  janitor::clean_names() %>%
-  group_by(station,line_name,division) %>% 
-  summarise(remote_cnt = n_distinct(remote),
-            booth_cnt = n_distinct(booth)) 
-
+passenger_df = read_csv('passenger.csv')
 
 Booth_df_g = 
-  Booth_df %>%
-    janitor::clean_names() %>%
-    group_by(station) %>% 
-    summarise(remote_cnt = n_distinct(remote),
-              booth_cnt = n_distinct(booth),
-              line_name_all = paste0(line_name, collapse = ""),
-              division_all =  paste0(division, collapse = ",")) %>% 
-    ungroup()
-
-
-# function to drop duplicates in str (linename, divisionname)
-getdistinct_str = function(str, sep){
-  d <- unlist(strsplit(str, split=sep))
-  paste(unique(d), collapse = ',')[[1]]
-}
-
-# try demo
-str1 = "662323BCBC"
-getdistinct_str(str1, '')[[1]]
-
-Booth_df_g$line_name_all = map_chr(Booth_df_g$line_name_all, ~getdistinct_str(.x, ''))
-Booth_df_g$division_all = map_chr(Booth_df_g$division_all, ~getdistinct_str(.x, ','))
+  passenger_df %>% 
+    janitor::clean_names() %>% 
+    distinct(station)
 
 ```
 
@@ -90,7 +64,7 @@ coordinates_df =
 
 coordinates_df %>% fwrite('coordinates.csv')
 ```
-
+arrange(station)
 
 
 Left Join coordinates and out put final
@@ -98,11 +72,14 @@ Left Join coordinates and out put final
 ```{r}
 Booth_df_g = 
   Booth_df_g %>% 
-    left_join(coordinates_df, by = 'station') 
+    left_join(coordinates_df, by = 'station') %>% 
+    arrange(station)
 
 Booth_df_g %>% 
   fwrite('station_info.csv')
 
+Booth_df_g %>% 
+  
 ```
 
 
@@ -131,18 +108,32 @@ Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df2)
 # Remove ST like (1ST ST)
 coordinates_df2$station = str_replace(coordinates_df2$station, "ST", "")
 Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df2)
-Booth_df_g[is.na(Booth_df_g$long),] %>% fwrite('manual194_subway_info.csv')
+
 ```
 
 
 ## Third join
 
-Try subway crime data
+Replace AVE with AV
+
 ```{r}
+coordinates_df3 = coordinates_df
+coordinates_df3$station = str_replace_all(coordinates_df3$station, "AVE", "AV")
 
-subwaycrime_df = read_csv('subwaycrime.csv')
+Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df3)
 
-subwaycrime_df
+Booth_df_g %>% fwrite('machinesuccess_subway_info.csv')
+Booth_df_g[is.na(Booth_df_g$long),] %>% fwrite('manual_subway_info.csv')
+
+# try second and third together
+coordinates_df33 = coordinates_df
+coordinates_df33$station = str_replace_all(coordinates_df33$station, "TH|ND|RD", "")
+coordinates_df33$station = str_replace_all(coordinates_df33$station, "AVE", "AV")
+
+Booth_df_g = fancy_left_join(Booth_df_g, coordinates_df33)
+
+Booth_df_g %>% fwrite('machinesuccess_subway_info.csv')
+Booth_df_g[is.na(Booth_df_g$long),] %>% fwrite('manual_subway_info.csv')
 ```
 
 
