@@ -1,0 +1,80 @@
+---
+title: "match_crime_station_kyy"
+author: "Youyuan(Keviant) Kong"
+date: "2021/11/14"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(data.table)
+library(readxl)
+library(rvest)
+library(httr)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+
+## 读取这两个数据，匹配坐标
+```{r}
+croodinate_df = read_xlsx('data/subway_info_final.xlsx') %>% 
+  janitor::clean_names()
+crime_df<-read_csv('data/subwaycrime.csv') %>% 
+  janitor::clean_names()
+```
+
+## 将crime里其中一行的数据粘贴到croodinate，然后依次计算distance
+## 找出其中的最小值，然后选定最小的那一行
+## 其中有一个错误是...最小的有两个一样的值，所以有head(1)这个代码
+```{r}
+croodinate_compare<-function(each){
+  closet_row<-
+    croodinate_df %>% 
+    mutate(lat_new=crime_df[each,]$latitude,
+         long_new=crime_df[each,]$longitude) %>% 
+    mutate(distance=(lat_new-lat)^2+(long_new-long)^2) %>% 
+    slice_min(distance,n=1) %>% 
+    head(1)
+  closet_row
+}
+
+
+crime_df<-crime_df %>% 
+  mutate(closest_station="",
+         distance=0)
+
+
+for (each in 1:nrow(crime_df)){
+  crime_df[each,38]=croodinate_compare(each) %>% pull(station)
+  a<-croodinate_compare(each)
+  crime_df[each,39]= a%>% pull(distance)
+}
+fwrite(crime_df,"subwaycrime_with_station.csv")
+##for (each in 1:nrow(crime_df)) {
+##  crime_df[each,38]=croodinate_df %>% 
+##                    mutate(lat_new=crime_df[each,]$latitude,
+##                    long_new=crime_df[each,]$longitude) %>% 
+##                    mutate(distance=(lat_new-lat)^2+(long_new-long)^2) ##%>%
+##                    slice_min(distance,n=1) %>% 
+##                    head(1) %>% 
+##                    pull(station)
+##   }
+
+```

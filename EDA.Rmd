@@ -3,11 +3,30 @@ title: "EDA"
 author: "Zheyan"
 date: "11/9/2021"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 library(leaflet)
 library(tidyverse)
+library(plotly)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Where crime?
@@ -18,10 +37,98 @@ df = read_csv('data/subwaycrime.csv')
 df %>% 
   leaflet() %>% 
   addTiles() %>% 
-  addCircleMarkers(~Longitude, ~Latitude,radius= 3, weight= 0.5)
+  addCircleMarkers(~longitude, ~latitude,radius= 3, weight= 0.5,
+                   fillColor=~(boro_nm))
 
 
 ```
 
+```{r}
+crime_df = read_csv('data/subwaycrime_with_station.csv')
+
+leaflet(crime_df %>% 
+          head(50)) %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addMarkers(lat = ~latitude, lng = ~longitude,
+             popup = paste("Time:",crime_df$cmplnt_fr_tm , "<br>", 
+                "Offense Description:", crime_df$ofns_desc, "<br>",
+                "Suspect Information", c(crime_df$susp_age_group,
+                                         crime_df$susp_race,
+                                         crime_df$susp_sex), "<br>",
+                "Victim Information:", c(crime_df$vic_age_group,
+                                         crime_df$vic_race,
+                                         crime_df$vic_sex), 
+                clusterOptions = markerClusterOptions())
+  )
+```
+
+## adjusted by Keviant
+## Top 10 offense classification
+```{r}
+crime_df = read_csv('data/subwaycrime_with_station.csv')
+crime_df %>% 
+  count(ofns_desc) %>% 
+  mutate(ofns_desc = fct_reorder(ofns_desc, n)) %>% 
+  slice_max(n,n=10) %>% 
+  plot_ly(x = ~ofns_desc, y = ~n, color = ~ofns_desc, type = "bar", colors = "viridis") %>% 
+  layout(yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Type of Offense'))
+
+## 部分代码来源 
+## https://stackoverflow.com/questions/51955803/how-to-change-x-axis-layout-using-plotly-in-r
+  
+```
+
+Top 20 station where crime happens frequently
+```{r}
+crime_df = read_csv('data/subwaycrime_with_station.csv')
+crime_df %>% 
+  count(closest_station) %>% 
+  mutate(closest_station = fct_reorder(closest_station, n)) %>% 
+  slice_max(n,n=20) %>% 
+  plot_ly(x = ~closest_station, y = ~n, color = ~closest_station, type = "bar", colors = "viridis") %>% 
+  layout(yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Type of station'))
 
 
+```
+
+Overall function
+```{r}
+as.Date.numeric(crime_df$cmplnt_fr_tm,origin=)
+strptime(as.Date(crime_df$cmplnt_fr_tm),format = "%H:%M:%S")
+crime_df %>% 
+  count(boro_nm) %>% 
+  mutate(boro_nm = fct_reorder(boro_nm, n)) %>% 
+  slice_max(n,n=20) %>% 
+  plot_ly(x = ~boro_nm, y = ~n, color = ~boro_nm, type = "bar", colors = "viridis") %>% 
+  layout(yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Area'))
+```
+
+
+
+## Stack Bar Chart type 1
+```{r}
+crime_df %>% 
+  count(boro_nm,susp_race) %>% 
+  plot_ly(x = ~boro_nm, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
+  layout(barmode="stack",
+         yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Area'))
+```
+
+## Stack Bar Chart type 2
+```{r}
+
+crime_df %>% 
+  count(boro_nm,susp_race) %>% 
+  plot_ly(x = ~boro_nm, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
+  layout(
+         yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Area'))
+
+```
+
+
+## Heat Map

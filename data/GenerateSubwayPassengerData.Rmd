@@ -144,7 +144,9 @@ Left join some station info such as which line? which company?
 ```{r}
 passenger_df_final = read_csv('passenger_cleaned.csv')
 passenger_df_final %>% 
-  group_by(station)
+  filter(entries_diff > 0, entries_diff < 100000)
+
+
 passenger_df_final
 ```
 
