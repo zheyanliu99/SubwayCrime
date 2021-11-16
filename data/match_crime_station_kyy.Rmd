@@ -31,6 +31,8 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
+
+## 读取这两个数据，匹配坐标
 ```{r}
 croodinate_df = read_xlsx('data/subway_info_final.xlsx') %>% 
   janitor::clean_names()
@@ -38,7 +40,9 @@ crime_df<-read_csv('data/subwaycrime.csv') %>%
   janitor::clean_names()
 ```
 
-
+## 将crime里其中一行的数据粘贴到croodinate，然后依次计算distance
+## 找出其中的最小值，然后选定最小的那一行
+## 其中有一个错误是...最小的有两个一样的值，所以有head(1)这个代码
 ```{r}
 croodinate_compare<-function(each){
   closet_row<-
