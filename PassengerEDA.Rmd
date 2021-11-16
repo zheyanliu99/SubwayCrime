@@ -15,6 +15,7 @@ library(rvest)
 library(leaflet)
 library(httr)
 library(lubridate)
+library(plotly)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -31,6 +32,8 @@ options(
 
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
+
+
 ```
 
 # Read and Process data
@@ -38,6 +41,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ```{r cars}
 passenger_df = read_csv('data/passenger_imputed.csv', show_col_types = FALSE)
+
 passenger_df = 
   passenger_df %>% 
   # Plotting use 1-year data 
@@ -112,6 +116,38 @@ df %>%
 ## By cluster
 
 ```{r}
+df_sub = 
+  df %>% 
+  ungroup() %>% 
+  select(long, lat) %>% 
+  drop_na()
+  
+k2 = kmeans(df_sub, centers = 4, nstart = 25)
+
+```
+
+Kmeans results and centers
+```{r}
+library("RColorBrewer")
+df$cluster = k2$cluster
+pal = colorFactor(
+  brewer.pal(n = 4, name = "Set1"),
+  df$cluster,
+  levels = NULL,
+  ordered = FALSE,
+  na.color = "#808080",
+  alpha = FALSE,
+  reverse = FALSE
+)
+
+df %>% 
+  leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircles(lng = ~long, lat = ~lat, weight = 1, stroke = FALSE,
+    radius = ~sqrt(passenger_flow)/14, popup = ~station, color = ~pal(cluster), opacity = 1, fillOpacity = 1) %>%
+  addLegend("topright", pal = pal, values = ~cluster, 
+            title = "Kmeans Cluster", opacity = 1) %>% 
+  setView(-73.8399986, 40.746739, zoom = 11)
 
 ```
 
@@ -119,11 +155,50 @@ df %>%
 ## By zipcode
 
 ```{r}
-irs <- read_csv("https://www.irs.gov/pub/irs-soi/16zpallnoagi.csv")
-irs
+
+library(tigris) 
+# cache zip boundaries that are download via tigris package
+options(tigris_use_cache = TRUE)
+
+# get zip boundaries that start with 282
+char_zips = zctas(cb = TRUE)
+char_zips = 
+  char_zips %>% 
+  rename(postal_code = GEOID10)
+
+# Still not working
+# df %>% 
+#   group_by(postal_code) %>% 
+#   summarise(passenger_flow = sum(passenger_flow)) %>% 
+#   left_join(char_zips, by = 'postal_code') %>% 
+#   leaflet() %>% 
+#    addPolygons(fillColor = ~pal(passenger_flow),
+#               weight = 2,
+#               opacity = 1,
+#               color = "white",
+#               dashArray = "3",
+#               fillOpacity = 0.7)
+
+  
+
 ```
 
+
+
+
+
 ## By sublocality
+
+```{r}
+df %>% 
+  filter('sublocality' != 'None') %>% 
+  group_by(sublocality) %>%  
+  summarise(passenger_flow = sum(passenger_flow)) %>% 
+  mutate(sublocality = as.factor(sublocality)) %>% 
+  arrange(-passenger_flow)
+  
+```
+
 
 
 
