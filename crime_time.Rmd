@@ -70,17 +70,17 @@ most_freq_event =
   summarize(event_num = n()) %>% 
   arrange(desc(event_num))
 
-sub_crime_freq %>% 
+plot_2 = 
+  sub_crime_freq %>% 
   group_by(law_cat_cd, date) %>% 
   summarize(event_num = n()) %>% 
   ggplot(aes(x = date, y = event_num, color = law_cat_cd)) + 
   geom_point() + geom_line() + 
-  labs(
-    title = "Top 5 Most Frequent Events Over Time",
-    x = "Month",
-    y = "Crime Events Times"
-  ) + 
   theme(legend.text=element_text(size=7))
+
+  ggplotly(plot_2) %>% 
+  layout(plot_2, title = "3 Degrees of Crime Events Numbers Over Time", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
+
 ```
 
 ## Crime events v.s. Time
@@ -107,7 +107,7 @@ sub_crime_time =
   ) %>% 
   filter(crime_event %in% c("CRIMINAL MISCHIEF & RELATED OF", "ASSAULT 3 & RELATED OFFENSES","HARRASSMENT 2","GRAND LARCENY","DANGEROUS DRUGS","FELONY ASSAULT","ROBBERY","PETIT LARCENY","FORGERY","SEX CRIMES","OFF. AGNST PUB ORD SENSBLTY &","DANGEROUS WEAPONS"))
 
-plot_2 = 
+plot_3 = 
   sub_crime_time %>% 
   mutate(event_time = as.factor(event_time)) %>% 
   ggplot(aes(x = event_time %>% fct_infreq(), fill = crime_event)) + 
@@ -123,7 +123,7 @@ plot_2 =
     legend.text = element_text(size = 8)) + 
   guides(col = guide_legend(nrow = 2))
 
-ggplotly(plot_2) %>%
+ggplotly(plot_3) %>%
   layout(legend = list(
       orientation = "h",
       xanchor = "center",
@@ -148,6 +148,8 @@ crime_response_time =
   mutate(start = as.POSIXct(paste(start_date, start_time), format = "%Y-%m-%d %H:%M:%S"), 
          end = as.POSIXct(paste(end_date, end_time), format = "%Y-%m-%d %H:%M:%S")) %>% 
   mutate(response_time = difftime(end, start, units = "hours")) %>% 
+  mutate(date = substring(start_date,1,7)) %>% 
+  filter(!(start_date %in% c("1971-09","2016-11","2018-04","2018-05"))) %>% 
   mutate(
     event_time = as.character(case_when(
       hms("00:00:00") <= start_time & start_time < hms("02:00:00") ~hms("00:00:00"),
@@ -163,6 +165,10 @@ crime_response_time =
       hms("20:00:00") <= start_time & start_time < hms("23:59:59") ~hms("20:00:00"),
     ))
   )
+
+crime_response_time %>% 
+  mutate(crime_event = fct_reorder(crime_event, response_time)) %>% 
+  plot_ly(y = ~ response_time, color = ~ crime_event, type = "box", colors = "viridis")
 
 ```
 
