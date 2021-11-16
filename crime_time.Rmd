@@ -27,48 +27,57 @@ raw_sub_station =
   janitor::clean_names()
 ```
 
-## Tidy data: add time intervals
+## Crime event v.s. Month
 
 ```{r}
-sub_crime = 
+sub_crime_freq = 
   raw_sub_crime %>% 
   select(cmplnt_fr_dt, cmplnt_fr_tm, ofns_desc, station_name, latitude, longitude) %>% 
   rename("date" = "cmplnt_fr_dt", "time" = "cmplnt_fr_tm", "crime_event" = "ofns_desc") %>% 
-  drop_na(time) %>% 
-  mutate(
-    time = case_when(
-      hms("00:00:00") <= time & time < hms("02:00:00") ~hms("00:00:00"),
-      hms("02:00:00") <= time & time < hms("04:00:00") ~hms("04:00:00"),
-      hms("04:00:00") <= time & time < hms("06:00:00") ~hms("04:00:00"),
-      hms("06:00:00") <= time & time < hms("08:00:00") ~hms("08:00:00"),
-      hms("08:00:00") <= time & time < hms("10:00:00") ~hms("08:00:00"),
-      hms("10:00:00") <= time & time < hms("12:00:00") ~hms("12:00:00"),
-      hms("12:00:00") <= time & time < hms("14:00:00") ~hms("12:00:00"),
-      hms("14:00:00") <= time & time < hms("16:00:00") ~hms("16:00:00"),
-      hms("16:00:00") <= time & time < hms("18:00:00") ~hms("16:00:00"),
-      hms("18:00:00") <= time & time < hms("20:00:00") ~hms("20:00:00"),
-      hms("20:00:00") <= time & time < hms("23:59:59") ~hms("20:00:00"),
-    )
-  ) %>% 
-  mutate(time = as.character(time)) %>% 
-  mutate(date = substring(as.character(as.Date(date, "%m/%d/%y")),1,7))
-```
-
-```{r}
-sub_crime %>% 
-  group_by(time, crime_event) %>% 
+  mutate(date = as.Date(date, "%m/%d/%Y")) %>% 
+  mutate(date = substring(as.character(as.Date(date, "%m/%d/%y")),1,7)) %>% 
+  filter(!(date %in% c("1971-09","2016-11","2018-04","2018-05")))
+  
+plot_1 = 
+  sub_crime_freq %>% 
+  group_by(date) %>% 
   summarise(event_num = n()) %>% 
-  filter(event_num > 50)
+  plot_ly(
+    x = ~date, y = ~event_num, type = "scatter", mode = "markers"
+  )
+
+layout(plot_1, title = "Crime events over time", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
 ```
 
-## Crime events number by time
+## Crime events v.s. Time
 
 ```{r}
-bar_plot = 
-  sub_crime %>% 
-  mutate(time = as.factor(time)) %>% 
-  ggplot(aes(x = time, fill = crime_event)) + 
-  geom_histogram(stat = "count", width = 0.8) + 
+sub_crime_time = 
+  raw_sub_crime %>% 
+  select(cmplnt_fr_dt, cmplnt_fr_tm, ofns_desc, station_name, latitude, longitude) %>% 
+  rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "crime_event" = "ofns_desc") %>% 
+  mutate(
+    event_time = as.character(case_when(
+      hms("00:00:00") <= start_time & start_time < hms("02:00:00") ~hms("00:00:00"),
+      hms("02:00:00") <= start_time & start_time < hms("04:00:00") ~hms("04:00:00"),
+      hms("04:00:00") <= start_time & start_time < hms("06:00:00") ~hms("04:00:00"),
+      hms("06:00:00") <= start_time & start_time < hms("08:00:00") ~hms("08:00:00"),
+      hms("08:00:00") <= start_time & start_time < hms("10:00:00") ~hms("08:00:00"),
+      hms("10:00:00") <= start_time & start_time < hms("12:00:00") ~hms("12:00:00"),
+      hms("12:00:00") <= start_time & start_time < hms("14:00:00") ~hms("12:00:00"),
+      hms("14:00:00") <= start_time & start_time < hms("16:00:00") ~hms("16:00:00"),
+      hms("16:00:00") <= start_time & start_time < hms("18:00:00") ~hms("16:00:00"),
+      hms("18:00:00") <= start_time & start_time < hms("20:00:00") ~hms("20:00:00"),
+      hms("20:00:00") <= start_time & start_time < hms("23:59:59") ~hms("20:00:00"),
+    ))
+  ) %>% 
+  filter(crime_event %in% c("CRIMINAL MISCHIEF & RELATED OF", "ASSAULT 3 & RELATED OFFENSES","HARRASSMENT 2","GRAND LARCENY","DANGEROUS DRUGS","FELONY ASSAULT","ROBBERY","PETIT LARCENY","FORGERY","SEX CRIMES","OFF. AGNST PUB ORD SENSBLTY &","DANGEROUS WEAPONS","THEFT OF SERVICES","OFFENSES AGAINST PUBLIC ADMINI"))
+
+plot_2 = 
+  sub_crime_time %>% 
+  mutate(event_time = as.factor(event_time)) %>% 
+  ggplot(aes(x = event_time %>% fct_infreq(), fill = crime_event)) + 
+  geom_histogram(stat = "count", width = 0.9, height = 2) + 
   labs(
     title = "Frequency of crime events v.s. Time points", 
     x = "Occurrence time", 
@@ -80,45 +89,47 @@ bar_plot =
     legend.text = element_text(size = 8)) + 
   guides(col = guide_legend(nrow = 2))
 
-ggplotly(bar_plot) %>%
+ggplotly(plot_2) %>%
   layout(legend = list(
       orientation = "h",
       xanchor = "center",
       yanchor = "top",
-      x = 0.5,
-      y = - 0.1
+      x = 0.3,
+      y = - 0.3
     )
   )
 ```
 
-## The number of crime events trends over month
+## Response time
 
 ```{r}
-spaghetti_plot1 = 
-  sub_crime %>% 
-  group_by(date, time) %>% 
-  count() %>% 
-  filter(!(date %in% ("2019-09"))) %>% 
-  ggplot(aes(x = date, y = n, color = time)) +
-  geom_line() +
-  xlab("Month") +
-  ylab("Number of crime events") +
-  theme_light() + 
-  theme(
-    plot.title = element_text(hjust = 0.5), 
-    legend.position = "bottom",
-    legend.text = element_text(size = 8)) + 
-  guides(col = guide_legend(nrow = 2))
-
-ggplotly(spaghetti_plot1) %>%
-  layout(legend = list(
-      orientation = "h",
-      xanchor = "center",
-      yanchor = "top",
-      x = 0.5,
-      y = -0.2
-    )
+crime_response_time = 
+  raw_sub_crime %>% 
+  rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "crime_event" = "ofns_desc") %>% 
+  drop_na(start_time, end_time) %>%
+  mutate(start_date = as.character(as.Date(start_date, "%m/%d/%Y")), 
+         end_date = as.character(as.Date(end_date, "%m/%d/%Y"))) %>% 
+  mutate(start = as.POSIXct(paste(start_date, start_time), format = "%Y-%m-%d %H:%M:%S"), 
+         end = as.POSIXct(paste(end_date, end_time), format = "%Y-%m-%d %H:%M:%S")) %>% 
+  mutate(response_time = as.numeric(difftime(end, start, units = "mins"))) %>% 
+  mutate(
+    event_time = as.character(case_when(
+      hms("00:00:00") <= start_time & start_time < hms("02:00:00") ~hms("00:00:00"),
+      hms("02:00:00") <= start_time & start_time < hms("04:00:00") ~hms("04:00:00"),
+      hms("04:00:00") <= start_time & start_time < hms("06:00:00") ~hms("04:00:00"),
+      hms("06:00:00") <= start_time & start_time < hms("08:00:00") ~hms("08:00:00"),
+      hms("08:00:00") <= start_time & start_time < hms("10:00:00") ~hms("08:00:00"),
+      hms("10:00:00") <= start_time & start_time < hms("12:00:00") ~hms("12:00:00"),
+      hms("12:00:00") <= start_time & start_time < hms("14:00:00") ~hms("12:00:00"),
+      hms("14:00:00") <= start_time & start_time < hms("16:00:00") ~hms("16:00:00"),
+      hms("16:00:00") <= start_time & start_time < hms("18:00:00") ~hms("16:00:00"),
+      hms("18:00:00") <= start_time & start_time < hms("20:00:00") ~hms("20:00:00"),
+      hms("20:00:00") <= start_time & start_time < hms("23:59:59") ~hms("20:00:00"),
+    ))
   )
+
+crime_response_time %>% 
+  ggplot(aes(x = event_time, y = response_time)) + geom_boxplot()
 ```
 
 
