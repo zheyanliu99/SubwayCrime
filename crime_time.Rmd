@@ -32,7 +32,7 @@ raw_sub_station =
 ```{r}
 sub_crime_freq = 
   raw_sub_crime %>% 
-  select(cmplnt_fr_dt, cmplnt_fr_tm, ofns_desc, station_name, latitude, longitude) %>% 
+  select(cmplnt_fr_dt, cmplnt_fr_tm, ofns_desc, law_cat_cd, station_name, latitude, longitude) %>% 
   rename("date" = "cmplnt_fr_dt", "time" = "cmplnt_fr_tm", "crime_event" = "ofns_desc") %>% 
   mutate(date = as.Date(date, "%m/%d/%Y")) %>% 
   mutate(date = substring(as.character(as.Date(date, "%m/%d/%y")),1,7)) %>% 
@@ -47,6 +47,40 @@ plot_1 =
   )
 
 layout(plot_1, title = "Crime events over time", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
+```
+
+## Generally, Top 10 most frequent crime events
+
+```{r}
+sub_crime_freq %>% 
+  count(crime_event) %>% 
+  mutate(crime_event = fct_reorder(crime_event, n)) %>% 
+  slice_max(n, n = 10) %>% 
+  plot_ly(x = ~ crime_event, y = ~ n, color = ~ crime_event, type = "bar", colors = "viridis") %>% 
+  layout(yaxis = list(title = 'Top 10 most frequenct crime events'),
+         xaxis = list(title = 'Crime Events'))
+```
+
+## Top 5 Most Frequent crime events change over time
+
+```{r}
+most_freq_event = 
+  sub_crime_freq %>%
+  group_by(crime_event) %>% 
+  summarize(event_num = n()) %>% 
+  arrange(desc(event_num))
+
+sub_crime_freq %>% 
+  group_by(law_cat_cd, date) %>% 
+  summarize(event_num = n()) %>% 
+  ggplot(aes(x = date, y = event_num, color = law_cat_cd)) + 
+  geom_point() + geom_line() + 
+  labs(
+    title = "Top 5 Most Frequent Events Over Time",
+    x = "Month",
+    y = "Crime Events Times"
+  ) + 
+  theme(legend.text=element_text(size=7))
 ```
 
 ## Crime events v.s. Time
@@ -71,7 +105,7 @@ sub_crime_time =
       hms("20:00:00") <= start_time & start_time < hms("23:59:59") ~hms("20:00:00"),
     ))
   ) %>% 
-  filter(crime_event %in% c("CRIMINAL MISCHIEF & RELATED OF", "ASSAULT 3 & RELATED OFFENSES","HARRASSMENT 2","GRAND LARCENY","DANGEROUS DRUGS","FELONY ASSAULT","ROBBERY","PETIT LARCENY","FORGERY","SEX CRIMES","OFF. AGNST PUB ORD SENSBLTY &","DANGEROUS WEAPONS","THEFT OF SERVICES","OFFENSES AGAINST PUBLIC ADMINI"))
+  filter(crime_event %in% c("CRIMINAL MISCHIEF & RELATED OF", "ASSAULT 3 & RELATED OFFENSES","HARRASSMENT 2","GRAND LARCENY","DANGEROUS DRUGS","FELONY ASSAULT","ROBBERY","PETIT LARCENY","FORGERY","SEX CRIMES","OFF. AGNST PUB ORD SENSBLTY &","DANGEROUS WEAPONS"))
 
 plot_2 = 
   sub_crime_time %>% 
@@ -106,12 +140,14 @@ ggplotly(plot_2) %>%
 crime_response_time = 
   raw_sub_crime %>% 
   rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "crime_event" = "ofns_desc") %>% 
+  select(start_date, start_time, end_date, end_time, crime_event, law_cat_cd) %>% 
   drop_na(start_time, end_time) %>%
+  filter(crime_event %in% c("CRIMINAL MISCHIEF & RELATED OF", "ASSAULT 3 & RELATED OFFENSES","HARRASSMENT 2","GRAND LARCENY","DANGEROUS DRUGS","FELONY ASSAULT","ROBBERY","PETIT LARCENY","FORGERY","SEX CRIMES","OFF. AGNST PUB ORD SENSBLTY &","DANGEROUS WEAPONS")) %>% 
   mutate(start_date = as.character(as.Date(start_date, "%m/%d/%Y")), 
          end_date = as.character(as.Date(end_date, "%m/%d/%Y"))) %>% 
   mutate(start = as.POSIXct(paste(start_date, start_time), format = "%Y-%m-%d %H:%M:%S"), 
          end = as.POSIXct(paste(end_date, end_time), format = "%Y-%m-%d %H:%M:%S")) %>% 
-  mutate(response_time = as.numeric(difftime(end, start, units = "mins"))) %>% 
+  mutate(response_time = difftime(end, start, units = "hours")) %>% 
   mutate(
     event_time = as.character(case_when(
       hms("00:00:00") <= start_time & start_time < hms("02:00:00") ~hms("00:00:00"),
@@ -128,8 +164,6 @@ crime_response_time =
     ))
   )
 
-crime_response_time %>% 
-  ggplot(aes(x = event_time, y = response_time)) + geom_boxplot()
 ```
 
 
