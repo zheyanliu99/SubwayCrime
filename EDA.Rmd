@@ -11,6 +11,8 @@ editor_options:
 library(leaflet)
 library(tidyverse)
 library(plotly)
+##install.packages("leaflet.extras")
+library(leaflet.extras)
 
 knitr::opts_chunk$set(
   fig.width = 6,
@@ -27,6 +29,9 @@ options(
 
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
+Sys.setenv("plotly_username"="aabramov90")
+Sys.setenv("plotly_api_key"="TcaNTrLIJVEJyrUlhXgd")
+Sys.setenv('MAPBOX_TOKEN' = 'pk.eyJ1IjoiYWFicmFtb3Y5MCIsImEiOiJja2k5aHQ4ZWswZnhmMnNtcDJ0b2FlZzdjIn0.QcpV6ynhO9mlLga7CvUJwA')
 ```
 
 ## Where crime?
@@ -95,8 +100,7 @@ crime_df %>%
 
 Overall function
 ```{r}
-as.Date.numeric(crime_df$cmplnt_fr_tm,origin=)
-strptime(as.Date(crime_df$cmplnt_fr_tm),format = "%H:%M:%S")
+
 crime_df %>% 
   count(boro_nm) %>% 
   mutate(boro_nm = fct_reorder(boro_nm, n)) %>% 
@@ -132,3 +136,34 @@ crime_df %>%
 
 
 ## Heat Map
+```{r}
+crime_df %>% 
+  group_by(closest_station) %>% 
+  summarise(Trend=n(),
+            longitude=mean(longitude),
+            latitude=mean(latitude)) %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addHeatmap(lng=~longitude,lat=~latitude,
+             intensity=~Trend,max=100,radius=5,blur=10)
+
+```
+
+```{r}
+crime_df %>% 
+  plot_mapbox(
+    lon = ~longitude, 
+    lat = ~latitude, 
+    color = ~boro_nm,
+    mode = 'markers',
+    hoverinfo = 'skip')  %>% 
+  layout(
+    mapbox = 
+      list(
+        style = 'streets',
+        zoom = 9.5,
+        center = list(lat = 40.7, lon = -74.0)),
+      title = "Density Heatmap of Compliants in Subway")%>% 
+  config(mapboxAccessToken = Sys.getenv("MAPBOX_TOKEN"))
+
+```
