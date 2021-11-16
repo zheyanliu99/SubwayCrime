@@ -1,0 +1,144 @@
+---
+title: "PassengerEDA"
+author: "Zheyan"
+date: "11/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(data.table)
+library(readxl)
+library(rvest)
+library(leaflet)
+library(httr)
+library(lubridate)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+# Read and Process data
+
+
+```{r cars}
+passenger_df = read_csv('data/passenger_imputed.csv', show_col_types = FALSE)
+passenger_df = 
+  passenger_df %>% 
+  # Plotting use 1-year data 
+  filter(date >= as.Date("2020-11-01"),
+         date < as.Date("2021-11-01"))
+
+```
+
+
+```{r}
+# just use part of features
+location_df = 
+  read_csv('data/subway_info_final3.csv', show_col_types = FALSE) %>% 
+  # only keep new york
+  filter(administrative_area_level_1 == 'New York') %>% 
+  select(station, linename, service, sublocality, postal_code, lat, long)
+  
+
+passenger_df = 
+  passenger_df %>% 
+  left_join(location_df, by = c('station', 'linename')) %>% 
+  drop_na(sublocality) %>% 
+  relocate(station, linename, service, sublocality, postal_code, lat, long)
+```
+
+# Visualization 
+
+## Plotting by lat and long
+
+```{r}
+df = 
+  passenger_df %>% 
+    drop_na(entry_diff_imputed, exit_diff_imputed) %>% 
+    group_by(station, service, linename, sublocality, postal_code, lat, long) %>% 
+    summarise(total_entry = sum(entry_diff_imputed),
+              total_exit = sum(exit_diff_imputed)) %>% 
+    mutate(passenger_flow = total_entry + total_exit)
+
+df %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addCircleMarkers(~long, ~lat,radius= df$passenger_flow/100000000, weight= 0.9)
+
+
+qpal <- colorQuantile("YlOrRd", df$passenger_flow, n = 4)
+
+pal <- 
+   colorFactor(palette = c("blue", "azure4", "orange",'green','brown','yellow','red','forestgreen','purple'), 
+               levels = c('8 Avenue(ACE)',
+                          'Shuttle(S)',
+                          '6 Avenue(BDFM)',
+                          'Brooklyn-Queens Crosstown(G)',
+                          '14 St-Canarsie(L)',
+                          'Broadway(NQRW)',
+                          '7 Avenue(123)',
+                          'Lexington Av(456)',
+                          'Flushing(7)'))
+
+
+df %>% 
+  mutate(passenger_flow2 = 10*log(passenger_flow)) %>% 
+  leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircles(lng = ~long, lat = ~lat, weight = 1, stroke = FALSE,
+    radius = ~sqrt(passenger_flow)/30, popup = ~station, color = ~pal(service), opacity = 0.75, fillOpacity = 0.75) %>%
+  addLegend("topright", pal = pal, values = ~service, 
+            title = "Subway Service", opacity = 0.75) %>% 
+  setView(-73.8399986, 40.746739, zoom = 11)
+
+```
+
+## By cluster
+
+```{r}
+
+```
+
+
+## By zipcode
+
+```{r}
+irs <- read_csv("https://www.irs.gov/pub/irs-soi/16zpallnoagi.csv")
+irs
+```
+
+## By sublocality
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
