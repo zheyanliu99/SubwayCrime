@@ -34,7 +34,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ## 读取这两个数据，匹配坐标(need adjusted)
 ```{r}
-croodinate_df = read_xlsx('data/subway_info_final3.xlsx') %>% 
+croodinate_df = read_csv('data/subway_info_final3.csv') %>% 
   janitor::clean_names()
 crime_df<-read_csv('data/subwaycrime.csv') %>% 
   janitor::clean_names()
@@ -58,14 +58,20 @@ croodinate_compare<-function(each){
 
 crime_df<-crime_df %>% 
   mutate(closest_station="",
+         closest_line="",
          distance=0)
-
 
 for (each in 1:nrow(crime_df)){
   crime_df[each,38]=croodinate_compare(each) %>% pull(station)
   a<-croodinate_compare(each)
-  crime_df[each,39]= a%>% pull(distance)
+  crime_df[each,39]= a%>% pull(linename)
+  crime_df[each,40]= a%>% pull(distance)
 }
+
+bigger_distance<-crime_df %>% 
+  filter(distance>=.0001) %>% 
+  relocate(distance,station_name,closest_station,closest_line,latitude,longitude)
+fwrite(bigger_distance,"bigger_distance.csv")
 fwrite(crime_df,"subwaycrime_with_station.csv")
 ##for (each in 1:nrow(crime_df)) {
 ##  crime_df[each,38]=croodinate_df %>% 
