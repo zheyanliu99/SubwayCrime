@@ -37,7 +37,8 @@ Sys.setenv('MAPBOX_TOKEN' = 'pk.eyJ1IjoiYWFicmFtb3Y5MCIsImEiOiJja2k5aHQ4ZWswZnhm
 ## Where crime?
 
 ```{r}
-df = read_csv('data/subwaycrime.csv')
+df = read_csv('data/subwaycrime.csv') %>% 
+  janitor::clean_names()
 
 df %>% 
   leaflet() %>% 
