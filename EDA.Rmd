@@ -37,7 +37,8 @@ Sys.setenv('MAPBOX_TOKEN' = 'pk.eyJ1IjoiYWFicmFtb3Y5MCIsImEiOiJja2k5aHQ4ZWswZnhm
 ## Where crime?
 
 ```{r}
-df = read_csv('data/subwaycrime.csv')
+df = read_csv('data/subwaycrime.csv') %>% 
+  janitor::clean_names()
 
 df %>% 
   leaflet() %>% 
@@ -51,8 +52,7 @@ df %>%
 ```{r}
 crime_df = read_csv('data/subwaycrime_with_station.csv')
 
-leaflet(crime_df %>% 
-          head(50)) %>%
+leaflet(crime_df) %>%
   addProviderTiles(providers$CartoDB.Positron) %>% 
   addMarkers(lat = ~latitude, lng = ~longitude,
              popup = paste("Time:",crime_df$cmplnt_fr_tm , "<br>", 
@@ -134,7 +134,16 @@ crime_df %>%
 
 ```
 
+```{r}
+crime_df %>% 
+  count(boro_nm,vic_race) %>% 
+  plot_ly(x = ~boro_nm, y = ~n, color = ~vic_race, type = "bar", colors = "viridis") %>% 
+  layout(
+         yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Area'))
 
+
+```
 ## Heat Map
 ```{r}
 crime_df %>% 

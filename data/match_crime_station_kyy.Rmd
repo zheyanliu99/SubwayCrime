@@ -32,9 +32,9 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
-## 读取这两个数据，匹配坐标
+## 读取这两个数据，匹配坐标(need adjusted)
 ```{r}
-croodinate_df = read_xlsx('data/subway_info_final.xlsx') %>% 
+croodinate_df = read_xlsx('data/subway_info_final3.xlsx') %>% 
   janitor::clean_names()
 crime_df<-read_csv('data/subwaycrime.csv') %>% 
   janitor::clean_names()
