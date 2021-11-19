@@ -10,6 +10,7 @@ library(shiny)
 library(shinythemes)
 library(tidyverse)
 library(reticulate)
+library(leaflet)
 
 # use local python
 # use_python('/Users/jimmy/anaconda3/python.exe')
@@ -57,7 +58,8 @@ ui <- fluidPage(theme = shinytheme("paper"),
                                       tags$label(h3('Routes')), # Status/Output Text Box
                                       verbatimTextOutput('contents'),
                                       DT::dataTableOutput("tabledata"), # Results DT table
-                                      tableOutput('tabledata2') # Results table
+                                      # Leaflet map
+                                      leafletOutput("mymap")
                                     ) # mainPanel()
                                     
                            )
@@ -116,7 +118,19 @@ server <- function(input, output, session) {
                       rownames = FALSE)
       }
     })
-
+  
+  points <- eventReactive(input$recalc, {
+    cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
+  }, ignoreNULL = FALSE)
+  
+  output$mymap <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(providers$Stamen.TonerLite,
+                       options = providerTileOptions(noWrap = TRUE)
+      ) %>%
+      addMarkers(data = points())
+  })
+  
 }
 
 
