@@ -12,7 +12,7 @@ library(tidyverse)
 library(reticulate)
 
 # use local python
-use_python('/Users/jimmy/anaconda3/python.exe')
+# use_python('/Users/jimmy/anaconda3/python.exe')
 
 getroute = import("GetRoute")
 source_python("GetRoute.py")

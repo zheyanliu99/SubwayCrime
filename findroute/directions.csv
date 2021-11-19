@@ -1,10 +1,9 @@
 time,distance,walking_distance,line,departure_stop,arrival_stop,num_stops,departure_time,arrival_time,route_num
-5742.0,40941.0,1177.0,D,Fordham Rd,7 Avenue Station,11,1637365080,1637366760,1
-5742.0,40941.0,1177.0,E,7 Avenue Station,Sutphin Blvd - Archer Av - JFK Airport,9,1637366940,1637368755,1
-6674.0,43090.0,1177.0,D,Fordham Rd,42 St-Bryant Park Station,13,1637365080,1637366970,2
-6674.0,43090.0,1177.0,F,42 St-Bryant Park Station,Forest Hills-71 Av,7,1637367000,1637368470,2
-6674.0,43090.0,1177.0,E,Forest Hills-71 Av,Sutphin Blvd - Archer Av - JFK Airport,3,1637368590,1637369070,2
-6357.0,40941.0,1177.0,D,Fordham Rd,7 Avenue Station,11,1637365680,1637367360,3
-6357.0,40941.0,1177.0,E,7 Avenue Station,Sutphin Blvd - Archer Av - JFK Airport,11,1637367690,1637369490,3
-7065.0,46314.0,1044.0,B,Fordham Rd,125 St,10,1637365260,1637366340,4
-7065.0,46314.0,1044.0,A,125 St,Howard Beach - JFK Subway Station,21,1637366580,1637369880,4
+4729.0,37034.0,272.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637364619,1637365684,1
+4729.0,37034.0,272.0,E,42 St - Port Authority Bus Terminal,Sutphin Blvd - Archer Av - JFK Airport,11,1637365820,1637368025,1
+5151.0,40665.0,139.0,A,168 St,Howard Beach - JFK Subway Station,23,1637364619,1637368549,2
+5036.0,35407.0,375.0,1,168 St - Washington Hts,59 St - Columbus Circle,13,1637364570,1637365800,3
+5036.0,35407.0,375.0,D,59 St-Columbus Circle,7 Avenue Station,1,1637366040,1637366160,3
+5036.0,35407.0,375.0,E,7 Avenue Station,Sutphin Blvd - Archer Av - JFK Airport,9,1637366475,1637368245,3
+4608.0,37034.0,272.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637365470,1637366520,4
+4608.0,37034.0,272.0,E,42 St - Port Authority Bus Terminal,Sutphin Blvd - Archer Av - JFK Airport,11,1637366700,1637368755,4
