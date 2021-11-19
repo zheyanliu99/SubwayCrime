@@ -1,9 +1,10 @@
-time,distance,walking_distance,arrival_stop,arrival_time,departure_stop,departure_time,line,num_stops,route_num
-6351.0,40665.0,139.0,Howard Beach - JFK Subway Station,1637310330,168 St,1637305680,A,45,1
-5703.0,35791.0,272.0,125 St,1637306760,168 St,1637306280,A,5,2
-5703.0,35791.0,272.0,7 Avenue Station,1637307540,125 St,1637306970,D,2,2
-5703.0,35791.0,272.0,Sutphin Blvd - Archer Av - JFK Airport,1637310180,7 Avenue Station,1637307810,E,21,2
-5871.0,40665.0,139.0,Howard Beach - JFK Subway Station,1637312130,168 St,1637307480,A,45,3
-5223.0,35791.0,272.0,125 St,1637309160,168 St,1637308680,A,5,4
-5223.0,35791.0,272.0,7 Avenue Station,1637309940,125 St,1637309370,D,2,4
-5223.0,35791.0,272.0,Sutphin Blvd - Archer Av - JFK Airport,1637312580,7 Avenue Station,1637310210,E,21,4
+time,distance,walking_distance,line,departure_stop,arrival_stop,num_stops,departure_time,arrival_time,route_num
+5742.0,40941.0,1177.0,D,Fordham Rd,7 Avenue Station,11,1637365080,1637366760,1
+5742.0,40941.0,1177.0,E,7 Avenue Station,Sutphin Blvd - Archer Av - JFK Airport,9,1637366940,1637368755,1
+6674.0,43090.0,1177.0,D,Fordham Rd,42 St-Bryant Park Station,13,1637365080,1637366970,2
+6674.0,43090.0,1177.0,F,42 St-Bryant Park Station,Forest Hills-71 Av,7,1637367000,1637368470,2
+6674.0,43090.0,1177.0,E,Forest Hills-71 Av,Sutphin Blvd - Archer Av - JFK Airport,3,1637368590,1637369070,2
+6357.0,40941.0,1177.0,D,Fordham Rd,7 Avenue Station,11,1637365680,1637367360,3
+6357.0,40941.0,1177.0,E,7 Avenue Station,Sutphin Blvd - Archer Av - JFK Airport,11,1637367690,1637369490,3
+7065.0,46314.0,1044.0,B,Fordham Rd,125 St,10,1637365260,1637366340,4
+7065.0,46314.0,1044.0,A,125 St,Howard Beach - JFK Subway Station,21,1637366580,1637369880,4
