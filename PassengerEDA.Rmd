@@ -3,6 +3,8 @@ title: "PassengerEDA"
 author: "Zheyan"
 date: "11/15/2021"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -165,30 +167,79 @@ char_zips = zctas(cb = TRUE)
 char_zips = 
   char_zips %>% 
   rename(postal_code = GEOID10)
+```
+这一步GEOID10改的有点多此一举，导致后来的geo_join有点看不懂
 
-# Still not working
-# df %>% 
-#   group_by(postal_code) %>% 
-#   summarise(passenger_flow = sum(passenger_flow)) %>% 
-#   left_join(char_zips, by = 'postal_code') %>% 
-#   leaflet() %>% 
-#    addPolygons(fillColor = ~pal(passenger_flow),
-#               weight = 2,
-#               opacity = 1,
-#               color = "white",
-#               dashArray = "3",
-#               fillOpacity = 0.7) 
+创建一个summary_df,然后和char_zips合并，并选择合并的同类column
 
+```{r}
 
+summary_df<-df %>%
+  mutate(postal_code) %>% 
+  group_by(postal_code) %>%
+  summarise(passenger_flow = sum(passenger_flow)) 
+
+summary_df<-geo_join(char_zips, 
+                      summary_df, 
+                      by_sp = "postal_code", 
+                      by_df = "postal_code",
+                      how = "left") %>% 
+  filter(passenger_flow>=0)
+## Still not working
+# df %>%
+#   group_by(postal_code) %>%
+#   summarise(passenger_flow = sum(passenger_flow)) %>%
+#   left_join(char_zips, by = 'postal_code') %>%
+```
+
+```{r}
+pal <- colorNumeric(
+  palette = "Greens",
+  domain = summary_df$passenger_flow)
+
+labels <- 
+  paste0(
+    "Zip Code: ",
+    summary_df$postal_code, "<br/>",
+    "Flow of Passengers: ",
+    summary_df$passenger_flow) %>%
+  lapply(htmltools::HTML)
+```
+
+```{r}
+summary_df %>%  
+  leaflet() %>%
+   addPolygons(fillColor = ~pal(passenger_flow),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(weight = 2,
+                                           color = "#666",
+                                           dashArray = "",
+                                           fillOpacity = 0.7,
+                                           bringToFront = TRUE),
+              label = labels) %>% 
+  addLegend(pal = pal, 
+            values = ~passenger_flow, 
+            opacity = 0.7, 
+            title = htmltools::HTML("Passengers' Flow <br> 
+                                    by Zip Code <br>
+                                    2021"),
+            position = "bottomright")
+
+char_zips %>% 
+  leaflet()
 
 ```
 
 ```{r, include=FALSE}
-# # packages required
-# library(geojsonio)
-# library(leaflet)
-# library(magrittr)
-# library(htmlwidgets)
+## packages required
+library(geojsonio)
+ library(leaflet)
+ library(magrittr)
+ library(htmlwidgets)
 #  
 #  
 #  
