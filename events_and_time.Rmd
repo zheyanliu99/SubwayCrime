@@ -1,5 +1,5 @@
 ---
-title: "Crime events by time"
+title: "Crime events and time"
 output: 
   html_document: 
     toc: true
@@ -13,6 +13,7 @@ library(readxl)
 library(httr)
 library(lubridate)
 library(plotly)
+library(dplyr)
 ```
 
 
@@ -21,9 +22,10 @@ raw_sub_crime =
   read_csv("./data/subwaycrime.csv") %>% 
   janitor::clean_names() %>% 
   rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "law_cat" = "law_cat_cd", "crime_event" = "ofns_desc", "crime_desc" = "pd_desc") %>% 
-  mutate(start_date = as.character(as.Date(start_date, "%m/%d/%Y")), 
-         end_date = as.character(as.Date(end_date, "%m/%d/%Y"))) %>% 
-  filter(start_date > "2021-01-01") %>% 
+  mutate(law_cat = ordered(law_cat, level = c("VIOLATION", "MISDEMEANOR", "FELONY"))) %>% 
+  mutate(start_date = as.Date(start_date, "%m/%d/%Y"), 
+         end_date = as.Date(end_date, "%m/%d/%Y")) %>% 
+  filter(start_date > "2020-12-28") %>% 
   mutate(start = as.POSIXct(paste(start_date, start_time), format = "%Y-%m-%d %H:%M:%S"), 
          end = as.POSIXct(paste(end_date, end_time), format = "%Y-%m-%d %H:%M:%S")) %>% 
   mutate(crime_event = tolower(crime_event),
@@ -57,6 +59,7 @@ raw_sub_crime =
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_month = 
   raw_sub_crime %>% 
+  filter(start_date > "2021-01-01") %>% 
   select(start_date, start_time, crime_event, law_cat) %>% 
   mutate(start_date = substring(start_date, 1, 7))
   
@@ -71,23 +74,24 @@ plot_1 =
 layout(plot_1, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
 ```
 
-### Number of crime events each day
+### Number of crime events each week
 
 ```{r, message=FALSE, warning=FALSE}
-sub_crime_day = 
+sub_crime_week = 
   raw_sub_crime %>% 
   select(start_date, start_time, crime_event, law_cat) %>% 
-  group_by(start_date) %>% 
+  mutate(week = cut.Date(start_date, breaks = "1 week", labels = FALSE)) %>% 
+  arrange(week) %>% 
+  group_by(week) %>% 
   summarise(event_num = n())
   
 plot_2 = 
-  sub_crime_day %>% 
+  sub_crime_week %>% 
     plot_ly(
-    x = ~start_date, y = ~event_num, type = "bar"
+    x = ~week, y = ~event_num, type = "scatter", mode = "marker"
   )
 
-layout(plot_2, title = "Crime events over day", xaxis = list(title = "Day"), yaxis = list(title = "Number of Crime Events"))
-
+layout(plot_2, title = "Crime events over weeks", xaxis = list(title = "Week"), yaxis = list(title = "Number of Crime Events"))
 ```
 
 ### Top 5 crime events v.s. Occurrence time
@@ -158,7 +162,7 @@ plot_5 =
   crime_prcd_time %>% 
   plot_ly(y = ~ prcd_time, color = ~ law_cat, type = "box")
 
-layout(plot_5, title = "Crime type", xaxis = list(title = "Proceeding time"), yaxis = list(title = "Crime type v.s. Proceeding time")
+layout(plot_5, title = "Crime type", xaxis = list(title = "Proceeding time"), yaxis = list(title = "Crime type v.s. Proceeding time (mins)")
     )
 ```
 
