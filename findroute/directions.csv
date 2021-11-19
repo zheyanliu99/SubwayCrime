@@ -1,0 +1,9 @@
+time,distance,walking_distance,arrival_stop,arrival_time,departure_stop,departure_time,line,num_stops,route_num
+6351.0,40665.0,139.0,Howard Beach - JFK Subway Station,1637310330,168 St,1637305680,A,45,1
+5703.0,35791.0,272.0,125 St,1637306760,168 St,1637306280,A,5,2
+5703.0,35791.0,272.0,7 Avenue Station,1637307540,125 St,1637306970,D,2,2
+5703.0,35791.0,272.0,Sutphin Blvd - Archer Av - JFK Airport,1637310180,7 Avenue Station,1637307810,E,21,2
+5871.0,40665.0,139.0,Howard Beach - JFK Subway Station,1637312130,168 St,1637307480,A,45,3
+5223.0,35791.0,272.0,125 St,1637309160,168 St,1637308680,A,5,4
+5223.0,35791.0,272.0,7 Avenue Station,1637309940,125 St,1637309370,D,2,4
+5223.0,35791.0,272.0,Sutphin Blvd - Archer Av - JFK Airport,1637312580,7 Avenue Station,1637310210,E,21,4
