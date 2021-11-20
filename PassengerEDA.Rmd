@@ -113,6 +113,8 @@ df %>%
             title = "Subway Service", opacity = 0.75) %>% 
   setView(-73.8399986, 40.746739, zoom = 11)
 
+
+
 ```
 
 ## By cluster
@@ -124,7 +126,7 @@ df_sub =
   select(long, lat) %>% 
   drop_na()
   
-k2 = kmeans(df_sub, centers = 4, nstart = 25)
+k2 = kmeans(df_sub, centers = 8, nstart = 25)
 
 ```
 
@@ -133,7 +135,7 @@ Kmeans results and centers
 library("RColorBrewer")
 df$cluster = k2$cluster
 pal = colorFactor(
-  brewer.pal(n = 4, name = "Set1"),
+  brewer.pal(n = 9, name = "Set1"),
   df$cluster,
   levels = NULL,
   ordered = FALSE,
@@ -146,7 +148,7 @@ df %>%
   leaflet() %>% 
   addProviderTiles(providers$CartoDB.Positron) %>% 
   addCircles(lng = ~long, lat = ~lat, weight = 1, stroke = FALSE,
-    radius = ~sqrt(passenger_flow)/14, popup = ~station, color = ~pal(cluster), opacity = 1, fillOpacity = 1) %>%
+    radius = ~sqrt(passenger_flow)/20, popup = ~station, color = ~pal(cluster), opacity = 1, fillOpacity = 1) %>%
   addLegend("topright", pal = pal, values = ~cluster, 
             title = "Kmeans Cluster", opacity = 1) %>% 
   setView(-73.8399986, 40.746739, zoom = 11)
