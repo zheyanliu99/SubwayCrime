@@ -91,7 +91,10 @@ class google_routes():
             direction_df = extract_info_from_direction(direction['legs'][0], route_num + 1)
             self.direction_df_list.append(direction_df)
         
-        directions_df = pd.concat(self.direction_df_list, ignore_index=True)
+        if self.direction_df_list:
+            directions_df = pd.concat(self.direction_df_list, ignore_index=True)
+        else:
+            directions_df = pd.DataFrame(0)
         # directions_df.to_csv('directions.csv', index = False)
 
         return directions_df
@@ -112,3 +115,6 @@ departure_time = datetime.datetime.now()
 gmaps = googlemaps.Client(key = key)
 directions = gmaps.directions(start_location, destination, mode = 'transit', 
                               transit_mode = 'subway', alternatives = True,  departure_time = departure_time)
+
+
+
