@@ -1,0 +1,9 @@
+time,distance,walking_distance,line,departure_stop,arrival_stop,num_stops,departure_time,arrival_time,route_num
+4568.0,37034.0,272.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637365510,1637366560,1
+4568.0,37034.0,272.0,E,42 St - Port Authority Bus Terminal,Sutphin Blvd - Archer Av - JFK Airport,11,1637366700,1637368755,1
+4548.0,35289.0,272.0,C,168 St,125 St,5,1637365530,1637365950,2
+4548.0,35289.0,272.0,D,125 St,7 Avenue Station,2,1637366160,1637366760,2
+4548.0,35289.0,272.0,E,7 Avenue Station,Sutphin Blvd - Archer Av - JFK Airport,9,1637366940,1637368755,2
+5541.0,40665.0,139.0,A,168 St,Howard Beach - JFK Subway Station,23,1637365470,1637369310,3
+5253.0,37034.0,272.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637366160,1637367210,4
+5253.0,37034.0,272.0,E,42 St - Port Authority Bus Terminal,Sutphin Blvd - Archer Av - JFK Airport,13,1637367480,1637369610,4

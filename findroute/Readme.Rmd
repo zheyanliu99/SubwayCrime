@@ -1,0 +1,7 @@
+---
+title: "Readme"
+author: "Zheyan"
+date: "11/18/2021"
+output: github_document
+---
+Shiny app for user customized subway route. We will list the time, crime, crowdness and walking distance so that user can choose the route they want.

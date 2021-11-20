@@ -1,0 +1,9 @@
+time,distance,walking_distance,line,departure_stop,arrival_stop,num_stops,departure_time,arrival_time,route_num
+2063.0,14560.0,609.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637364619,1637365684,1
+2063.0,14560.0,609.0,7,Times Sq - 42 St,Hunters Point Avenue,4,1637365920,1637366430,1
+2022.0,14560.0,609.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637365020,1637366085,2
+2022.0,14560.0,609.0,7,Times Sq - 42 St,Hunters Point Avenue,4,1637366280,1637366790,2
+2496.0,14532.0,419.0,1,168 St - Washington Hts,Times Sq - 42 St,15,1637364776,1637366246,3
+2496.0,14532.0,419.0,7X,Times Sq - 42 St,Hunters Point Avenue,4,1637366460,1637366970,3
+2112.0,14560.0,609.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637365470,1637366520,4
+2112.0,14560.0,609.0,7X,Times Sq - 42 St,Hunters Point Avenue,4,1637366820,1637367330,4
