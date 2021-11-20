@@ -35,6 +35,13 @@ df %>%
 
 df %>% 
   mutate(line = paste0(line, num_stops, collapse = '('))
+
+subwayIcons <- icons(
+  iconUrl = "https://maps.gstatic.com/mapfiles/transit/iw2/6/subway2.png",
+  iconWidth = 16, iconHeight = 16,
+  iconAnchorX = 16, iconAnchorY = 16,
+)
+
 ####################################
 # User Interface                   #
 ####################################
@@ -46,8 +53,22 @@ ui <- fluidPage(theme = shinytheme("paper"),
                                     sidebarPanel(
                                       HTML("<h3>Input parameters</h3>"),
                                       
+                                      HTML("<h5>Who are you?</h5>"),
+                                      selectInput("gender", "Your Gender",
+                                                  list("Female", "Male")),
+                                      selectInput("age", "Your Age",
+                                                  list("<18", "18-30",'30-50','>50')),
+                                      selectInput("race", "Your Race",
+                                                  list(`Hispanic` = list('Hispanic'),
+                                                       `Non-Hispanic` = list("White", "Black",'Asian'))),
+                                      
+                                      
+                                      HTML("<h5>When you leave?</h5>"),
+                                      dateInput("start_date", "Date:", value = Sys.Date(), min =  Sys.Date(), max = Sys.Date() + 14),
+                                      
+                                      HTML("<h5>Where to go?</h5>"),
                                       textInput("start_location", "Your Location:", "168 st"),
-                                      textInput("destination", "Place of Interest:", "JFK"),
+                                      textInput("destination", "Place of Interest:", "Prospect Park"),
                                       
                                       actionButton("submitbutton", 
                                                    "Submit", 
@@ -85,7 +106,17 @@ server <- function(input, output, session) {
     
     mygoogle_routes$start_location = isolate(paste(input$start_location, 'New York', sep = ','))
     mygoogle_routes$destination = isolate(paste(input$destination, 'New York', sep = ','))
-    df = mygoogle_routes$get_directions() # it is a R dataframe
+    # it is a R dataframe 
+    df = 
+      mygoogle_routes$get_directions() %>% 
+      
+      mutate(
+        # change time into minuates
+        time = round(time/60),
+        # change distance into miles
+        distance = round(distance/1609, 1),
+        walking_distance = round(walking_distance/1609, 2))
+             
     
     print(df)
   })
@@ -98,9 +129,19 @@ server <- function(input, output, session) {
         summarise(time = mean(time),
                   distance = mean(distance),
                   walking_distance = mean(walking_distance),
-                  line = paste0(line, '[', as.character(num_stops), ']', collapse = " - ")) %>% 
+                  line = paste0(line, '[', as.character(num_stops), ']', collapse = " - "),
+                  n = n()) %>% 
+        mutate(
+          crime_score = round(runif(n),2),
+          crowdness_score = round(runif(n),2)
+        ) %>% 
         distinct(line, .keep_all = TRUE) %>% 
-        rename('line[stops]' = line) 
+        select(-n, -distance) %>% 
+        relocate(route_num, time, walking_distance, crime_score, crowdness_score, line) %>% 
+        rename('line[stops]' = line,
+               'time(min)' = time,
+               # 'distance(mile)' = distance,
+               'walking_distance(mile)' = walking_distance)  
       
     print(df2)
       
@@ -113,14 +154,27 @@ server <- function(input, output, session) {
       pivot_longer(ends_with('lat'), names_to = 'journey', values_to = 'lat') %>% 
       pivot_longer(ends_with('lng'), names_to = 'journey2', values_to = 'lng') %>% 
       filter((journey == 'departure_stop_lat' & journey2 == 'departure_stop_lng')|(journey == 'arrival_stop_lat' & journey2 == 'arrival_stop_lng')) %>% 
-      mutate(group = paste(as.character(route_num), line))
+      mutate(group = paste(as.character(route_num), line)) %>% 
+      # add subway service
+      mutate(service = 
+               case_when(  line %in% c('A', 'C', 'E')  ~ "8 Avenue(ACE)",
+                           line %in% c('S') ~ "Shuttle(S)",
+                           line %in% c('B', 'D', 'F', 'M') ~ "6 Avenue(BDFM)",
+                           line %in% c('G') ~ "Brooklyn-Queens Crosstown(G)",
+                           line %in% c('L') ~ "14 St-Canarsie(L)",
+                           line %in% c('N', 'Q', 'R', 'W') ~ "Broadway(NQRW)",
+                           line %in% c('1', '2', '3') ~ "7 Avenue(123)",
+                           line %in% c('4', '5', '6') ~ "Lexington Av(456)",
+                           line %in% c('7') ~ "Flushing(7)",
+                           TRUE ~ 'other_line')) %>% 
+      relocate(route_num)
     
   })
   
   # Status/Output Text Box
   output$contents <- renderPrint({
     if (input$submitbutton>0) { 
-      isolate("Find results") 
+      isolate("Routes Found") 
     } else {
       return("Please enter your start location and destination")
     }
@@ -145,13 +199,13 @@ server <- function(input, output, session) {
       }
     })
   
-  output$tabledata2 <- DT::renderDataTable({
-    if (input$submitbutton>0) {
-      DT::datatable(df_map(),
-                    options = list(scrollX = TRUE),
-                    rownames = FALSE)
-    }
-  })
+  # output$tabledata2 <- DT::renderDataTable({
+  #   if (input$submitbutton>0) {
+  #     DT::datatable(df_map(),
+  #                   options = list(scrollX = TRUE),
+  #                   rownames = FALSE)
+  #   }
+  # })
   
   
   output$mymap <- renderLeaflet({
@@ -176,11 +230,31 @@ server <- function(input, output, session) {
                            'Flushing(7)'))
   
   observe({
+  
+    
     leafletProxy("mymap", data = df_map()) %>%
-      clearShapes() %>%
-      addPolylines(lng = ~lng, lat = ~lat, group = ~group, line) %>% 
-      addCircles(lng = ~lng , lat = ~lat, weight = 1, stroke = FALSE,
-                              radius = 400, opacity = 1, fillOpacity = 1) 
+      clearShapes()  %>% 
+      clearMarkers()
+    
+    print('I am here')
+    print(df_map() %>%  distinct(group) %>%  pull(group))
+    for(group in df_map() %>%  distinct(group) %>%  pull(group)){
+      print(df$group)
+      leafletProxy("mymap", data = df_map()) %>%
+        addPolylines(lng = ~lng, lat = ~lat, data=df_map()[df_map()$group==group,], color=~pal(service))
+    }
+    
+    leafletProxy("mymap", data = df_map()) %>% 
+      # addCircles(lng = ~lng , lat = ~lat, weight = 1, stroke = FALSE,
+      #                                      radius = 400, opacity = 1, fillOpacity = 1)
+      addMarkers(lng = ~lng, lat = ~lat, icon = subwayIcons)
+    
+    
+    # leafletProxy("mymap", data = df_map()) %>%
+    #   clearShapes() %>%
+    #   addPolylines(lng = ~lng, lat = ~lat, group = ~group, popup = ~route_num, color = ~pal(service)) %>% 
+    #   addCircles(lng = ~lng , lat = ~lat, weight = 1, stroke = FALSE,
+    #                           radius = 400, opacity = 1, fillOpacity = 1) 
   })
   
   # output$mymap <- renderLeaflet({
