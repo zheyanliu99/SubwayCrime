@@ -1,0 +1,156 @@
+---
+title: "Modeling Data processing"
+author: "Baode"
+date: "11/13/2021"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(data.table)
+library(readxl)
+library(nnet)
+library(caret)
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## import pas data
+```{r}
+pas = read_csv('passenger_imputed.csv') %>%
+  janitor::clean_names() %>%
+  filter(year(as.Date(date, format = "/%Y-/%m-/%d")) %in% c(2019,2020)) %>%
+  mutate(pas_volume = entry_diff + exit_diff)
+
+tidypas = pas  %>% # line merge
+  select(station, linename, date, time_period, time, pas_volume, weekday) 
+
+coo = read_csv('data/subway_info_final3.csv')
+
+coopas = left_join(tidypas,coo, by = "station") 
+#%>% select(station, linename.x, date, time_period, time, pas_volume, weekday,lat,long)
+coopas[1:4,]
+# weekday 0 for Mon.
+```
+
+```{r}
+pas %>% ggplot(aes(x=pas_volume))+geom_density()
+pas[1:4,]
+max(pas$pas_volume)
+min(pas$pas_volume)
+pas$pas_volume
+```
+
+## import cri data and clean it.
+```{r}
+cri = read_csv('./NYPD_Complaint_Data_Historic.csv') %>%
+  janitor::clean_names() %>%
+  filter(prem_typ_desc == "TRANSIT - NYC SUBWAY",
+         vic_age_group %in% c("<18","18-24","25-44","45-64","65+"),
+         vic_race %in% c("AMERICAN INDIAN/ALASKAN NATIVE",
+                         "ASIAN / PACIFIC ISLANDER","BLACK","BLACK HISPANIC",
+                         "WHITE","WHITE HISPANIC"),
+         vic_sex %in% c("F","M"),
+         boro_nm %in% c("BRONX","BROOKLYN","MANHATTAN","QUEENS"),
+         year(as.Date(cmplnt_fr_dt, format = "%m/%d/%Y")) > 2005
+         ) %>%
+  select(law_cat_cd,cmplnt_fr_dt,cmplnt_fr_tm,
+         boro_nm,vic_age_group, vic_race, vic_sex) %>%
+  mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt,format("%m/%d/%Y"))) %>%
+  na.omit()
+ 
+
+cri %>%
+  group_by(year(as.Date(cmplnt_fr_dt, format = "%Y-%m-%d"))) %>%
+  summarise(n=n())
+
+cri %>%
+  group_by(vic_age_group) %>%
+  summarise(n=n())
+
+```
+
+
+
+## change variables type to input type
+```{r}
+#  attempted -> type
+#cri %>% 
+#  mutate(law_cat_cd = ifelse(crm_atpt_cptd_cd == "ATTEMPTED",crm_atpt_cptd_cd,law_cat_cd)) %>%
+#  group_by(law_cat_cd) %>%
+#  summarise(n = n())
+
+cri_input = cri %>%
+  rename(lev_off = law_cat_cd, quarter = cmplnt_fr_dt, time = cmplnt_fr_tm) %>%
+  mutate(lev_off = recode(lev_off, "FELONY" = 3,
+                          "MISDEMEANOR" = 2, "VIOLATION" = 1),
+         quarter = as.character(quarter(as.Date(cri_input$quarter, format = "%Y-%m-%d"))),
+         time = hour(cri_input$time),
+         time = as.character(time),
+         time = recode(time, '0' = 0,'1' = 0,'2' = 0,'3' = 0,
+                       '4' = 4,'5' = 4,'6' = 4,'7' = 4,
+                       '8' = 8,'9' = 8,'10' = 8,'11' = 8,
+                       '12' = 12,'13' = 12,'14' = 12,'15' = 12,
+                       '16' = 16,'17' = 16,'18' = 16,'19' = 16,
+                       '20' = 20,'21' = 20,'22' = 20,'23' = 20),
+         time = as.character(time))
+#fwrite(cri_input, 'cri_input.csv')
+
+```
+
+
+
+```{r}
+set.seed(42)
+index = createDataPartition(cri_input$lev_off, p = 0.8, list = FALSE)
+train = cri_input[index,]
+test = cri_input[-index,]
+
+```
+
+# multinom 
+```{r}
+
+multinom_re = multinom(formula = lev_off ~ .,data = train)
+pred = predict(multinom_re,test)
+print(summary(multinom_re)$AIC)
+print(sum(as.numeric(pred == test$lev_off))/nrow(test))
+      
+  
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
