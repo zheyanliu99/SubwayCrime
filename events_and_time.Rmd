@@ -158,7 +158,7 @@ ggplotly(plot_3) %>%
 
 ## Degrees of crime event
 
-Among the top 10 frequent crime events, events with degree violation mainly occurs in the second degree of harassment, and there is basically no other degree events happened in this type of crimes; events 
+Among the top 10 frequent crime events, events with degree violation mainly occurs in the second degree of harassment, and there is basically no other degree events happened in this type of crimes; events with misdemeanor degree mainly happens in the third degree of assault and criminal mischief; and crime events with felony degree almost happen in each crime event among the top 10 most frequent crime events.
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_degree = 
@@ -177,6 +177,10 @@ layout(plot_4, title = "Crime Events Numbers each degree", xaxis = list(title = 
 
 
 ## Proceeding time
+
+For the proceeding time, the overall relationship between proceeding time and degrees of crime events if that the median proceeding time depcreases along with the degree of events increase. Excluding some extreme outliers, felony crime events have the largest median proceeding time so the difficulty of dealing with this type of events for official workers may increase the proceeding time; it also has the largest range of proceeding time, it may depend on the specific cases of this type of events; 
+
+For the violation degree of crime events, it has the lowest median proceeding time, so it may be much easier to be delt with for official workers.
 
 ```{r, message=FALSE, warning=FALSE}
 crime_prcd_time = 
@@ -197,6 +201,8 @@ layout(plot_5, title = "Crime type", xaxis = list(title = "Proceeding time"), ya
 
 
 ## Day of week v.s. Occurrence time
+
+From the heat map, it is easier to be judged that most of crime events were mainly occurred in the afternoon from Tuesday to Thursday. We can say that in the noon around 12:00 pm on Tuesday and Wednesday may be the most dangerous time on in a week, whereas there are not that many crime events on Saturday and Sunday.
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_dow = 
