@@ -14,8 +14,8 @@ library(httr)
 library(lubridate)
 library(plotly)
 library(dplyr)
+library(patchwork)
 ```
-
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 raw_sub_crime = 
@@ -52,16 +52,34 @@ raw_sub_crime =
   select(start_date, start_time, end_date, end_time, law_cat, crime_event, crime_desc, start, end, event_time)
 ```
 
+## Count data
+
+There are totally 5955 crime events updating to September, 2021.
+
+#### Violation events
+
+Of these crime events, 775 were judged as violation crime events.
+
+#### Misdemeanor events
+
+Of these crime events, 3169 were judged as misdemeanor crime events.
+
+#### Felony events
+
+Of these crime events, 2040 were judged as felony crime events.
+
 ## Crime events v.s. Time
 
 ### Number of cirime events each month
+
+Basically, the number of crime events in each month has the comparably same value. Specifically, March has the highest events number, whereas February has the lowest events number; there is a overall increasing number in the number of crime events along with months.
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_month = 
   raw_sub_crime %>% 
   filter(start_date > "2021-01-01") %>% 
   select(start_date, start_time, crime_event, law_cat) %>% 
-  mutate(start_date = substring(start_date, 1, 7))
+  mutate(start_date = substring(start_date, 1, 7)) 
   
 plot_1 = 
   sub_crime_month %>% 
@@ -75,6 +93,8 @@ layout(plot_1, title = "Crime events over month", xaxis = list(title = "Month"),
 ```
 
 ### Number of crime events each week
+
+With the degree to weeks, the highest number of crime events appears in the eleventh week, which in the March. It appears that there would be a locally maximum point for around every ten weeks, and there also would be a sudden increase and decrease at the beginning and end of the year, accordingly.
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_week = 
@@ -95,6 +115,13 @@ layout(plot_2, title = "Crime events over weeks", xaxis = list(title = "Week"), 
 ```
 
 ### Top 5 crime events v.s. Occurrence time
+
+For the most frequent crime events, they mainly happen in the afternoon, from 12:00 pm to 20:00 pm in the 9 months in 2021. Of these crime events, from 12:00 pm to 20:00 pm, crime mischief is the most frequent happening events. In New York City, criminal mischief includes intentionally damage, participation in the destruction of an abandoned building. 
+
+The third degree of assault is the second frequent crime events in that time interval, which includes intention to cause physical injury to another person.
+
+In that time interval, of crime events, the second degree of harassment is the third frequently happening events, which includes the intention to harass, annoy or alarm some person and strike people in some manner or make physical contact with them. 
+
 
 ```{r, message=FALSE, warning=FALSE}
 crime_occ_time = 
@@ -130,6 +157,8 @@ ggplotly(plot_3) %>%
 
 
 ## Degrees of crime event
+
+Among the top 10 frequent crime events, events with degree violation mainly occurs in the second degree of harassment, and there is basically no other degree events happened in this type of crimes; events 
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_degree = 
