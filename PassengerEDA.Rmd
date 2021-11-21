@@ -78,7 +78,7 @@ passenger_df =
 # Subway passenger EDA with location
 
 
-Passenger flow is closely related with crime. The more passenger flow in a station, the more criminals there will be. We conduct EDA to:
+Passenger flow is closely related with crime. The more passenger flow in a station, the more criminals there will be. Therefore, we conduct EDA to:
 
 * Find relationship between location and passenger flow
 * Determine the location variable for the model
@@ -273,7 +273,7 @@ summary_df %>%
   setView(-73.8399986, 40.746739, zoom = 10)
 ```
 
-The zipcode does not demonstrate the exact relationship between location and passenger flow. For instance, some zipcode such as *10002* and *10011* in lower Manhattan should have more passengers, however few stations are built there. Therefore, the key cause to this confusion is that subway stations are not built based on zipcode.
+The zipcode does not demonstrate the exact relationship between location and passenger flow. For instance, some zipcodes such as *10002* and *10011* in lower Manhattan should have more passengers, however few stations are built there. Therefore, the key cause to this confusion is that subway stations are not built based on zipcode.
 
 ## Kmeans analysis of station
 
