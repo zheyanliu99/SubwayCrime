@@ -2,9 +2,13 @@
 title: "EDA"
 author: "Zheyan"
 date: "11/9/2021"
-output: html_document
-editor_options: 
-  chunk_output_type: console
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide 
+    theme: cosmo
+
 ---
 
 ```{r setup, include=FALSE}
@@ -32,44 +36,79 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ```
 
-## Where crime?
 
-```{r}
-df = read_csv('data/subwaycrime.csv') %>% 
-  janitor::clean_names() %>% 
-df %>% 
- mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format="％M/%D/%Y")) %>% 
-  
-  
+```{r,include=FALSE}
+# df = read_csv('data/subwaycrime.csv') %>% 
+#   janitor::clean_names() %>% 
+# df %>% 
+#  mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format="％M/%D/%Y")) %>% 
+#   
+#   
+# 
+# df %>% 
+#   leaflet() %>% 
+#   addTiles() %>% 
+#   addCircleMarkers(~longitude, ~latitude,radius= 3, weight= 0.5,
+#                    fillColor=~(boro_nm))
 
-df %>% 
-  leaflet() %>% 
-  addTiles() %>% 
-  addCircleMarkers(~longitude, ~latitude,radius= 3, weight= 0.5,
-                   fillColor=~(boro_nm))
-
-
-```
-
-```{r}
 crime_df = read_csv('data/subwaycrime_with_station.csv')
 
 crime_df<-crime_df %>% 
  mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format='%m/%d/%Y')) %>% 
  filter(cmplnt_to_dt>='2021-1-1')
 
+```
 
-str(crime_df)
+## Where crime?
+
+New York City can be a dangerous place and crime from above ground will 
+often extend into the NYC Subway.</br>
+We mainly focus on the recent crime data on subway in NYC in this year, and 
+there are `r nrow(crime_df)` complaints in 2021. 
+
+## Heat Map of Subway Crime in NYC, 2021
+
+From this map, you can check where the crime happened frequently. 
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+crime_df %>% 
+  group_by(closest_station) %>% 
+  summarise(Trend=n(),
+            longitude=mean(longitude),
+            latitude=mean(latitude)) %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addHeatmap(lng=~longitude,lat=~latitude,
+             intensity=~exp(Trend),max=100,radius=5,blur=10)
+
+```
+
+## Map of Subway Crime in NYC, 2021
+
+From this map, you can check each crime's location, type, victim and suspects' 
+information and time. 
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+
+
 leaflet(crime_df) %>%
   addProviderTiles(providers$CartoDB.Positron) %>% 
   addMarkers(lat = ~latitude, lng = ~longitude, 
+             popup = paste("Offense Description:", crime_df$ofns_desc, "<br>",
+                           "Suspect's age:",crime_df$susp_age_group,"<br>",
+                           "Suspect's race:", crime_df$susp_race,"<br>",
+                           "Suspect's gender:",crime_df$susp_sex,"<br>",
+                           "Victim's age:",crime_df$vic_age_group,"<br>",
+                           "Victim's race:", crime_df$vic_race,"<br>",
+                           "Victim's gender:",crime_df$vic_sex,"<br>",
+                           "Time:",crime_df$cmplnt_to_dt),
                 clusterOptions = markerClusterOptions())
-  )
+  
 
 
-# 
+# "Offense Description:", crime_df$ofns_desc, "<br>",
 # "<br>", 
-#                 "Offense Description:", crime_df$ofns_desc, "<br>",
+#                 
 #                 "Suspect Information", c(crime_df$susp_age_group,
 #                                          crime_df$susp_race,
 #                                          crime_df$susp_sex), "<br>",
@@ -78,10 +117,36 @@ leaflet(crime_df) %>%
 #                                          crime_df$vic_sex), 
 ```
 
-## adjusted by Keviant
+## Distribution of crime in boroughs
+
+When firstly scanning the map above, you can ambigouously know how many crimes 
+in each part of NYc, so let uscheck them in each borough using bar chart.
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
+crime_df %>% 
+  count(boro_nm) %>% 
+  mutate(boro_nm = fct_reorder(boro_nm, n)) %>% 
+  slice_max(n,n=20) %>% 
+  plot_ly(x = ~boro_nm, y = ~n, color = ~boro_nm, type = "bar", colors = "viridis") %>% 
+  layout(yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Area'))
+```
+
 ## Top 10 offense classification
-```{r}
-crime_df = read_csv('data/subwaycrime_with_station.csv')
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+## crime_df = read_csv('data/subwaycrime_with_station.csv')
+
+```
+
+There are `r count(distinct(crime_df,ofns_desc))` kinds of crime occurring in the subway, there is the bar chart shows the wildest 10 crimes in the subway.
+
+The most frequent crime mainly consists of sexual assaults and thefts. The assualt
+has 869 cases, which is more than a quarter of the total crimes. 
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+
 crime_df %>% 
   count(ofns_desc) %>% 
   mutate(ofns_desc = fct_reorder(ofns_desc, n)) %>% 
@@ -90,13 +155,16 @@ crime_df %>%
   layout(yaxis = list(title = 'Number of Compliants'),
          xaxis = list(title = 'Type of Offense'))
 
-## 部分代码来源 
+## some data's resources
 ## https://stackoverflow.com/questions/51955803/how-to-change-x-axis-layout-using-plotly-in-r
-  
+
 ```
 
-Top 20 station where crime happens frequently
-```{r}
+## Top 20 station where crime happens frequently
+
+From this chart, you can mainly check which station is the most dangerous station
+in 2021. 
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
 crime_df = read_csv('data/subwaycrime_with_station.csv')
 crime_df %>% 
   count(closest_station) %>% 
@@ -109,34 +177,16 @@ crime_df %>%
 
 ```
 
-Overall function
-```{r}
+
+
+## Barchart by each Borough about suspects
+
+From this graph, you can check in each borough, which races more possibly 
+commit a crime in the subway. 
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
 
 crime_df %>% 
-  count(boro_nm) %>% 
-  mutate(boro_nm = fct_reorder(boro_nm, n)) %>% 
-  slice_max(n,n=20) %>% 
-  plot_ly(x = ~boro_nm, y = ~n, color = ~boro_nm, type = "bar", colors = "viridis") %>% 
-  layout(yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'Area'))
-```
-
-
-
-## Stack Bar Chart type 1
-```{r}
-crime_df %>% 
-  count(boro_nm,susp_race) %>% 
-  plot_ly(x = ~boro_nm, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
-  layout(barmode="stack",
-         yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'Area'))
-```
-
-## Stack Bar Chart type 2
-```{r}
-
-crime_df %>% 
+  drop_na(boro_nm,susp_race) %>% 
   count(boro_nm,susp_race) %>% 
   plot_ly(x = ~boro_nm, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
   layout(
@@ -145,45 +195,61 @@ crime_df %>%
 
 ```
 
-```{r}
+## Barchart by each Borough about Victims
+
+From this graph, you can check in each borough, which races more possibly 
+vulnerable in the subway. 
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
 crime_df %>% 
+  filter(vic_race!="UNKNOWN") %>% 
   count(boro_nm,vic_race) %>% 
   plot_ly(x = ~boro_nm, y = ~n, color = ~vic_race, type = "bar", colors = "viridis") %>% 
   layout(
          yaxis = list(title = 'Number of Compliants'),
          xaxis = list(title = 'Area'))
 
-
-```
-## Heat Map
-```{r}
-crime_df %>% 
-  group_by(closest_station) %>% 
-  summarise(Trend=n(),
-            longitude=mean(longitude),
-            latitude=mean(latitude)) %>% 
-  leaflet() %>% 
-  addTiles() %>% 
-  addHeatmap(lng=~longitude,lat=~latitude,
-             intensity=~Trend,max=100,radius=5,blur=10)
-
 ```
 
-```{r}
+## 
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
 crime_df %>% 
-  plot_mapbox(
-    lon = ~longitude, 
-    lat = ~latitude, 
-    color = ~boro_nm,
-    mode = 'markers',
-    hoverinfo = 'skip')  %>% 
+  filter(ofns_desc %in% c("SEX CRIMES","HARRASSMENT 2","ASSAULT 3 & RELATED OFFENSES")) %>% 
+  count(vic_age_group,vic_race) %>% 
+  plot_ly(x = ~vic_age_group, y = ~n, color = ~vic_race, type = "bar", colors = "viridis") %>% 
   layout(
-    mapbox = 
-      list(
-        style = 'streets',
-        zoom = 9.5,
-        center = list(lat = 40.7, lon = -74.0)),
-      title = "Density Heatmap of Compliants in Subway")%>% 
-  config(mapboxAccessToken = Sys.getenv("MAPBOX_TOKEN"))
+         yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Age Group'))
+  
+```
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+crime_df %>% 
+  filter(ofns_desc %in% c("ASSAULT 3 & RELATED OFFENSES")) %>% 
+  count(vic_age_group,vic_sex) %>% 
+  plot_ly(x = ~vic_age_group, y = ~n, color = ~vic_sex, type = "bar", colors = "viridis") %>% 
+  layout(
+         yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Age Group'))
+  
+
+```
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+crime_df %>% 
+  filter(ofns_desc %in% c("ASSAULT 3 & RELATED OFFENSES",
+                          "HARRASSMENT 2","GRAND LARCENY",
+                          "DANGEROUS DRUGS","FELONY ASSAULT",
+                          "ROBBERY","PETIT LARCENY","FORGERY",
+                          "SEX CRIMES")
+  ) %>% count(ofns_desc,vic_sex) %>% 
+  
+    plot_ly(x = ~ofns_desc, y = ~n, color = ~vic_sex, type = "bar", colors = "viridis") %>% 
+  layout(
+         yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Age Group'))
+  
+                
 
 ```

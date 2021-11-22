@@ -1,0 +1,441 @@
+---
+title: "time data"
+output: 
+  html_document:  
+    toc: true 
+    toc_float: true 
+    code_folding: hide 
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+library(plotly)
+library(gganimate)
+library(animation)
+library(lubridate)
+library(leaflet)
+ani.options(interval=2)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+# Data Cleanning
+
+### Passenger Data
+```{r echo=FALSE,tidy=TRUE,message=FALSE}
+# read passgenger data, create unique variable for each station(station_line),get the start and end time of each oberservation
+passenger_df <- 
+  read_csv("passenger_imputed.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    station_line = str_c(station,linename,sep = " line:"),
+    start_time = time-14400,
+  ) %>% 
+  rename(
+    end_time = time
+  ) %>% 
+  select(station_line,station,linename,date,time_period,start_time,end_time,entry_diff_imputed,exit_diff_imputed)
+
+# get the information of each station
+subway_info <- 
+  read_csv("data/subway_info_final3.csv") %>% 
+  mutate(
+    station_line = str_c(station,linename,sep = " line:")
+    ) %>% 
+  select(station_line,service)
+
+# set the color of each station by its line
+linecolor <- colorFactor(
+  palette = c("blue", "azure4", "orange",'green','brown','yellow','red','forestgreen','purple'),
+  levels = c('8 Avenue(ACE)',
+             'Shuttle(S)',
+             '6 Avenue(BDFM)',
+             'Brooklyn-Queens Crosstown(G)',
+             '14 St-Canarsie(L)',
+             'Broadway(NQRW)',
+             '7 Avenue(123)',
+             'Lexington Av(456)',
+             'Flushing(7)'))
+
+
+            
+```
+
+
+
+```{r eval=FALSE,echo=FALSE,tidy=TRUE,message=FALSE}
+{start_date <-  as.Date(readline(prompt = "Enter The Start Date(YYYY-MM-DD):"));
+end_date <-  as.Date(readline(prompt = "Enter The End Date(YYYY-MM-DD):"));
+start_time <- readline(prompt = "Enter the Start Time(00:00,04:00,08:00,12:00,16:00,20:00):");
+end_time <- readline(prompt = "Enter the Start Time(00:00,04:00,08:00,12:00,16:00,20:00):")}
+```
+
+### Time 
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+# 2021-01-01
+start_date <-  ymd("2021-01-01")
+end_date <-  ymd("2021-06-30")
+start_time <- "00:00"
+end_time <- "20:00"
+
+time_s <- as.numeric(substr(start_time,1,2))*3600
+time_e <- as.numeric(substr(end_time,1,2))*3600
+date_series <- seq(start_date,end_date,by=1)
+
+passenger_df_time <- 
+  passenger_df%>% 
+  filter(
+    date %in% date_series,
+    !(date == start_date&start_time<time_s),
+    !(date == end_date&start_time>time_e)
+  )
+```
+
+# Busiest Station 
+
+## Top 10 busiest station
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+passenger_df_time %>% 
+  group_by(station_line) %>% 
+  summarize(
+    total_entry = sum(entry_diff_imputed,na.rm = TRUE),
+    total_exit = sum(exit_diff_imputed,na.rm = TRUE),
+  ) %>% 
+  mutate(total = total_entry + total_exit,
+         station_line = fct_reorder(station_line, total),
+         rank = order(total, decreasing = TRUE)
+         ) %>% 
+  filter(rank %in% c(1:10)) %>% 
+  left_join(subway_info) %>% 
+  mutate(
+    station_line = fct_reorder(station_line,total)
+  ) %>% 
+  plot_ly(
+    x = ~station_line, y = ~total, type = "bar",
+    color = ~station_line, alpha = 0.5)
+
+```
+This is the top 10 buiests station during 2021-01-01 and 2021-06-30.
+
+## Top 5 busiest station and their daily passenger over time
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+# get the top X busiest stations and get their name
+top_5_str <- 
+  passenger_df_time %>% 
+  group_by(station_line) %>% 
+  summarize(
+    total_entry = sum(entry_diff_imputed,na.rm = TRUE),
+    total_exit = sum(exit_diff_imputed,na.rm = TRUE),
+  ) %>% 
+  mutate(total = total_entry + total_exit,
+         station_line = fct_reorder(station_line, total),
+         rank = order(total, decreasing = TRUE)
+         ) %>% 
+  filter(rank %in% c(1:5)) %>% 
+  pull(station_line)
+
+# draw the line of top x lines
+passenger_df_time %>% 
+  filter(station_line %in% top_5_str) %>% 
+  group_by(station_line,date) %>% 
+  summarize(
+    total_entry = sum(entry_diff_imputed,na.rm = TRUE),
+    total_exit = sum(exit_diff_imputed,na.rm = TRUE)
+    )%>%
+  mutate(total = total_entry + total_exit) %>% 
+  ggplot(aes(x = date,y= total,color = station_line))+
+  geom_line() +
+  geom_point() +
+  transition_reveal(date)
+      
+```
+This is the top 5 buiests station during 2021-01-01 and 2021-06-30 and their daily passenger data
+
+# Busiest Line
+### Get the busiest line
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+# if a station have more than one line, divide the passenger by the number of line
+passenger_line_df <- 
+  passenger_df_time %>% 
+  mutate(
+    entry_single = entry_diff_imputed/nchar(linename),
+    exit_single = exit_diff_imputed/nchar(linename),
+    total = entry_single + exit_single
+    ) %>% 
+  select(station_line,linename,date,total)
+
+# function that get the passenger of specific line and date.
+line_function <- function(date1,line){
+ line_df <-  
+  passenger_line_df %>% 
+  filter(
+    date == date1,
+    str_detect(linename,line)
+    )
+ 
+ number = sum(pull(line_df,total),na.rm = TRUE)
+ 
+ return(number)
+}
+
+#  a dataframe for each line in everyday 
+final <- tibble(linename = str_sort(unique(unlist(strsplit(unique(passenger_df$linename),"")))))
+date_series1 <- as.data.frame(date_series)
+passenger_timeline_df <- 
+  merge(date_series1,final)
+
+# get the data for each line
+passenger_timeline_df <- 
+  passenger_timeline_df %>% 
+  mutate(
+    total = map2(date_series,linename,line_function),
+  )
+
+# the line rank
+passenger_timeline_df %>% 
+  group_by(linename) %>% 
+  summarize(
+    total_people = sum(unlist(total))
+  ) %>% 
+  mutate(
+    linename = fct_reorder(linename,total_people)
+  ) %>% 
+  plot_ly(
+    x = ~linename,y = ~total_people, color = ~linename,type = "bar" 
+  )
+```
+This is the passenger data of each line during 2021-01-01 and 2021-06-30
+
+### daily passenger of each line (except 1)
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+passenger_timeline_df %>%
+  mutate(
+    total = round(unlist(total))
+  ) %>% 
+  filter(linename != 1) %>% 
+  ggplot(aes(x=date_series,y=total,color = linename))+
+  geom_line()+
+  theme_bw()+
+  facet_wrap(~linename) +
+  transition_reveal(date_series) +
+  ease_aes('linear')
+```
+This is the daily passenger data of each line during 2021-01-01 and 2021-06-30(except line 1)
+
+### daily passenger of each line (except 1)
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+passenger_timeline_df %>%
+  mutate(
+    total = round(unlist(total))
+  ) %>% 
+  filter(linename == 1) %>% 
+  ggplot(aes(x=date_series,y=total,color = linename))+
+  geom_line()+
+  theme_bw()+
+  facet_wrap(~linename) +
+  transition_reveal(date_series) +
+  ease_aes('linear')
+
+
+```
+This is the daily passenger data of line 1 during 2021-01-01 and 2021-06-30.
+
+### Get the 10 busiest station in line 1
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+passenger_df_time %>% 
+  filter(str_detect(linename, "1")) %>% 
+  mutate(
+    entry_single = entry_diff_imputed/nchar(linename),
+    exit_single = exit_diff_imputed/nchar(linename),
+  ) %>%
+  group_by(station,linename) %>% 
+  summarize(
+    total_entry = sum(entry_single,na.rm = TRUE),
+    total_exit = sum(exit_single,na.rm = TRUE),
+  ) %>% 
+  ungroup() %>% 
+  mutate(total = total_entry + total_exit,
+         station = fct_reorder(station, total),
+         rank = order(total, decreasing = TRUE)) %>% 
+  filter(rank %in% c(1:10)) %>% 
+  ggplot(aes(x =station,y=total)) +
+  geom_col()+
+  coord_flip()
+```
+This is the top 10 busiest station in line 1 during 2021-01-01 and 2021-06-30.
+
+##animation: line 1 station
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+animtaion_line1 <- 
+  passenger_df_time %>% 
+  filter(str_detect(linename, "1")) %>% 
+  mutate(
+    entry_single = entry_diff_imputed/nchar(linename),
+    exit_single = exit_diff_imputed/nchar(linename),
+    total = entry_single + exit_single
+  ) %>% 
+  group_by(date,station_line) %>% 
+  summarize(
+    total_people = sum(total)
+  ) %>%
+  ggplot(aes(x=station_line,y = total_people))+
+  geom_col()+
+  coord_flip()+
+  labs(title = "{closest_state}") +
+  transition_states(date)
+
+animate(animtaion_line1, fps=1)
+```
+This is the daily passenger data of each station in line 1 during 2021-01-01 and 2021-06-30.
+
+# Crime
+
+### Crime Data
+```{r echo=FALSE,tidy=TRUE,message=FALSE}
+# read the crime date and adjust time variable, create unique variable for each station(station_line), count the crime data for each station in each period
+subwaycrime_with_station <- 
+  read_csv("data/subwaycrime_with_station.csv") %>% 
+  filter(
+    cmplnt_to_dt != "NA"
+  ) %>% 
+  mutate(
+    date = mdy(cmplnt_to_dt),
+      end_time = case_when(
+      hms("00:00:00")<=cmplnt_to_tm&cmplnt_to_tm<hms("04:00:00") ~hms("04:00:00"),
+      hms("04:00:00")<=cmplnt_to_tm&cmplnt_to_tm<hms("08:00:00") ~hms("08:00:00"),
+      hms("08:00:00")<=cmplnt_to_tm&cmplnt_to_tm<hms("12:00:00") ~hms("12:00:00"),
+      hms("12:00:00")<=cmplnt_to_tm&cmplnt_to_tm<hms("16:00:00") ~hms("16:00:00"),
+      hms("16:00:00")<=cmplnt_to_tm&cmplnt_to_tm<hms("20:00:00") ~hms("20:00:00"),
+      hms("20:00:00")<=cmplnt_to_tm&cmplnt_to_tm<hms("24:00:00") ~hms("24:00:00"),
+    ),
+    linename = closest_line,
+    station_line = str_c(closest_station,closest_line,sep = " line:"),
+  ) %>% 
+  select(station_line,linename,ofns_desc,pd_desc,law_cat_cd,date,end_time) %>% 
+  group_by(station_line,linename,date,end_time,law_cat_cd) %>% 
+  summarize(
+    number = n()
+  ) %>% 
+  pivot_wider(
+    names_from = law_cat_cd,
+    values_from = number
+  ) %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    felony = replace_na(felony,0),
+    misdemeanor = replace_na(misdemeanor,0),
+    violation = replace_na(violation,0)
+  )
+
+# set passenge data for crime data
+passenger_crime <- 
+  passenger_df_time %>%
+  mutate(
+    end_time = hours(end_time/3600)
+  ) %>%
+  select(station_line,linename,date,end_time,entry_diff_imputed,exit_diff_imputed)
+
+# merge passenger and crime data
+passenger_crime_df <- 
+  left_join(passenger_crime,subwaycrime_with_station,by = c("station_line","linename","date","end_time")) %>% 
+  mutate(
+    felony = replace_na(felony,0),
+    misdemeanor = replace_na(misdemeanor,0),
+    violation = replace_na(violation,0),
+    crime = felony + misdemeanor + violation,
+    total = entry_diff_imputed+exit_diff_imputed
+  )
+
+```
+
+
+### Line crime data
+```{r echo=FALSE,tidy=TRUE,message=FALSE,warning=FALSE}
+# function that get the passenger of specific line and date.
+line_passenger_function <- function(date1,line){
+ line_df <-  
+  passenger_crime_df %>% 
+  filter(
+    date == date1,
+    str_detect(linename,line)
+    )
+ 
+ number = sum(pull(line_df,total),na.rm = TRUE)
+ 
+ return(number)
+}
+
+line_crime_function <- function(date1,line){
+ line_df <-  
+  passenger_crime_df %>% 
+  filter(
+    date == date1,
+    str_detect(linename,line)
+    )
+ 
+ number = sum(pull(line_df,crime),na.rm = TRUE)
+ 
+ return(number)
+}
+
+#  a dataframe for each line in everyday 
+final <- tibble(linename = str_sort(unique(unlist(strsplit(unique(passenger_df$linename),"")))))
+date_series1 <- as.data.frame(date_series)
+passenger_timeline_df <- 
+  merge(date_series1,final)
+
+# get the data for each line
+passenger_time_crime_line_df <- 
+  passenger_timeline_df %>% 
+  mutate(
+    total_people = map2(date_series,linename,line_passenger_function),
+    total_crime = map2(date_series,linename,line_crime_function),
+  )
+
+passenger_time_crime_line_df <- 
+  passenger_time_crime_line_df%>%
+  mutate(
+    total_people = round(unlist(total_people)),
+    total_crime = unlist(total_crime)
+  ) 
+
+# plot of passenger and crime data
+time_crime <- 
+  passenger_time_crime_line_df %>% 
+  ggplot(aes(x = total_people,y = total_crime,color = linename,size = (total_crime/total_people))) +
+  geom_point() +
+  labs(title = 'Date: {frame_time}') +
+  transition_time(date_series)
+
+
+animate(time_crime, fps=1)
+```
+This is the daily passenger and crime data  of each  line  during 2021-01-01 and 2021-06-30.
+
+```{r}
+passenger_df_time %>% 
+  filter(str_detect(linename, "1")) %>% 
+  mutate(total = entry_diff_imputed + entry_diff_imputed) %>% 
+  group_by(date) %>% 
+  summarize(total_people =sum(total,na.rm=TRUE)) %>% 
+  ggplot(aes(x = date, y = total_people ))+
+  geom_line()
+```
+
