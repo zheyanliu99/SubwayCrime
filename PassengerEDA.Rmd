@@ -1,8 +1,12 @@
 ---
-title: "PassengerEDA"
+title: "2021 Subway Passenger EDA"
 author: "Zheyan"
 date: "11/15/2021"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
 editor_options: 
   chunk_output_type: console
 ---
@@ -11,6 +15,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
+library(RColorBrewer)
 library(data.table)
 library(readxl)
 library(rvest)
@@ -18,11 +23,14 @@ library(leaflet)
 library(httr)
 library(lubridate)
 library(plotly)
+library(tigris) 
+set.seed(77)
+
 
 knitr::opts_chunk$set(
   fig.width = 6,
-  fig.asp = .6,
-  out.width = "95%"
+  fig.asp = 1,
+  out.width = "98%"
 )
 
 theme_set(theme_minimal() + theme(legend.position = 'bottom'))
@@ -38,22 +46,17 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ```
 
-# Read and Process data
 
-
-```{r cars}
+```{r read and process data}
 passenger_df = read_csv('data/passenger_imputed.csv', show_col_types = FALSE)
 
 passenger_df = 
   passenger_df %>% 
   # Plotting use 1-year data 
-  filter(date >= as.Date("2020-11-01"),
-         date < as.Date("2021-11-01"))
-
-```
+  filter(date >= as.Date("2021-01-01"),
+         date < as.Date("2021-11-05"))
 
 
-```{r}
 # just use part of features
 location_df = 
   read_csv('data/subway_info_final3.csv', show_col_types = FALSE) %>% 
@@ -67,35 +70,49 @@ passenger_df =
   left_join(location_df, by = c('station', 'linename')) %>% 
   drop_na(sublocality) %>% 
   relocate(station, linename, service, sublocality, postal_code, lat, long)
+
 ```
 
-# Visualization 
 
-## Plotting by lat and long
 
-```{r}
+# Subway passenger EDA with location
+
+
+Passenger flow is closely related with crime. The more passenger flow in a station, the more criminals there will be. Therefore, we conduct EDA to:
+
+* Find relationship between location and passenger flow
+* Determine the location variable for the model
+
+## Total passengers in each station
+
+The color of each circle is the line of the subway and the size is the total number of passengers in 2021.
+
+```{r, message=FALSE, warning=FALSE}
 df = 
   passenger_df %>% 
     drop_na(entry_diff_imputed, exit_diff_imputed) %>% 
     group_by(station, service, linename, sublocality, postal_code, lat, long) %>% 
     summarise(total_entry = sum(entry_diff_imputed),
               total_exit = sum(exit_diff_imputed)) %>% 
-    mutate(passenger_flow = total_entry + total_exit)
+    mutate(passenger_flow = total_entry + total_exit,
+           # set passenger_flow to int
+           passenger_flow = as.integer(passenger_flow))
 
-df %>% 
-  leaflet() %>% 
-  addTiles() %>% 
-  addCircleMarkers(~long, ~lat,radius= df$passenger_flow/100000000, weight= 0.9)
+# df %>% 
+#   leaflet() %>% 
+#   addTiles() %>% 
+#   addCircleMarkers(~long, ~lat,radius= df$passenger_flow/100000000, weight= 0.9)
 
 
 qpal <- colorQuantile("YlOrRd", df$passenger_flow, n = 4)
 
 pal <- 
-   colorFactor(palette = c("blue", "azure4", "orange",'green','brown','yellow','red','forestgreen','purple'), 
+   colorFactor(palette = c("blue", "azure4", "orange",'green','green','brown','yellow','red','forestgreen','purple'), 
                levels = c('8 Avenue(ACE)',
                           'Shuttle(S)',
                           '6 Avenue(BDFM)',
                           'Brooklyn-Queens Crosstown(G)',
+                          'Brooklyn-Queens(G)',
                           '14 St-Canarsie(L)',
                           'Broadway(NQRW)',
                           '7 Avenue(123)',
@@ -104,80 +121,60 @@ pal <-
 
 
 df %>% 
+  mutate(service = ifelse(service == 'Brooklyn-Queens Crosstown(G)', 'Brooklyn-Queens(G)', service)) %>% 
   mutate(passenger_flow2 = 10*log(passenger_flow)) %>% 
   leaflet() %>% 
   addProviderTiles(providers$CartoDB.Positron) %>% 
   addCircles(lng = ~long, lat = ~lat, weight = 1, stroke = FALSE,
-    radius = ~sqrt(passenger_flow)/30, popup = ~station, color = ~pal(service), opacity = 0.75, fillOpacity = 0.75) %>%
+    radius = ~sqrt(passenger_flow)/20, popup = ~station, color = ~pal(service), opacity = 0.75, fillOpacity = 0.75) %>%
   addLegend("topright", pal = pal, values = ~service, 
             title = "Subway Service", opacity = 0.75) %>% 
   setView(-73.8399986, 40.746739, zoom = 11)
-
 ```
 
-## By cluster
+There are patterns between station locations and total passenger flow. Big stations are mostly located in lower and middle Manhattan, and there are some sub center stations in other areas, such as *9th Street* station in Brooklyn and *FLUSHING-MAIN* station in Queen.
+
+## By sublocality
 
 ```{r}
-df_sub = 
-  df %>% 
-  ungroup() %>% 
-  select(long, lat) %>% 
-  drop_na()
-  
-k2 = kmeans(df_sub, centers = 4, nstart = 25)
-
-```
-
-Kmeans results and centers
-```{r}
-library("RColorBrewer")
-df$cluster = k2$cluster
-pal = colorFactor(
-  brewer.pal(n = 4, name = "Set1"),
-  df$cluster,
-  levels = NULL,
-  ordered = FALSE,
-  na.color = "#808080",
-  alpha = FALSE,
-  reverse = FALSE
-)
-
 df %>% 
-  leaflet() %>% 
-  addProviderTiles(providers$CartoDB.Positron) %>% 
-  addCircles(lng = ~long, lat = ~lat, weight = 1, stroke = FALSE,
-    radius = ~sqrt(passenger_flow)/14, popup = ~station, color = ~pal(cluster), opacity = 1, fillOpacity = 1) %>%
-  addLegend("topright", pal = pal, values = ~cluster, 
-            title = "Kmeans Cluster", opacity = 1) %>% 
-  setView(-73.8399986, 40.746739, zoom = 11)
+  ungroup %>% 
+  filter('sublocality' != 'None') %>% 
+  drop_na() %>% 
+  group_by(sublocality) %>%  
+  summarise(passenger_flow = sum(passenger_flow)) %>% 
+  mutate(sublocality = as.factor(sublocality)) %>% 
+  arrange(-passenger_flow) %>% 
+  filter(passenger_flow < 500000 |passenger_flow > 60000000) %>% 
+  knitr::kable()
 
 ```
 
+Manhattan has the most subway passengers in 2021 and Staten Island has the least subway passenger_flow. Additionally, sublocality only has 5 levels, which is too few for a machine learning model.
 
-## By zipcode
+## EDA with zipcode
 
-```{r}
+### Total passengers in each zipcode
 
-library(tigris) 
+
+```{r, message=FALSE, warning=FALSE}
 # cache zip boundaries that are download via tigris package
 options(tigris_use_cache = TRUE)
+
 
 # get zip boundaries that start with 282
 char_zips = zctas(cb = TRUE)
 char_zips = 
   char_zips %>% 
   rename(postal_code = GEOID10)
-```
-这一步GEOID10改的有点多此一举，导致后来的geo_join有点看不懂
 
-创建一个summary_df,然后和char_zips合并，并选择合并的同类column
-
-```{r}
-
-summary_df<-df %>%
+summary_df<-
+  df %>%
   mutate(postal_code) %>% 
   group_by(postal_code) %>%
-  summarise(passenger_flow = sum(passenger_flow)) 
+  summarise(passenger_flow = sum(passenger_flow),
+            station_cnt = n_distinct(station, linename)) 
+
 
 summary_df<-geo_join(char_zips, 
                       summary_df, 
@@ -185,17 +182,11 @@ summary_df<-geo_join(char_zips,
                       by_df = "postal_code",
                       how = "left") %>% 
   filter(passenger_flow>=0)
-## Still not working
-# df %>%
-#   group_by(postal_code) %>%
-#   summarise(passenger_flow = sum(passenger_flow)) %>%
-#   left_join(char_zips, by = 'postal_code') %>%
-```
 
-```{r}
 pal <- colorNumeric(
   palette = "Greens",
-  domain = summary_df$passenger_flow)
+  domain = summary_df$passenger_flow,
+  na.color = "white")
 
 labels <- 
   paste0(
@@ -204,11 +195,17 @@ labels <-
     "Flow of Passengers: ",
     summary_df$passenger_flow) %>%
   lapply(htmltools::HTML)
-```
 
-```{r}
+# summary_df2 = 
+#   char_zips %>% 
+#     select(postal_code) %>% 
+#     left_join(summary_df, by = 'postal_code') 
+
 summary_df %>%  
+  mutate(postal_code_int = as.integer(postal_code)) %>% 
+  filter(postal_code_int >= 10000 & postal_code_int < 14900) %>% 
   leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
    addPolygons(fillColor = ~pal(passenger_flow),
               weight = 2,
               opacity = 1,
@@ -224,131 +221,102 @@ summary_df %>%
   addLegend(pal = pal, 
             values = ~passenger_flow, 
             opacity = 0.7, 
-            title = htmltools::HTML("Passengers' Flow <br> 
-                                    by Zip Code <br>
-                                    2021"),
-            position = "bottomright")
+            title = htmltools::HTML("Total Passengers 2021"),
+            position = "bottomright") %>% 
+  setView(-73.8399986, 40.746739, zoom = 10)
 
-char_zips %>% 
-  leaflet()
+
+
 
 ```
 
-```{r, include=FALSE}
-## packages required
-library(geojsonio)
- library(leaflet)
- library(magrittr)
- library(htmlwidgets)
-#  
-#  
-#  
-# #######################
-# ## READ POLYGON DATA ##
-# #######################
-#  
-# # Read shapefile: Spatial Polygon DB
-# neighborhoods_utrecht <- geojson_read("data/NY/10001.geojson", method= "local", what = "sp")
-# 
-# 
-# neighborhoods_utrecht
-# # What kind of data does this spatial object contain
-# head(neighborhoods_utrecht@data)
-#  
-# # Show the neighborhoods of Utrecht on a Leaflet map
-# leaflet(neighborhoods_utrecht) %>%
-#   #addProviderTiles("nlmaps.standaard") %>% 
-#   addProviderTiles("Esri.WorldGrayCanvas") %>%
-#   addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, fillOpacity = 0.7, fillColor = "lightblue")
-#  
-#  
-#  
-# ##################################
-# ## LOAD DATA TO PLOT ON POLYGON ##
-# ##################################
-#  
-# # Import data to be displayed on the map 
-# utrecht_data <- read.csv("data_utrecht.csv", header = TRUE, sep = ";", quote = "\"", dec = ".", fill = TRUE)
-#  
-# # Create merge ID and merge data
-# neighborhoods_utrecht@data$gwb_buurt_code <- 344 * 10000 + as.numeric(levels(neighborhoods_utrecht@data$KODE))[neighborhoods_utrecht@data$KODE] 
-# neighborhoods_utrecht@data <- merge(neighborhoods_utrecht@data, utrecht_data, by.x="gwb_buurt_code", by.y="gwb_buurt_code")
-#  
-#  
-#  
-# #########################
-# ## DISPLAY DATA ON MAP ##
-# #########################
-#  
-# # Define cut points for the colorbins
-# cuts <- c(0.0, 0.05, 0.1, 0.15, 0.20, 0.25, 0.30, 1)
-#  
-# # Choose a color palette and assign it to the values
-# colorbins <- colorBin("YlOrRd", domain = neighborhoods_utrecht$p_65_inf, bins = cuts)
-#  
-# # Display data on elderly people on the map 
-# map <-  leaflet(neighborhoods_utrecht) %>%
-#                 addTiles() %>%
-#                 addProviderTiles("Esri.WorldGrayCanvas") %>%
-#                 addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, 
-#                             fillOpacity = 0.7, fillColor = ~colorbins(neighborhoods_utrecht$p_65_inf))  
-#  
-# map
-#  
-# # Add a legend
-# map_with_legend <- map %>% addLegend(pal = colorbins, 
-#                                       values = neighborhoods_utrecht$p_65_inf,
-#                                       labFormat = labelFormat(suffix = " %", transform = function(p_65_inf) 100 * p_65_inf),
-#                                       opacity = 0.7, title = "Residents of age 65 and older", position = "topright")
-#  
-# map_with_legend
-#  
-#  
-#  
-# ###########################################
-# ## ADD MOUSE-OVER HIGHLIGHTS AND TOOLTIP ##
-# ###########################################
-#  
-# # Create HTML labels for tooltip
-# tooltip <- sprintf("<strong>%s</strong><br/>%.1f%% elderly residents"
-#                    ,neighborhoods_utrecht$gwb_buurt_naam
-#                    ,neighborhoods_utrecht$p_65_inf*100
-#                   ) %>% lapply(htmltools::HTML)
-#  
-#  
-# # Display map
-# map_with_tooltip <- map_with_legend %>% addPolygons(stroke = TRUE, color = "white", weight="1", smoothFactor = 0.3, fillOpacity = 0.7, 
-#                                         fillColor = ~colorbins(neighborhoods_utrecht$p_65_inf), 
-#                                         highlight = highlightOptions(weight = 5, color = "grey", fillOpacity = 0.7, bringToFront = TRUE),
-#                                         label = tooltip
-#                                                    )
-# map_with_tooltip
-#  
-#  
-#  
-# ###########################
-# ## SAVE OUTPUT HTML FILE ##
-# ###########################
-#  
-# # Save output as HTML widget (or incorporate into Shiny / Flexdashboard)
-# saveWidget(map_with_tooltip, file="Elderly residents in Utrecht.html")
+
+### Total subway stations in each zipcode
+
+```{r, warning=FALSE}
+labels <- 
+  paste0(
+    "Zip Code: ",
+    summary_df$postal_code, "<br/>",
+    "Stations count: ",
+    summary_df$station_cnt) %>%
+  lapply(htmltools::HTML)
+
+
+pal <- colorNumeric(
+  palette = "Purples",
+  domain = summary_df$station_cnt,
+  na.color = "white")
+
+summary_df %>%  
+  mutate(postal_code_int = as.integer(postal_code)) %>% 
+  filter(postal_code_int >= 10000 & postal_code_int < 14900) %>% 
+  leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+   addPolygons(fillColor = ~pal(station_cnt),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(weight = 2,
+                                           color = "#666",
+                                           dashArray = "",
+                                           fillOpacity = 0.7,
+                                           bringToFront = TRUE),
+              label = labels) %>% 
+  addLegend(pal = pal, 
+            values = ~station_cnt, 
+            opacity = 0.7, 
+            title = htmltools::HTML("Total Stations 2021"),
+            position = "bottomright") %>% 
+  setView(-73.8399986, 40.746739, zoom = 10)
 ```
 
+The zipcode does not demonstrate the exact relationship between location and passenger flow. For instance, some zipcodes such as *10002* and *10011* in lower Manhattan should have more passengers, however few stations are built there. Therefore, the key cause to this confusion is that subway stations are not built based on zipcode.
 
+## Kmeans analysis of station
 
+We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. The color of each circle is the Kmeans cluster they belong and the size is the total number of passengers in 2021.
 
+```{r, message=FALSE, warning=FALSE}
 
-## By sublocality
+# conduct kmeans
+df_sub = 
+  df %>% 
+  ungroup() %>% 
+  select(long, lat) %>% 
+  drop_na()
 
-```{r}
+k2 = kmeans(df_sub, centers = 8, nstart = 25)
+
+# EDA with Kmeans results
+df$cluster = k2$cluster
+
+pal = colorFactor(
+  brewer.pal(n = 9, name = "Set1"),
+  df$cluster,
+  levels = NULL,
+  ordered = FALSE,
+  na.color = "#808080",
+  alpha = FALSE,
+  reverse = FALSE
+)
+
 df %>% 
-  filter('sublocality' != 'None') %>% 
-  group_by(sublocality) %>%  
-  summarise(passenger_flow = sum(passenger_flow)) %>% 
-  mutate(sublocality = as.factor(sublocality)) %>% 
-  arrange(-passenger_flow)
-  
+  leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircles(lng = ~long, lat = ~lat, weight = 1, stroke = FALSE,
+    radius = ~sqrt(passenger_flow)/20, popup = ~station, color = ~pal(cluster), opacity = 1, fillOpacity = 1) %>%
+  addLegend("topright", pal = pal, values = ~cluster, 
+            title = "Kmeans Cluster", opacity = 1) %>% 
+  setView(-73.8399986, 40.746739, zoom = 11)
+
+
 ```
+
+
+Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Manhattan and upper Manhattan. Brooklyn and Queens shares 3 cluster. Also, there is a cluster for Bronx. We think the Kmeans result is easier to interpret than that of zipcode or sublocality and it can partly represent the relationship between passenger flow and location. Therefore, we use Kmeans result as the location variable in our model.
 
 
 

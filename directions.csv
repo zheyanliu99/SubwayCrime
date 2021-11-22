@@ -1,9 +1,9 @@
 time,distance,walking_distance,line,departure_stop,arrival_stop,num_stops,departure_time,arrival_time,route_num
-2063.0,14560.0,609.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637364619,1637365684,1
-2063.0,14560.0,609.0,7,Times Sq - 42 St,Hunters Point Avenue,4,1637365920,1637366430,1
-2022.0,14560.0,609.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637365020,1637366085,2
-2022.0,14560.0,609.0,7,Times Sq - 42 St,Hunters Point Avenue,4,1637366280,1637366790,2
-2496.0,14532.0,419.0,1,168 St - Washington Hts,Times Sq - 42 St,15,1637364776,1637366246,3
-2496.0,14532.0,419.0,7X,Times Sq - 42 St,Hunters Point Avenue,4,1637366460,1637366970,3
-2112.0,14560.0,609.0,A,168 St,42 St - Port Authority Bus Terminal,4,1637365470,1637366520,4
-2112.0,14560.0,609.0,7X,Times Sq - 42 St,Hunters Point Avenue,4,1637366820,1637367330,4
+3478.0,24893.0,434.0,A,168 St,Hoyt - Schermerhorn Streets,13,1637369100,1637371290,1
+3478.0,24893.0,434.0,G,Hoyt - Schermerhorn Streets,15 St - Prospect Park,6,1637371590,1637372190,1
+3658.0,24342.0,434.0,A,168 St,Jay St - MetroTech,12,1637369100,1637371200,2
+3658.0,24342.0,434.0,F,Jay St - MetroTech,15 St - Prospect Park,6,1637371680,1637372370,2
+3538.0,24893.0,434.0,A,168 St,Hoyt - Schermerhorn Streets,13,1637369490,1637371800,3
+3538.0,24893.0,434.0,G,Hoyt - Schermerhorn Streets,15 St - Prospect Park,6,1637372040,1637372640,3
+3478.0,24342.0,434.0,A,168 St,Jay St - MetroTech,12,1637369850,1637371920,4
+3478.0,24342.0,434.0,F,Jay St - MetroTech,15 St - Prospect Park,6,1637372250,1637372940,4

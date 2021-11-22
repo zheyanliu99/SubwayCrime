@@ -46,6 +46,11 @@ def extract_info_from_direction(legs, route_num):
                     # get departure and arrival time, can calculate time on the train
                     subway_route_dict['departure_time'] = step['transit_details']['departure_time']['value']
                     subway_route_dict['arrival_time'] = step['transit_details']['arrival_time']['value']
+                    # get lat and lng
+                    subway_route_dict['departure_stop_lat'] = step['transit_details']['departure_stop']['location']['lat']
+                    subway_route_dict['departure_stop_lng'] = step['transit_details']['departure_stop']['location']['lng']
+                    subway_route_dict['arrival_stop_lat'] = step['transit_details']['arrival_stop']['location']['lat']
+                    subway_route_dict['arrival_stop_lng'] = step['transit_details']['arrival_stop']['location']['lng']
 
                     # append that in step_dict key 'subway_route'
                     step_dict['subway_route'][transit_num] = subway_route_dict
@@ -86,8 +91,11 @@ class google_routes():
             direction_df = extract_info_from_direction(direction['legs'][0], route_num + 1)
             self.direction_df_list.append(direction_df)
         
-        directions_df = pd.concat(self.direction_df_list, ignore_index=True)
-        directions_df.to_csv('directions.csv', index = False)
+        if self.direction_df_list:
+            directions_df = pd.concat(self.direction_df_list, ignore_index=True)
+        else:
+            directions_df = pd.DataFrame(0)
+        # directions_df.to_csv('directions.csv', index = False)
 
         return directions_df
         
@@ -96,3 +104,17 @@ class google_routes():
 mygoogle_routes = google_routes()
 a = mygoogle_routes.get_directions()
 a
+
+# %%
+key = 'AIzaSyAGrKCa5wYrYmkhiFQcKQ27oz0_jOivtkE'
+key = 'AIzaSyAGrKCa5wYrYmkhiFQcKQ27oz0_jOivtkE'
+start_location = '168 St, New York, NY 10032'
+destination = 'JFK, NY 11101'
+departure_time = datetime.datetime.now()
+
+gmaps = googlemaps.Client(key = key)
+directions = gmaps.directions(start_location, destination, mode = 'transit', 
+                              transit_mode = 'subway', alternatives = True,  departure_time = departure_time)
+
+
+
