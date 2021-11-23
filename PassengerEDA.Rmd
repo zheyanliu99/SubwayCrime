@@ -293,8 +293,21 @@ k2 = kmeans(df_sub, centers = 8, nstart = 25)
 # EDA with Kmeans results
 df$cluster = k2$cluster
 
+df = 
+  df %>%
+  mutate(cluster = case_when(
+    cluster == 1 ~ 'Queen',
+    cluster == 2 ~ 'Upper Manhattan',
+    cluster == 3 ~ 'Queen-Brooklyn',
+    cluster == 4 ~ 'Middle Manhattan',
+    cluster == 5 ~ 'Bronx',
+    cluster == 6 ~ 'Brooklyn',
+    cluster == 7 ~ 'Lower Manhattan',
+    cluster == 8 ~ 'Rockaway Beach',
+  ))
+
 pal = colorFactor(
-  brewer.pal(n = 9, name = "Set1"),
+  brewer.pal(n = 10, name = "Set1"),
   df$cluster,
   levels = NULL,
   ordered = FALSE,
@@ -313,6 +326,8 @@ df %>%
   setView(-73.8399986, 40.746739, zoom = 11)
 
 
+
+
 ```
 
 
@@ -322,6 +337,24 @@ Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Man
 
 
 
+```{r output cluster data, include=FALSE}
+
+df_join = 
+  df %>% ungroup %>% select(station, linename, cluster)  %>% 
+  group_by(station, linename, cluster)
+
+location_df = 
+  read_csv('data/subway_info_final3.csv', show_col_types = FALSE)
+
+df_output = 
+  location_df %>% 
+  left_join(df_join, by = c('station', 'linename'))
+
+
+# write.csv(df_output, 'data/subway_info_final3.csv')
+
+
+```
 
 
 
