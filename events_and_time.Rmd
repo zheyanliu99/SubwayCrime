@@ -7,6 +7,9 @@ output:
     code_folding: hide
 ---
 
+<link rel="stylesheet" href="academicons.css"/>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
 ```{r setup, echo = FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(readxl)

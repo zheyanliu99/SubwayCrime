@@ -8,6 +8,8 @@ navbar:
       href: PassengerEDA.html
     - text: 'Crime'
       href: events_and_time.html
+    - text: 'Shiny App'
+      href: https://zheyanliu.shinyapps.io/NYC_subway_findroute/
       
   right:
     # - text: "About"
@@ -20,10 +22,10 @@ navbar:
       href: mailto:<zheyan.liu@columbia.edu>
     # - icon: fa-address-book fa-lg
     #   href: ./resources/Liu.Zheyan.Resume.pdf
-    - icon: fa-linkedin fa-lg
-      href: https://www.linkedin.com/in/zheyanliu999/
+    # - icon: fa-linkedin fa-lg
+    #   href: https://www.linkedin.com/in/zheyanliu999/
     - icon: fa-github fa-lg
-      href: https://github.com/zheyanliu99
+      href: https://github.com/zheyanliu99/SubwayCrime.git
       
       
 output:
