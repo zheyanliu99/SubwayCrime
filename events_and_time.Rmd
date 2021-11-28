@@ -37,7 +37,6 @@ raw_sub_crime =
   filter(start_date > "2005-12-31")
 ```
 
-
 ### Number of crime events each year
 
 For the most frequent crime events, they mainly happen in the afternoon, from 12:00 pm to 20:00 pm in the 9 months in 2021. Of these crime events, from 12:00 pm to 20:00 pm, crime mischief is the most frequent happening events. In New York City, criminal mischief includes intentionally damage, participation in the destruction of an abandoned building. 
@@ -141,20 +140,19 @@ From the heat map, it is easier to be judged that most of crime events were main
 sub_crime_dow = 
   raw_sub_crime %>% 
   mutate(day_of_week = wday(as.Date(start_date), label=TRUE, abbr = FALSE)) %>% 
-  mutate(day_of_week = fct_relevel(day_of_week, "Saturday", "Friday", "Thursday", "Wednesday", "Tuesday", "Monday", "Sunday")) %>% 
-  separate(start_time, into = c("hour", "minute", "second"), sep = ":") %>% 
-  select(day_of_week, hour, crime_event) %>% 
-  group_by(day_of_week, hour) %>% 
+  mutate(day_of_week = fct_relevel(day_of_week, "Saturday", "Friday", "Thursday", "Wednesday", "Tuesday", "Monday", "Sunday")) %>%
+  select(day_of_week, start_time_hour, crime_event) %>% 
+  group_by(day_of_week, start_time_hour) %>% 
   summarise(crime_num = n())
 
-plot_5 = 
+plot_6 = 
   sub_crime_dow %>% 
   plot_ly(
-    x = ~ hour, y = ~ day_of_week, z = ~ crime_num, type = "heatmap", colors = "BuPu"
+    x = ~ start_time_hour, y = ~ day_of_week, z = ~ crime_num, type = "heatmap", colors = "BuPu"
   ) %>%
   colorbar(title = "Events Number", x = 1.1, y = 0.8) 
 
-layout(plot_5, title = "Crime frequency: Day v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Day of week")
+layout(plot_6, title = "Crime frequency: Day v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Day of week")
     )
 ```
 
@@ -167,17 +165,16 @@ For the violation degree of crime events, it has the lowest median proceeding ti
 ```{r, message=FALSE, warning=FALSE}
 crime_prcd_time = 
   raw_sub_crime %>% 
-  drop_na(start_time, end_time) %>%
+  drop_na(start, end) %>%
   mutate(prcd_time = difftime(end, start, units = "mins")) %>% 
   filter(prcd_time < 35) %>% 
   filter(prcd_time != 0) %>% 
   mutate(quarters = quarters(as.Date(start_date)))
 
-plot_5 = 
+plot_7 = 
   crime_prcd_time %>% 
   plot_ly(y = ~ prcd_time, color = ~ law_cat, type = "box")
 
-layout(plot_5, title = "Crime type", xaxis = list(title = "Proceeding time"), yaxis = list(title = "Crime type v.s. Proceeding time (mins)")
-    )
+layout(plot_7, title = "Crime type", xaxis = list(title = "Proceeding time"), yaxis = list(title = "Crime type v.s. Proceeding time (mins)"))
 ```
 
