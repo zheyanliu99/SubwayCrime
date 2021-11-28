@@ -59,6 +59,8 @@ layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), 
 
 ### Number of crime events each season
 
+With the degree to weeks, the highest number of crime events appears in the eleventh week, which in the March. It appears that there would be a locally maximum point for around every ten weeks, and there also would be a sudden increase and decrease at the beginning and end of the year, accordingly.
+
 ```{r}
 sub_crime_season = 
   raw_sub_crime %>% 
@@ -77,10 +79,10 @@ plot_2 =
   group_by(event_quarter) %>% 
   summarise(event_num = n()) %>% 
   plot_ly(
-    x = ~quarter, y = ~event_num, type = "scatter"
+    x = ~event_quarter, y = ~event_num, type = "scatter", mode = "points"
   )
 
-layout(plot_2, title = "Crime events over seasons", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"))
+layout(plot_2, title = "Crime events over quarter", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"))
 ```
 
 ### Number of cirime events each month
@@ -104,27 +106,6 @@ plot_3 =
 layout(plot_3, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
 ```
 
-### Number of crime events each week
-
-With the degree to weeks, the highest number of crime events appears in the eleventh week, which in the March. It appears that there would be a locally maximum point for around every ten weeks, and there also would be a sudden increase and decrease at the beginning and end of the year, accordingly.
-
-```{r, message=FALSE, warning=FALSE}
-sub_crime_week = 
-  raw_sub_crime %>% 
-  select(start_date, start_time_hour, crime_event, law_cat) %>% 
-  mutate(week = cut.Date(start_date, breaks = "1 week", labels = FALSE)) %>% 
-  arrange(week) %>% 
-  group_by(week) %>% 
-  summarise(event_num = n())
-  
-plot_4 = 
-  sub_crime_week %>% 
-    plot_ly(
-    x = ~week, y = ~event_num, type = "scatter", mode = "marker"
-  )
-
-layout(plot_4, title = "Crime events over weeks", xaxis = list(title = "Week"), yaxis = list(title = "Number of Crime Events"))
-```
 
 ### Top 5 crime events v.s. Occurrence time
 
@@ -135,58 +116,51 @@ The third degree of assault is the second frequent crime events in that time int
 In that time interval, of crime events, the second degree of harassment is the third frequently happening events, which includes the intention to harass, annoy or alarm some person and strike people in some manner or make physical contact with them. 
 
 
-```{r, message=FALSE, warning=FALSE}
-crime_occ_time = 
-  raw_sub_crime %>% 
-  mutate(event_time = ordered(event_time, levels = c("2 AM","6 AM","10 AM","2 PM","6 PM","10 PM"))) %>% 
-  filter(crime_event %in% c("criminal mischief & related of","assault 3 & related offenses","harrassment 2","grand larceny","dangerous drugs"))
-
-plot_3 = 
-  crime_occ_time %>% 
-  ggplot(aes(x = event_time, fill = crime_event)) + 
-  geom_histogram(stat = "count", width = 0.9, height = 2) + 
-  labs(
-    title = "Frequency of crime events v.s. Time points", 
-    x = "Occurrence time", 
-    y = "Frequency of crime events") + 
-  theme_bw() + 
-  theme(
-    plot.title = element_text(hjust = 1), 
-    legend.position = "bottom",
-    legend.text = element_text(size = 8)) + 
-  guides(col = guide_legend(nrow = 2))
-
-ggplotly(plot_3) %>%
-  layout(legend = list(
-      orientation = "h",
-      xanchor = "center",
-      yanchor = "top",
-      x = 0.3,
-      y = - 0.3
-    )
-  )
-```
-
-
-## Degrees of crime event
+## Degrees of crime event v.s. Occurrence time
 
 Among the top 10 frequent crime events, events with degree violation mainly occurs in the second degree of harassment, and there is basically no other degree events happened in this type of crimes; events with misdemeanor degree mainly happens in the third degree of assault and criminal mischief; and crime events with felony degree almost happen in each crime event among the top 10 most frequent crime events.
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_degree = 
   raw_sub_crime %>% 
-  filter(crime_event %in% c("criminal mischief & related of","assault 3 & related offenses","harrassment 2","grand larceny","dangerous drugs","felony assault", "robbery", "petit larceny", "forgery", "sex crimes")) %>% 
-  count(crime_event, law_cat)
+  group_by(law_cat, start_time_hour) %>% 
+  summarise(event_num = n()) %>% 
+  rename("crime_degree" = "law_cat", "hour" = "start_time_hour")
 
-plot_4 = 
+plot_5 = 
   sub_crime_degree %>% 
-    plot_ly(
-    x = ~crime_event, y = ~n, color = ~law_cat, type = "bar"
-  )
+  plot_ly(
+    x = ~ hour, y = ~ crime_degree, z = ~ event_num, type = "heatmap", colors = "YlGn"
+  ) %>%
+  colorbar(title = "Events Number", x = 1.1, y = 0.8) 
 
-layout(plot_4, title = "Crime Events Numbers each degree", xaxis = list(title = "Crime events"), yaxis = list(title = "Number of Crime Events"))
+layout(plot_5, title = "Crime frequency: Degree v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Degree"))
 ```
 
+## Day of week v.s. Occurrence time
+
+From the heat map, it is easier to be judged that most of crime events were mainly occurred in the afternoon from Tuesday to Thursday. We can say that in the noon around 12:00 pm on Tuesday and Wednesday may be the most dangerous time on in a week, whereas there are not that many crime events on Saturday and Sunday.
+
+```{r, message=FALSE, warning=FALSE}
+sub_crime_dow = 
+  raw_sub_crime %>% 
+  mutate(day_of_week = wday(as.Date(start_date), label=TRUE, abbr = FALSE)) %>% 
+  mutate(day_of_week = fct_relevel(day_of_week, "Saturday", "Friday", "Thursday", "Wednesday", "Tuesday", "Monday", "Sunday")) %>% 
+  separate(start_time, into = c("hour", "minute", "second"), sep = ":") %>% 
+  select(day_of_week, hour, crime_event) %>% 
+  group_by(day_of_week, hour) %>% 
+  summarise(crime_num = n())
+
+plot_5 = 
+  sub_crime_dow %>% 
+  plot_ly(
+    x = ~ hour, y = ~ day_of_week, z = ~ crime_num, type = "heatmap", colors = "BuPu"
+  ) %>%
+  colorbar(title = "Events Number", x = 1.1, y = 0.8) 
+
+layout(plot_5, title = "Crime frequency: Day v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Day of week")
+    )
+```
 
 ## Proceeding time
 
@@ -208,32 +182,6 @@ plot_5 =
   plot_ly(y = ~ prcd_time, color = ~ law_cat, type = "box")
 
 layout(plot_5, title = "Crime type", xaxis = list(title = "Proceeding time"), yaxis = list(title = "Crime type v.s. Proceeding time (mins)")
-    )
-```
-
-
-## Day of week v.s. Occurrence time
-
-From the heat map, it is easier to be judged that most of crime events were mainly occurred in the afternoon from Tuesday to Thursday. We can say that in the noon around 12:00 pm on Tuesday and Wednesday may be the most dangerous time on in a week, whereas there are not that many crime events on Saturday and Sunday.
-
-```{r, message=FALSE, warning=FALSE}
-sub_crime_dow = 
-  raw_sub_crime %>% 
-  mutate(day_of_week = wday(as.Date(start_date), label=TRUE, abbr = FALSE)) %>% 
-  mutate(day_of_week = fct_relevel(day_of_week, "Saturday", "Friday", "Thursday", "Wednesday", "Tuesday", "Monday", "Sunday")) %>% 
-  separate(start_time, into = c("hour", "minute", "second"), sep = ":") %>% 
-  select(day_of_week, hour, crime_event) %>% 
-  group_by(day_of_week, hour) %>% 
-  summarise(crime_num = n())
-
-plot_6 = 
-  sub_crime_dow %>% 
-  plot_ly(
-    x = ~ hour, y = ~ day_of_week, z = ~ crime_num, type = "heatmap", colors = "BuPu"
-  ) %>%
-  colorbar(title = "Events Number", x = 1.1, y = 0.8) 
-
-layout(plot_6, title = "Crime frequency: Day v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Day of week")
     )
 ```
 
