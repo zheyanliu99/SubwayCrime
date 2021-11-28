@@ -51,7 +51,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
-```{r read and process data}
+```{r read and process data, message=FALSE, warning=FALSE}
 passenger_df = read_csv('data/passenger_imputed.csv', show_col_types = FALSE)
 
 passenger_df = 
@@ -85,7 +85,7 @@ passenger_df =
 Passenger flow is closely related with crime. The more passenger flow in a station, the more criminals there will be. Therefore, we conduct EDA to:
 
 * Find relationship between location and passenger flow
-* Determine the location variable for the model
+* Determine the most appropriate location variable for the model
 
 ## Total passengers in each station
 

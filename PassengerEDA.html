@@ -342,6 +342,9 @@ div.tocify {
 <li>
   <a href="events_and_time.html">Crime</a>
 </li>
+<li>
+  <a href="https://zheyanliu.shinyapps.io/NYC_subway_findroute/">Shiny App</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -351,13 +354,7 @@ div.tocify {
   </a>
 </li>
 <li>
-  <a href="https://www.linkedin.com/in/zheyanliu999/">
-    <span class="fa fa-linkedin fa-lg"></span>
-     
-  </a>
-</li>
-<li>
-  <a href="https://github.com/zheyanliu99">
+  <a href="https://github.com/zheyanliu99/SubwayCrime.git">
     <span class="fa fa-github fa-lg"></span>
      
   </a>
@@ -401,10 +398,10 @@ location_df =
   read_csv(&#39;data/subway_info_final3.csv&#39;, show_col_types = FALSE) %&gt;% 
   # only keep new york
   filter(administrative_area_level_1 == &#39;New York&#39;) %&gt;% 
-  select(station, linename, service, sublocality, postal_code, lat, long)</code></pre>
-<pre><code>## New names:
-## * `` -&gt; ...1</code></pre>
-<pre class="r"><code>passenger_df = 
+  select(station, linename, service, sublocality, postal_code, lat, long)
+  
+
+passenger_df = 
   passenger_df %&gt;% 
   left_join(location_df, by = c(&#39;station&#39;, &#39;linename&#39;)) %&gt;% 
   drop_na(sublocality) %&gt;% 
@@ -414,7 +411,7 @@ location_df =
 <p>Passenger flow is closely related with crime. The more passenger flow in a station, the more criminals there will be. Therefore, we conduct EDA to:</p>
 <ul>
 <li>Find relationship between location and passenger flow</li>
-<li>Determine the location variable for the model</li>
+<li>Determine the most appropriate location variable for the model</li>
 </ul>
 <div id="total-passengers-in-each-station" class="section level2">
 <h2>Total passengers in each station</h2>
