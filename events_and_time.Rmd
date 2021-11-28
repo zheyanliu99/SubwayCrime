@@ -41,7 +41,7 @@ raw_sub_crime =
 
 For the most frequent crime events, they mainly happen in the afternoon, from 12:00 pm to 20:00 pm in the 9 months in 2021. Of these crime events, from 12:00 pm to 20:00 pm, crime mischief is the most frequent happening events. In New York City, criminal mischief includes intentionally damage, participation in the destruction of an abandoned building. 
 
-```{r}
+```{r, 犯罪率!!!!}
 sub_crime_year = 
   raw_sub_crime %>% 
   select(start_date, start_time_hour, crime_event, law_cat) %>% 
