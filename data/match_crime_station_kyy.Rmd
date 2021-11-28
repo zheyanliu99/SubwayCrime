@@ -39,12 +39,12 @@ croodinate_df = read_csv('data/subway_info_final3.csv') %>%
   janitor::clean_names()
 crime_df<-read_csv('data/subwaycrime.csv') %>% 
   janitor::clean_names() %>% 
-  mutate(cmplnt_fr_tm=(chron(times.=cmplnt_fr_tm,format= "H:M:S")) )%>% 
+  mutate(cmplnt_fr_tm=as.character(cmplnt_fr_tm))%>% 
   select(-new_georeferenced_column) 
 
 crime_df2<-read_csv('data/subway.csv') %>% 
   janitor::clean_names() %>% 
-  mutate(cmplnt_fr_tm=(chron(times.=cmplnt_fr_tm,format= "H:M:S")) ) %>% 
+  mutate(cmplnt_fr_tm=as.character(cmplnt_fr_tm)) %>% 
   mutate(cmplnt_to_tm=as.character(cmplnt_to_tm))
 
 crime_df_total<-bind_rows(crime_df,crime_df2)
@@ -90,8 +90,13 @@ crime_df_total %>%
 bigger_distance<-crime_df %>% 
   filter(distance>=.0001) %>% 
   relocate(distance,station_name,closest_station,closest_line,latitude,longitude)
+
+crime_df_new=crime_df %>% 
+  mutate(cmplnt_fr_tm=crime_df_total$cmplnt_fr_tm)
+
 fwrite(bigger_distance,"bigger_distance.csv")
 fwrite(crime_df_total,"subwaycrime_with_station_new.csv")
+fwrite(crime_df_new,"subwaycrime_with_station_new_2.csv")
 ##for (each in 1:nrow(crime_df)) {
 ##  crime_df[each,38]=croodinate_df %>% 
 ##                    mutate(lat_new=crime_df[each,]$latitude,

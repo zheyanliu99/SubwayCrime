@@ -1,0 +1,88 @@
+---
+title: "word_cloud"
+author: "Youyuan(Keviant) Kong"
+date: "2021/11/26"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide 
+    theme: cosmo
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(data.table)
+library(readxl)
+library(rvest)
+library(httr)
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "95%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+```{r}
+# install.packages("tm")  # for text mining
+# install.packages("SnowballC") # for text stemming
+# install.packages("wordcloud") # word-cloud generator 
+# install.packages("RColorBrewer") # color palettes
+# Load
+library("tm")
+library("SnowballC")
+library("wordcloud")
+library("RColorBrewer")
+```
+
+
+```{r, echo = FALSE, message=FALSE, warning=FALSE}
+crime_df<-read.csv("subwaycrime_with_station_new_2.csv")
+text1<-crime_df %>% 
+  pull(pd_desc)
+
+word_series<-Corpus(VectorSource(text1))
+
+
+
+toSpace <- 
+  content_transformer(function(x, pattern) gsub(pattern, " ", x))
+
+word_series <- tm_map(word_series, toSpace, ",")
+word_series <- tm_map(word_series, toSpace, "/")
+word_series <- tm_map(word_series, toSpace, "\\(")
+word_series <- tm_map(word_series, toSpace, ")")
+word_series <- tm_map(word_series, toSpace, "\\.") 
+word_series <- tm_map(word_series, removeWords, "etc") 
+
+word_series <- tm_map(word_series, removeWords, stopwords("english"))
+
+dtm <- TermDocumentMatrix(word_series)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v) %>% 
+  filter(word!="etc")
+head(d, 1000)
+
+set.seed(123)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+
+
+text <- readLines(filePath)
+
+```
+
