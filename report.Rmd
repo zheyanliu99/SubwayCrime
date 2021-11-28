@@ -46,7 +46,7 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
 ```
-
+![](images/Word_Cloud.png){width=60%}
 # Introduction
 
 
