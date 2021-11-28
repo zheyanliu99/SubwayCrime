@@ -51,11 +51,12 @@ scale_fill_discrete = scale_fill_viridis_d
 #   addCircleMarkers(~longitude, ~latitude,radius= 3, weight= 0.5,
 #                    fillColor=~(boro_nm))
 
-crime_df = read_csv('data/subwaycrime_with_station.csv')
+crime_df = read_csv('subwaycrime_with_station_new_2.csv')
 
 crime_df<-crime_df %>% 
  mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format='%m/%d/%Y')) %>% 
- filter(cmplnt_to_dt>='2021-1-1')
+ filter(distance<=0.0001)##%>% 
+## filter(cmplnt_to_dt>='2021-1-1')
 
 ```
 
@@ -117,20 +118,20 @@ leaflet(crime_df) %>%
 #                                          crime_df$vic_sex), 
 ```
 
-## Distribution of crime in boroughs
+## Distribution of crime in 7 Clusters
 
-When firstly scanning the map above, you can ambigouously know how many crimes 
-in each part of NYc, so let uscheck them in each borough using bar chart.
+When firstly scanning the map above, you can ambiguously know how many crimes 
+in each part of NYc, so let us check them in each ambiguously using bar chart.
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 
 crime_df %>% 
-  count(boro_nm) %>% 
-  mutate(boro_nm = fct_reorder(boro_nm, n)) %>% 
+  count(cluster) %>% 
+  mutate(cluster = fct_reorder(cluster, n)) %>% 
   slice_max(n,n=20) %>% 
-  plot_ly(x = ~boro_nm, y = ~n, color = ~boro_nm, type = "bar", colors = "viridis") %>% 
+  plot_ly(x = ~cluster, y = ~n, color = ~cluster, type = "bar", colors = "viridis") %>% 
   layout(yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'Area'))
+         xaxis = list(title = 'Cluster'))
 ```
 
 ## Top 10 offense classification
@@ -179,16 +180,18 @@ crime_df %>%
 
 
 
-## Barchart by each Borough about suspects
+## Barchart by about suspects
 
 From this graph, you can check in each borough, which races more possibly 
 commit a crime in the subway. 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 
 crime_df %>% 
-  drop_na(boro_nm,susp_race) %>% 
-  count(boro_nm,susp_race) %>% 
-  plot_ly(x = ~boro_nm, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
+  drop_na(cluster,susp_race) %>% 
+  filter(susp_race!="UNKNOWN") %>% 
+  count(cluster,susp_race) %>% 
+  mutate(cluster = fct_reorder(cluster, n)) %>% 
+  plot_ly(x = ~cluster, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
   layout(
          yaxis = list(title = 'Number of Compliants'),
          xaxis = list(title = 'Area'))

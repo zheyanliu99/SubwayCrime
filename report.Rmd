@@ -1,0 +1,439 @@
+---
+title: "2021 Subway Passenger EDA"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+---
+
+<link rel="stylesheet" href="academicons.css"/>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(RColorBrewer)
+library(data.table)
+library(readxl)
+library(rvest)
+library(leaflet)
+library(httr)
+library(lubridate)
+library(plotly)
+library(tigris) 
+set.seed(77)
+
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = 1,
+  out.width = "98%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = 'bottom'))
+
+options(
+  ggplot2.continuous.colour = 'viridis',
+  ggplot2.continuous.fill = 'viridis'
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+```
+![](images/Word_Cloud.png){width=60%}
+# Introduction
+
+
+# Data
+
+
+## Data Introduction
+
+### Subway Crime
+
+### Subway Passenger
+
+The orginal [Subway passenger data](http://web.mta.info/developers/turnstile.html) is from [MTA](https://new.mta.info/)(Metropolitan Transportation Authority). The orginal data contains total entries and exits in each station in every 4 hours from 2010 to now. Data is not in a readable format, they are seperated by time in different htmls, we read and process passenger data with [ GenerateSubwayPassengerData.rmd](https://github.com/zheyanliu99/SubwayCrime/blob/main/data/GenerateSubwayPassengerData2.Rmd)
+
+The variables we use are:
+
+* STATION: Station name 
+* LINENAME: Lines in this station, there can be more than one lines in one station
+* DATE: Format MM/DD/YYYY
+* TIME: Format 00:00:00
+* ENTRIES:Cumulative entries
+* EXITS: Cumulative exits 
+
+| variablename | type      | range | note                                                                   |   |
+|--------------|-----------|-------|------------------------------------------------------------------------|---|
+| STATION      | Character |       | station name                                                           |   |
+| LINENAME     | Character |       | lines in this station, there can be more than one lines in one station |   |
+| DATE         | Date      |  Year>2010     | format MM/DD/YYYY                                                      |   |
+| TIME         | Date      |       | format 00:00:00                                                        |   |
+| ENTRIES      | Intergar  |  >0    | cumulative entries                                                     |   |
+| EXITS        | Intergar  |  >0     | cumulative exits                                                       |   |
+
+
+## Data Cleanning
+
+### Subway Crime
+
+### Subway Passenger
+
+#### Google Map Api to find station coordinates
+
+We want to get coordinates of each station for the following reasons
+
+* location-based data visualization and analysis
+* More location-based features for the model
+* The station name in crime and passenger data are not matched, we can use corrdinates to match them
+
+However, how to get the correct coordinates is tricky, there are open datas about NYC subway stations infomation and all of them have different naming system with ours. In addition, the station names contain lots of dupilicates. For instance, there are 2 86 st stations in middle Manhattan and another one in Brooklyn. We can get the correct coordinates of stations by using both station names and line names. Therefore, our solution is to use [Google Maps Api](https://developers.google.com/maps). The code we use is [Subway_info.py](https://github.com/zheyanliu99/SubwayCrime/blob/main/data/Subway_info.py)
+
+#### Add service column
+
+There are too many subway lines and some of them share most of the rails, therefore it is not reasonable to conduct analysis or building models with the line name. Therefore, we created a new variable called service based on the defination of MTA. For instance, line A, B and C are called 
+'8 Avenue'.
+<br>
+<center>
+
+![](images/SubwayMap.jpg){width=60%}
+
+</center>
+<br>
+
+
+
+#### Chaoqi:correct subway line?
+
+#### Outliers of entries and exits
+
+For each station and given time, We got the actual entries and exits by calculating the difference of cumulative entries and exits between current time and last time. However, final results contains some outliers, some entries and exits are negative or extremely large. For these outliers, we replaced them with the mean of last two observations at the same time and station. We did this by  [FutherCleanPassenger.py](https://github.com/zheyanliu99/SubwayCrime/blob/main/data/FutherCleanPassenger.py).
+
+
+# Exploratory Data Analysis
+
+## Subway Crime
+
+## Subway Passenger
+
+
+```{r read and process data, include=FALSE ,message=FALSE, warning=FALSE}
+passenger_df = read_csv('data/passenger_imputed.csv', show_col_types = FALSE)
+
+passenger_df = 
+  passenger_df %>% 
+  # Plotting use 1-year data 
+  filter(date >= as.Date("2021-01-01"),
+         date < as.Date("2021-11-05"))
+
+
+# just use part of features
+location_df = 
+  read_csv('data/subway_info_final3.csv', show_col_types = FALSE) %>% 
+  # only keep new york
+  filter(administrative_area_level_1 == 'New York') %>% 
+  select(station, linename, service, sublocality, postal_code, lat, long)
+  
+
+passenger_df = 
+  passenger_df %>% 
+  left_join(location_df, by = c('station', 'linename')) %>% 
+  drop_na(sublocality) %>% 
+  relocate(station, linename, service, sublocality, postal_code, lat, long)
+
+```
+
+
+
+### Subway passenger EDA with location
+
+
+Passenger flow is closely related with crime. The more passenger flow in a station, the more criminals there will be. Therefore, we conduct EDA to:
+
+* Find relationship between location and passenger flow
+* Determine the most appropriate location variable for the model
+
+#### Total passengers in each station
+
+The color of each circle is the line of the subway and the size is the total number of passengers in 2021.
+
+```{r, message=FALSE, warning=FALSE}
+df = 
+  passenger_df %>% 
+    drop_na(entry_diff_imputed, exit_diff_imputed) %>% 
+    group_by(station, service, linename, sublocality, postal_code, lat, long) %>% 
+    summarise(total_entry = sum(entry_diff_imputed),
+              total_exit = sum(exit_diff_imputed)) %>% 
+    mutate(passenger_flow = total_entry + total_exit,
+           # set passenger_flow to int
+           passenger_flow = as.integer(passenger_flow))
+
+# df %>% 
+#   leaflet() %>% 
+#   addTiles() %>% 
+#   addCircleMarkers(~long, ~lat,radius= df$passenger_flow/100000000, weight= 0.9)
+
+
+qpal <- colorQuantile("YlOrRd", df$passenger_flow, n = 4)
+
+pal <- 
+   colorFactor(palette = c("blue", "azure4", "orange",'green','green','brown','yellow','red','forestgreen','purple'), 
+               levels = c('8 Avenue(ACE)',
+                          'Shuttle(S)',
+                          '6 Avenue(BDFM)',
+                          'Brooklyn-Queens Crosstown(G)',
+                          'Brooklyn-Queens(G)',
+                          '14 St-Canarsie(L)',
+                          'Broadway(NQRW)',
+                          '7 Avenue(123)',
+                          'Lexington Av(456)',
+                          'Flushing(7)'))
+
+
+df %>% 
+  mutate(service = ifelse(service == 'Brooklyn-Queens Crosstown(G)', 'Brooklyn-Queens(G)', service)) %>% 
+  mutate(passenger_flow2 = 10*log(passenger_flow)) %>% 
+  leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircles(lng = ~long, lat = ~lat, weight = 1, stroke = FALSE,
+    radius = ~sqrt(passenger_flow)/20, popup = ~station, color = ~pal(service), opacity = 0.75, fillOpacity = 0.75) %>%
+  addLegend("topright", pal = pal, values = ~service, 
+            title = "Subway Service", opacity = 0.75) %>% 
+  setView(-73.8399986, 40.746739, zoom = 11)
+```
+
+There are patterns between station locations and total passenger flow. Big stations are mostly located in lower and middle Manhattan, and there are some sub center stations in other areas, such as *9th Street* station in Brooklyn and *FLUSHING-MAIN* station in Queen.
+
+#### By sublocality
+
+```{r}
+df %>% 
+  ungroup %>% 
+  filter('sublocality' != 'None') %>% 
+  drop_na() %>% 
+  group_by(sublocality) %>%  
+  summarise(passenger_flow = sum(passenger_flow)) %>% 
+  mutate(sublocality = as.factor(sublocality)) %>% 
+  arrange(-passenger_flow) %>% 
+  filter(passenger_flow < 500000 |passenger_flow > 60000000) %>% 
+  knitr::kable()
+
+```
+
+Manhattan has the most subway passengers in 2021 and Staten Island has the least subway passenger_flow. Additionally, sublocality only has 5 levels, which is too few for a machine learning model.
+
+#### EDA with zipcode
+
+##### Total passengers in each zipcode
+
+
+```{r, message=FALSE, warning=FALSE}
+# cache zip boundaries that are download via tigris package
+options(tigris_use_cache = TRUE)
+
+
+# get zip boundaries that start with 282
+char_zips = zctas(cb = TRUE)
+char_zips = 
+  char_zips %>% 
+  rename(postal_code = GEOID10)
+
+summary_df<-
+  df %>%
+  mutate(postal_code) %>% 
+  group_by(postal_code) %>%
+  summarise(passenger_flow = sum(passenger_flow),
+            station_cnt = n_distinct(station, linename)) 
+
+
+summary_df<-geo_join(char_zips, 
+                      summary_df, 
+                      by_sp = "postal_code", 
+                      by_df = "postal_code",
+                      how = "left") %>% 
+  filter(passenger_flow>=0)
+
+pal <- colorNumeric(
+  palette = "Greens",
+  domain = summary_df$passenger_flow,
+  na.color = "white")
+
+labels <- 
+  paste0(
+    "Zip Code: ",
+    summary_df$postal_code, "<br/>",
+    "Flow of Passengers: ",
+    summary_df$passenger_flow) %>%
+  lapply(htmltools::HTML)
+
+# summary_df2 = 
+#   char_zips %>% 
+#     select(postal_code) %>% 
+#     left_join(summary_df, by = 'postal_code') 
+
+summary_df %>%  
+  mutate(postal_code_int = as.integer(postal_code)) %>% 
+  filter(postal_code_int >= 10000 & postal_code_int < 14900) %>% 
+  leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+   addPolygons(fillColor = ~pal(passenger_flow),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(weight = 2,
+                                           color = "#666",
+                                           dashArray = "",
+                                           fillOpacity = 0.7,
+                                           bringToFront = TRUE),
+              label = labels) %>% 
+  addLegend(pal = pal, 
+            values = ~passenger_flow, 
+            opacity = 0.7, 
+            title = htmltools::HTML("Total Passengers 2021"),
+            position = "bottomright") %>% 
+  setView(-73.8399986, 40.746739, zoom = 10)
+
+
+
+
+```
+
+
+##### Total subway stations in each zipcode
+
+```{r, warning=FALSE}
+labels <- 
+  paste0(
+    "Zip Code: ",
+    summary_df$postal_code, "<br/>",
+    "Stations count: ",
+    summary_df$station_cnt) %>%
+  lapply(htmltools::HTML)
+
+
+pal <- colorNumeric(
+  palette = "Purples",
+  domain = summary_df$station_cnt,
+  na.color = "white")
+
+summary_df %>%  
+  mutate(postal_code_int = as.integer(postal_code)) %>% 
+  filter(postal_code_int >= 10000 & postal_code_int < 14900) %>% 
+  leaflet() %>%
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+   addPolygons(fillColor = ~pal(station_cnt),
+              weight = 2,
+              opacity = 1,
+              color = "white",
+              dashArray = "3",
+              fillOpacity = 0.7,
+              highlight = highlightOptions(weight = 2,
+                                           color = "#666",
+                                           dashArray = "",
+                                           fillOpacity = 0.7,
+                                           bringToFront = TRUE),
+              label = labels) %>% 
+  addLegend(pal = pal, 
+            values = ~station_cnt, 
+            opacity = 0.7, 
+            title = htmltools::HTML("Total Stations 2021"),
+            position = "bottomright") %>% 
+  setView(-73.8399986, 40.746739, zoom = 10)
+```
+
+The zipcode does not demonstrate the exact relationship between location and passenger flow. For instance, some zipcodes such as *10002* and *10011* in lower Manhattan should have more passengers, however few stations are built there. Therefore, the key cause to this confusion is that subway stations are not built based on zipcode.
+
+#### Kmeans analysis of station
+
+We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. The color of each circle is the Kmeans cluster they belong and the size is the total number of passengers in 2021.
+
+```{r, message=FALSE, warning=FALSE}
+
+# conduct kmeans
+df_sub = 
+  df %>% 
+  ungroup() %>% 
+  select(long, lat) %>% 
+  drop_na()
+
+k2 = kmeans(df_sub, centers = 8, nstart = 25)
+
+# EDA with Kmeans results
+df$cluster = k2$cluster
+
+df = 
+  df %>%
+  mutate(cluster = case_when(
+    cluster == 1 ~ 'Queen',
+    cluster == 2 ~ 'Upper Manhattan',
+    cluster == 3 ~ 'Queen-Brooklyn',
+    cluster == 4 ~ 'Middle Manhattan',
+    cluster == 5 ~ 'Bronx',
+    cluster == 6 ~ 'Brooklyn',
+    cluster == 7 ~ 'Lower Manhattan',
+    cluster == 8 ~ 'Rockaway Beach',
+  ))
+
+pal = colorFactor(
+  brewer.pal(n = 10, name = "Set1"),
+  df$cluster,
+  levels = NULL,
+  ordered = FALSE,
+  na.color = "#808080",
+  alpha = FALSE,
+  reverse = FALSE
+)
+
+df %>% 
+  leaflet() %>% 
+  addProviderTiles(providers$CartoDB.Positron) %>% 
+  addCircles(lng = ~long, lat = ~lat, weight = 1, stroke = FALSE,
+    radius = ~sqrt(passenger_flow)/20, popup = ~station, color = ~pal(cluster), opacity = 1, fillOpacity = 1) %>%
+  addLegend("topright", pal = pal, values = ~cluster, 
+            title = "Kmeans Cluster", opacity = 1) %>% 
+  setView(-73.8399986, 40.746739, zoom = 11)
+
+
+
+
+```
+
+
+Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Manhattan and upper Manhattan. Brooklyn and Queens shares 3 cluster. Also, there is a cluster for Bronx. We think the Kmeans result is easier to interpret than that of zipcode or sublocality and it can partly represent the relationship between passenger flow and location. Therefore, we use Kmeans result as the location variable in our model.
+
+
+
+
+# Model
+
+## Introduction
+
+
+## Methodology
+
+## Reult
+
+
+# Model Application
+
+1.Google Api
+2.How to use
+
+# Summary
+
+1.Discussion
+2.Results
+3.Distribution
+4.Limitations
+5.Acknowledgement
+6.Reference
+7.Appendix

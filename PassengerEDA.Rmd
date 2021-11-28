@@ -11,6 +11,10 @@ editor_options:
   chunk_output_type: console
 ---
 
+<link rel="stylesheet" href="academicons.css"/>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -47,7 +51,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
-```{r read and process data}
+```{r read and process data, include=FALSE ,message=FALSE, warning=FALSE}
 passenger_df = read_csv('data/passenger_imputed.csv', show_col_types = FALSE)
 
 passenger_df = 
@@ -81,7 +85,7 @@ passenger_df =
 Passenger flow is closely related with crime. The more passenger flow in a station, the more criminals there will be. Therefore, we conduct EDA to:
 
 * Find relationship between location and passenger flow
-* Determine the location variable for the model
+* Determine the most appropriate location variable for the model
 
 ## Total passengers in each station
 
@@ -293,8 +297,21 @@ k2 = kmeans(df_sub, centers = 8, nstart = 25)
 # EDA with Kmeans results
 df$cluster = k2$cluster
 
+df = 
+  df %>%
+  mutate(cluster = case_when(
+    cluster == 1 ~ 'Queen',
+    cluster == 2 ~ 'Upper Manhattan',
+    cluster == 3 ~ 'Queen-Brooklyn',
+    cluster == 4 ~ 'Middle Manhattan',
+    cluster == 5 ~ 'Bronx',
+    cluster == 6 ~ 'Brooklyn',
+    cluster == 7 ~ 'Lower Manhattan',
+    cluster == 8 ~ 'Rockaway Beach',
+  ))
+
 pal = colorFactor(
-  brewer.pal(n = 9, name = "Set1"),
+  brewer.pal(n = 10, name = "Set1"),
   df$cluster,
   levels = NULL,
   ordered = FALSE,
@@ -313,6 +330,8 @@ df %>%
   setView(-73.8399986, 40.746739, zoom = 11)
 
 
+
+
 ```
 
 
@@ -322,6 +341,24 @@ Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Man
 
 
 
+```{r output cluster data, include=FALSE}
+
+df_join = 
+  df %>% ungroup %>% select(station, linename, cluster)  %>% 
+  group_by(station, linename, cluster)
+
+location_df = 
+  read_csv('data/subway_info_final3.csv', show_col_types = FALSE)
+
+df_output = 
+  location_df %>% 
+  left_join(df_join, by = c('station', 'linename'))
+
+
+# write.csv(df_output, 'data/subway_info_final3.csv')
+
+
+```
 
 
 

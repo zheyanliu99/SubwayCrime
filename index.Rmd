@@ -1,0 +1,33 @@
+---
+title: "NYC subway crime"
+output: 
+  html_document:
+    includes:
+       in_header: ga_script.html
+---
+
+<link rel="stylesheet" href="academicons.css"/>
+<link rel="stylesheet" href="styles.css" type="text/css">
+
+
+#### Zheyan Liu, Chaoqi Wu, Baode Gao, Youyuan Kong, Zexu Yuan
+#### Columbia University, Mailman School of Public Health
+
+<br>
+<center>
+
+Word Cloud Here
+
+</center>
+<br>
+
+## Introduction
+
+
+## Outcomes
+
+
+## Team members
+
+
+
