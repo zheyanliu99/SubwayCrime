@@ -40,6 +40,8 @@ raw_sub_crime =
 
 ### Number of crime events each year
 
+For the most frequent crime events, they mainly happen in the afternoon, from 12:00 pm to 20:00 pm in the 9 months in 2021. Of these crime events, from 12:00 pm to 20:00 pm, crime mischief is the most frequent happening events. In New York City, criminal mischief includes intentionally damage, participation in the destruction of an abandoned building. 
+
 ```{r}
 sub_crime_year = 
   raw_sub_crime %>% 
@@ -60,6 +62,10 @@ layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), 
 ### Number of crime events each season
 
 With the degree to weeks, the highest number of crime events appears in the eleventh week, which in the March. It appears that there would be a locally maximum point for around every ten weeks, and there also would be a sudden increase and decrease at the beginning and end of the year, accordingly.
+
+The third degree of assault is the second frequent crime events in that time interval, which includes intention to cause physical injury to another person.
+
+In that time interval, of crime events, the second degree of harassment is the third frequently happening events, which includes the intention to harass, annoy or alarm some person and strike people in some manner or make physical contact with them. 
 
 ```{r}
 sub_crime_season = 
@@ -105,16 +111,6 @@ plot_3 =
 
 layout(plot_3, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
 ```
-
-
-### Top 5 crime events v.s. Occurrence time
-
-For the most frequent crime events, they mainly happen in the afternoon, from 12:00 pm to 20:00 pm in the 9 months in 2021. Of these crime events, from 12:00 pm to 20:00 pm, crime mischief is the most frequent happening events. In New York City, criminal mischief includes intentionally damage, participation in the destruction of an abandoned building. 
-
-The third degree of assault is the second frequent crime events in that time interval, which includes intention to cause physical injury to another person.
-
-In that time interval, of crime events, the second degree of harassment is the third frequently happening events, which includes the intention to harass, annoy or alarm some person and strike people in some manner or make physical contact with them. 
-
 
 ## Degrees of crime event v.s. Occurrence time
 
