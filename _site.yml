@@ -18,6 +18,8 @@ navbar:
     #   href: plotly.html
     # - text: "Dashboard"
     #   href: dashboard.html
+    - text: Report
+      href: report.html
     - icon: fa-envelope fa-lg
       href: mailto:<zheyan.liu@columbia.edu>
     # - icon: fa-address-book fa-lg

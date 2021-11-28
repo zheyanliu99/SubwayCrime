@@ -1,7 +1,5 @@
 ---
 title: "2021 Subway Passenger EDA"
-author: "Zheyan"
-date: "11/15/2021"
 output: 
   html_document:
     toc: true
@@ -14,8 +12,8 @@ editor_options:
 <link rel="stylesheet" href="academicons.css"/>
 <link rel="stylesheet" href="styles.css" type="text/css">
 
-
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
@@ -47,8 +45,83 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
-
 ```
+
+# Introduction
+
+
+# Data
+
+
+## Data Introduction
+
+### Subway Crime
+
+### Subway Passenger
+
+The orginal [Subway passenger data](http://web.mta.info/developers/turnstile.html) is from [MTA](https://new.mta.info/)(Metropolitan Transportation Authority). The orginal data contains total entries and exits in each station in every 4 hours from 2010 to now. Data is not in a readable format, they are seperated by time in different htmls, we read and process passenger data with [ GenerateSubwayPassengerData.rmd](https://github.com/zheyanliu99/SubwayCrime/blob/main/data/GenerateSubwayPassengerData2.Rmd)
+
+The variables we use are:
+
+* STATION: Station name 
+* LINENAME: Lines in this station, there can be more than one lines in one station
+* DATE: Format MM/DD/YYYY
+* TIME: Format 00:00:00
+* ENTRIES:Cumulative entries
+* EXITS: Cumulative exits 
+
+| variablename | type      | range | note                                                                   |   |
+|--------------|-----------|-------|------------------------------------------------------------------------|---|
+| STATION      | Character |       | station name                                                           |   |
+| LINENAME     | Character |       | lines in this station, there can be more than one lines in one station |   |
+| DATE         | Date      |  Year>2010     | format MM/DD/YYYY                                                      |   |
+| TIME         | Date      |       | format 00:00:00                                                        |   |
+| ENTRIES      | Intergar  |  >0    | cumulative entries                                                     |   |
+| EXITS        | Intergar  |  >0     | cumulative exits                                                       |   |
+
+
+## Data Cleanning
+
+### Subway Crime
+
+### Subway Passenger
+
+#### Google Map Api to find station coordinates
+
+We want to get coordinates of each station for the following reasons
+
+* location-based data visualization and analysis
+* More location-based features for the model
+* The station name in crime and passenger data are not matched, we can use corrdinates to match them
+
+However, how to get the correct coordinates is tricky, there are open datas about NYC subway stations infomation and all of them have different naming system with ours. In addition, the station names contain lots of dupilicates. For instance, there are 2 86 st stations in middle Manhattan and another one in Brooklyn. We can get the correct coordinates of stations by using both station names and line names. Therefore, our solution is to use [Google Maps Api](https://developers.google.com/maps). The code we use is [Subway_info.py](https://github.com/zheyanliu99/SubwayCrime/blob/main/data/Subway_info.py)
+
+#### Add service column
+
+There are too many subway lines and some of them share most of the rails, therefore it is not reasonable to conduct analysis or building models with the line name. Therefore, we created a new variable called service based on the defination of MTA. For instance, line A, B and C are called 
+'8 Avenue'.
+<br>
+<center>
+
+![](images/SubwayMap.jpg){width=60%}
+
+</center>
+<br>
+
+
+
+#### Chaoqi:correct subway line?
+
+#### Outliers of entries and exits
+
+For each station and given time, We got the actual entries and exits by calculating the difference of cumulative entries and exits between current time and last time. However, final results contains some outliers, some entries and exits are negative or extremely large. For these outliers, we replaced them with the mean of last two observations at the same time and station. We did this by  [FutherCleanPassenger.py](https://github.com/zheyanliu99/SubwayCrime/blob/main/data/FutherCleanPassenger.py).
+
+
+# Exploratory Data Analysis
+
+## Subway Crime
+
+## Subway Passenger
 
 
 ```{r read and process data, include=FALSE ,message=FALSE, warning=FALSE}
@@ -79,7 +152,7 @@ passenger_df =
 
 
 
-# Subway passenger EDA with location
+### Subway passenger EDA with location
 
 
 Passenger flow is closely related with crime. The more passenger flow in a station, the more criminals there will be. Therefore, we conduct EDA to:
@@ -87,7 +160,7 @@ Passenger flow is closely related with crime. The more passenger flow in a stati
 * Find relationship between location and passenger flow
 * Determine the most appropriate location variable for the model
 
-## Total passengers in each station
+#### Total passengers in each station
 
 The color of each circle is the line of the subway and the size is the total number of passengers in 2021.
 
@@ -138,7 +211,7 @@ df %>%
 
 There are patterns between station locations and total passenger flow. Big stations are mostly located in lower and middle Manhattan, and there are some sub center stations in other areas, such as *9th Street* station in Brooklyn and *FLUSHING-MAIN* station in Queen.
 
-## By sublocality
+#### By sublocality
 
 ```{r}
 df %>% 
@@ -156,9 +229,9 @@ df %>%
 
 Manhattan has the most subway passengers in 2021 and Staten Island has the least subway passenger_flow. Additionally, sublocality only has 5 levels, which is too few for a machine learning model.
 
-## EDA with zipcode
+#### EDA with zipcode
 
-### Total passengers in each zipcode
+##### Total passengers in each zipcode
 
 
 ```{r, message=FALSE, warning=FALSE}
@@ -235,7 +308,7 @@ summary_df %>%
 ```
 
 
-### Total subway stations in each zipcode
+##### Total subway stations in each zipcode
 
 ```{r, warning=FALSE}
 labels <- 
@@ -279,7 +352,7 @@ summary_df %>%
 
 The zipcode does not demonstrate the exact relationship between location and passenger flow. For instance, some zipcodes such as *10002* and *10011* in lower Manhattan should have more passengers, however few stations are built there. Therefore, the key cause to this confusion is that subway stations are not built based on zipcode.
 
-## Kmeans analysis of station
+#### Kmeans analysis of station
 
 We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. The color of each circle is the Kmeans cluster they belong and the size is the total number of passengers in 2021.
 
@@ -340,36 +413,27 @@ Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Man
 
 
 
+# Model
 
-```{r output cluster data, include=FALSE}
-
-df_join = 
-  df %>% ungroup %>% select(station, linename, cluster)  %>% 
-  group_by(station, linename, cluster)
-
-location_df = 
-  read_csv('data/subway_info_final3.csv', show_col_types = FALSE)
-
-df_output = 
-  location_df %>% 
-  left_join(df_join, by = c('station', 'linename'))
+## Introduction
 
 
-# write.csv(df_output, 'data/subway_info_final3.csv')
+## Methodology
+
+## Reult
 
 
-```
+# Model Application
 
+1.Google Api
+2.How to use
 
+# Summary
 
-
-
-
-
-
-
-
-
-
-
-
+1.Discussion
+2.Results
+3.Distribution
+4.Limitations
+5.Acknowledgement
+6.Reference
+7.Appendix
