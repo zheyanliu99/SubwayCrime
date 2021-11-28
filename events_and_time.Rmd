@@ -19,36 +19,47 @@ library(patchwork)
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 raw_sub_crime = 
-  read_csv("./data/subwaycrime.csv") %>% 
+  read_csv("./data/subwaycrime_with_station_new.csv") %>% 
   janitor::clean_names() %>% 
   rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "law_cat" = "law_cat_cd", "crime_event" = "ofns_desc", "crime_desc" = "pd_desc") %>% 
   mutate(law_cat = ordered(law_cat, level = c("VIOLATION", "MISDEMEANOR", "FELONY"))) %>% 
   mutate(start_date = as.Date(start_date, "%m/%d/%Y"), 
          end_date = as.Date(end_date, "%m/%d/%Y")) %>% 
-  filter(start_date > "2020-12-28") %>% 
   mutate(start = as.POSIXct(paste(start_date, start_time), format = "%Y-%m-%d %H:%M:%S"), 
          end = as.POSIXct(paste(end_date, end_time), format = "%Y-%m-%d %H:%M:%S")) %>% 
   mutate(crime_event = tolower(crime_event),
          law_cat = tolower(law_cat),
          crime_desc = tolower(crime_desc)) %>% 
+  drop_na(start_time) %>% 
   mutate(
     event_time =
       case_when(
-      hms("00:00:00") <= start_time & start_time < hms("04:00:00") ~ hms("02:00:00"),
-      hms("04:00:00") <= start_time & start_time < hms("08:00:00") ~ hms("06:00:00"),
-      hms("08:00:00") <= start_time & start_time < hms("12:00:00") ~ hms("10:00:00"),
-      hms("12:00:00") <= start_time & start_time < hms("16:00:00") ~ hms("14:00:00"),
-      hms("16:00:00") <= start_time & start_time < hms("20:00:00") ~ hms("18:00:00"),
-      hms("20:00:00") <= start_time & start_time < hms("24:00:00") ~ hms("22:00:00")
+      hms("00:00:00") <= start_time & start_time <= hms("00:59:00") ~ hms("00:00:00"),
+      hms("01:00:00") <= start_time & start_time <= hms("01:59:00") ~ hms("01:00:00"),
+      hms("02:00:00") <= start_time & start_time <= hms("02:59:00") ~ hms("02:00:00"),
+      hms("03:00:00") <= start_time & start_time <= hms("03:59:00") ~ hms("03:00:00"),
+      hms("04:00:00") <= start_time & start_time <= hms("04:59:00") ~ hms("04:00:00"),
+      hms("05:00:00") <= start_time & start_time <= hms("05:59:00") ~ hms("05:00:00"),
+      hms("06:00:00") <= start_time & start_time <= hms("06:59:00") ~ hms("06:00:00"),
+      hms("07:00:00") <= start_time & start_time <= hms("07:59:00") ~ hms("07:00:00"),
+      hms("08:00:00") <= start_time & start_time <= hms("08:59:00") ~ hms("08:00:00"),
+      hms("09:00:00") <= start_time & start_time <= hms("09:59:00") ~ hms("09:00:00"),
+      hms("10:00:00") <= start_time & start_time <= hms("10:59:00") ~ hms("10:00:00"),
+      hms("11:00:00") <= start_time & start_time <= hms("11:59:00") ~ hms("11:00:00"),
+      hms("12:00:00") <= start_time & start_time <= hms("12:59:00") ~ hms("12:00:00"),
+      hms("13:00:00") <= start_time & start_time <= hms("13:59:00") ~ hms("13:00:00"),
+      hms("14:00:00") <= start_time & start_time <= hms("14:59:00") ~ hms("14:00:00"),
+      hms("15:00:00") <= start_time & start_time <= hms("15:59:00") ~ hms("15:00:00"),
+      hms("16:00:00") <= start_time & start_time <= hms("16:59:00") ~ hms("16:00:00"),
+      hms("17:00:00") <= start_time & start_time <= hms("17:59:00") ~ hms("17:00:00"),
+      hms("18:00:00") <= start_time & start_time <= hms("18:59:00") ~ hms("18:00:00"),
+      hms("19:00:00") <= start_time & start_time <= hms("19:59:00") ~ hms("19:00:00"),
+      hms("20:00:00") <= start_time & start_time <= hms("20:59:00") ~ hms("20:00:00"),
+      hms("21:00:00") <= start_time & start_time <= hms("21:59:00") ~ hms("21:00:00"),
+      hms("22:00:00") <= start_time & start_time <= hms("22:59:00") ~ hms("22:00:00"),
+      hms("23:00:00") <= start_time & start_time <= hms("23:59:00") ~ hms("23:00:00")
       )
   ) %>% 
-  mutate(
-    event_time = ifelse(event_time == "2H 0M 0S", "2 AM", 
-                        ifelse(event_time == "6H 0M 0S", "6 AM", 
-                               ifelse(event_time == "10H 0M 0S", "10 AM", 
-                                      ifelse(event_time == "14H 0M 0S", "2 PM", 
-                                             ifelse(event_time == "18H 0M 0S", "6 PM", "10 PM")))))
-    )%>% 
   select(start_date, start_time, end_date, end_time, law_cat, crime_event, crime_desc, start, end, event_time)
 ```
 
@@ -69,6 +80,10 @@ Of these crime events, 3169 were judged as misdemeanor crime events.
 Of these crime events, 2040 were judged as felony crime events.
 
 ## Crime events v.s. Time
+
+### Number of crime events each year
+
+### Number of crime events each season
 
 ### Number of cirime events each month
 
