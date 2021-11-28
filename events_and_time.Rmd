@@ -16,8 +16,6 @@ library(readxl)
 library(httr)
 library(lubridate)
 library(plotly)
-library(dplyr)
-library(patchwork)
 ```
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
@@ -34,59 +32,56 @@ raw_sub_crime =
          law_cat = tolower(law_cat),
          crime_desc = tolower(crime_desc)) %>% 
   drop_na(start_time) %>% 
-  mutate(
-    event_time =
-      case_when(
-      hms("00:00:00") <= start_time & start_time <= hms("00:59:00") ~ hms("00:00:00"),
-      hms("01:00:00") <= start_time & start_time <= hms("01:59:00") ~ hms("01:00:00"),
-      hms("02:00:00") <= start_time & start_time <= hms("02:59:00") ~ hms("02:00:00"),
-      hms("03:00:00") <= start_time & start_time <= hms("03:59:00") ~ hms("03:00:00"),
-      hms("04:00:00") <= start_time & start_time <= hms("04:59:00") ~ hms("04:00:00"),
-      hms("05:00:00") <= start_time & start_time <= hms("05:59:00") ~ hms("05:00:00"),
-      hms("06:00:00") <= start_time & start_time <= hms("06:59:00") ~ hms("06:00:00"),
-      hms("07:00:00") <= start_time & start_time <= hms("07:59:00") ~ hms("07:00:00"),
-      hms("08:00:00") <= start_time & start_time <= hms("08:59:00") ~ hms("08:00:00"),
-      hms("09:00:00") <= start_time & start_time <= hms("09:59:00") ~ hms("09:00:00"),
-      hms("10:00:00") <= start_time & start_time <= hms("10:59:00") ~ hms("10:00:00"),
-      hms("11:00:00") <= start_time & start_time <= hms("11:59:00") ~ hms("11:00:00"),
-      hms("12:00:00") <= start_time & start_time <= hms("12:59:00") ~ hms("12:00:00"),
-      hms("13:00:00") <= start_time & start_time <= hms("13:59:00") ~ hms("13:00:00"),
-      hms("14:00:00") <= start_time & start_time <= hms("14:59:00") ~ hms("14:00:00"),
-      hms("15:00:00") <= start_time & start_time <= hms("15:59:00") ~ hms("15:00:00"),
-      hms("16:00:00") <= start_time & start_time <= hms("16:59:00") ~ hms("16:00:00"),
-      hms("17:00:00") <= start_time & start_time <= hms("17:59:00") ~ hms("17:00:00"),
-      hms("18:00:00") <= start_time & start_time <= hms("18:59:00") ~ hms("18:00:00"),
-      hms("19:00:00") <= start_time & start_time <= hms("19:59:00") ~ hms("19:00:00"),
-      hms("20:00:00") <= start_time & start_time <= hms("20:59:00") ~ hms("20:00:00"),
-      hms("21:00:00") <= start_time & start_time <= hms("21:59:00") ~ hms("21:00:00"),
-      hms("22:00:00") <= start_time & start_time <= hms("22:59:00") ~ hms("22:00:00"),
-      hms("23:00:00") <= start_time & start_time <= hms("23:59:00") ~ hms("23:00:00")
-      )
-  ) %>% 
-  select(start_date, start_time, end_date, end_time, law_cat, crime_event, crime_desc, start, end, event_time)
+  separate(start_time, into = c("start_time_hour", "event_minute", "event_second"), sep = ":") %>% 
+  select(start_date, start_time_hour, end_date, end_time, law_cat, crime_event, crime_desc, start, end) %>% 
+  filter(start_date > "2005-12-31")
 ```
 
-## Count data
-
-There are totally 5955 crime events updating to September, 2021.
-
-#### Violation events
-
-Of these crime events, 775 were judged as violation crime events.
-
-#### Misdemeanor events
-
-Of these crime events, 3169 were judged as misdemeanor crime events.
-
-#### Felony events
-
-Of these crime events, 2040 were judged as felony crime events.
-
-## Crime events v.s. Time
 
 ### Number of crime events each year
 
+```{r}
+sub_crime_year = 
+  raw_sub_crime %>% 
+  select(start_date, start_time_hour, crime_event, law_cat) %>% 
+  mutate(start_date = substring(start_date, 1, 4))
+
+plot_1 = 
+  sub_crime_year %>% 
+  group_by(start_date) %>% 
+  summarise(event_num = n()) %>% 
+  plot_ly(
+    x = ~start_date, y = ~event_num, type = "bar"
+  )
+
+layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), yaxis = list(title = "Number of Crime Events"))
+```
+
 ### Number of crime events each season
+
+```{r}
+sub_crime_season = 
+  raw_sub_crime %>% 
+  select(start_date, start_time_hour, crime_event, law_cat) %>% 
+  separate(start_date, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(season = case_when(
+    month %in% c("01","02","03") ~ "Q1",
+    month %in% c("04","05","06") ~ "Q2",
+    month %in% c("07","08","09") ~ "Q3",
+    month %in% c("10","11","12") ~ "Q4"
+  )) %>% 
+  mutate(event_quarter = paste(year, season, sep = "-"))
+  
+plot_2 = 
+  sub_crime_season %>% 
+  group_by(event_quarter) %>% 
+  summarise(event_num = n()) %>% 
+  plot_ly(
+    x = ~quarter, y = ~event_num, type = "scatter"
+  )
+
+layout(plot_2, title = "Crime events over seasons", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"))
+```
 
 ### Number of cirime events each month
 
@@ -95,19 +90,18 @@ Basically, the number of crime events in each month has the comparably same valu
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_month = 
   raw_sub_crime %>% 
-  filter(start_date > "2021-01-01") %>% 
-  select(start_date, start_time, crime_event, law_cat) %>% 
+  select(start_date, start_time_hour, crime_event, law_cat) %>% 
   mutate(start_date = substring(start_date, 1, 7)) 
   
-plot_1 = 
+plot_3 = 
   sub_crime_month %>% 
   group_by(start_date) %>% 
   summarise(event_num = n()) %>% 
   plot_ly(
-    x = ~start_date, y = ~event_num, type = "bar"
+    x = ~start_date, y = ~event_num, type = "scatter"
   )
 
-layout(plot_1, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
+layout(plot_3, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
 ```
 
 ### Number of crime events each week
@@ -117,19 +111,19 @@ With the degree to weeks, the highest number of crime events appears in the elev
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_week = 
   raw_sub_crime %>% 
-  select(start_date, start_time, crime_event, law_cat) %>% 
+  select(start_date, start_time_hour, crime_event, law_cat) %>% 
   mutate(week = cut.Date(start_date, breaks = "1 week", labels = FALSE)) %>% 
   arrange(week) %>% 
   group_by(week) %>% 
   summarise(event_num = n())
   
-plot_2 = 
+plot_4 = 
   sub_crime_week %>% 
     plot_ly(
     x = ~week, y = ~event_num, type = "scatter", mode = "marker"
   )
 
-layout(plot_2, title = "Crime events over weeks", xaxis = list(title = "Week"), yaxis = list(title = "Number of Crime Events"))
+layout(plot_4, title = "Crime events over weeks", xaxis = list(title = "Week"), yaxis = list(title = "Number of Crime Events"))
 ```
 
 ### Top 5 crime events v.s. Occurrence time
