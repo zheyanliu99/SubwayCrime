@@ -36,7 +36,7 @@
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
-<script src="site_libs/htmlwidgets-1.5.3/htmlwidgets.js"></script>
+<script src="site_libs/htmlwidgets-1.5.4/htmlwidgets.js"></script>
 <link href="site_libs/leaflet-1.3.1/leaflet.css" rel="stylesheet" />
 <script src="site_libs/leaflet-1.3.1/leaflet.js"></script>
 <link href="site_libs/leafletfix-1.0.0/leafletfix.css" rel="stylesheet" />
@@ -337,8 +337,20 @@ div.tocify {
         <li>
   <a href="PassengerEDA.html">Passenger</a>
 </li>
-<li>
-  <a href="events_and_time.html">Crime</a>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Crime
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="events_and_time.html">by Time</a>
+    </li>
+    <li>
+      <a href="EDA.html">by Location</a>
+    </li>
+  </ul>
 </li>
 <li>
   <a href="https://zheyanliu.shinyapps.io/NYC_subway_findroute/">Shiny App</a>
@@ -346,6 +358,9 @@ div.tocify {
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
+  <a href="report.html">Report</a>
+</li>
+<li>
   <a href="mailto:&lt;zheyan.liu@columbia.edu&gt;">
     <span class="fa fa-envelope fa-lg"></span>
      
@@ -380,15 +395,113 @@ div.tocify {
 
 
 <p><link rel="stylesheet" href="academicons.css"/> <link rel="stylesheet" href="styles.css" type="text/css"></p>
-<div id="introduction" class="section level1">
-<h1>Introduction</h1>
-</div>
+<p><img src="images/Word_Cloud.png" style="width:60.0%" /> # Introduction</p>
+<p>New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pickpocketing, grand larceny, and assault. This closest place will trigger evil.</p>
+<p>On November 21, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety is tightly related to almost every citizen who is living, working, and studying in New York City.</p>
+<p>As students who are living here in New York City, most of us will almost take the subway to the campus in the early morning and back to the apartment in the night on weekdays, and hang out with friends on weekends. However, some of my friends experienced uncompleted crimes. Keeping away from danger at subway stations is closely related to ourselves. We hope we are able to help citizens to find comparatively safe and reliable routes when taking subways.</p>
 <div id="data" class="section level1">
 <h1>Data</h1>
 <div id="data-introduction" class="section level2">
 <h2>Data Introduction</h2>
 <div id="subway-crime" class="section level3">
 <h3>Subway Crime</h3>
+<p>The orginal subway crime data has two parts.<a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243">The first one</a> contains all valid felony, misdemeanor, and violation crimes reported to the New York City Police Department— <a href="https://www1.nyc.gov/site/nypd/index.page">NYPD</a>. The <a href="https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i">second one</a>  includes similar crimes. We join these two data frames and only analyze crimes which happen in subway, NYC.</p>
+<table>
+<colgroup>
+<col width="11%" />
+<col width="79%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">column name</th>
+<th align="left">description</th>
+<th align="left">type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">CMPLNT_NUM</td>
+<td align="left">Randomly generated persistent ID for each complaint</td>
+<td align="left">Number</td>
+</tr>
+<tr class="even">
+<td align="left">CMPLNT_FR_DT</td>
+<td align="left">Exact date of occurrence for the reported event (or starting date of occurrence, if CMPLNT_TO_DT exists)</td>
+<td align="left">Date &amp; Time</td>
+</tr>
+<tr class="odd">
+<td align="left">CMPLNT_FR_TM</td>
+<td align="left">Exact time of occurrence for the reported event (or starting time of occurrence, if CMPLNT_TO_TM exists)</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="even">
+<td align="left">CMPLNT_TO_DT</td>
+<td align="left">Ending date of occurrence for the reported event, if exact time of occurrence is unknown</td>
+<td align="left">Date &amp; Time</td>
+</tr>
+<tr class="odd">
+<td align="left">CMPLNT_TO_TM</td>
+<td align="left">Ending time of occurrence for the reported event, if exact time of occurrence is unknown</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="even">
+<td align="left">OFNS_DESC</td>
+<td align="left">Description of offense corresponding with key code</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="odd">
+<td align="left">LAW_CAT_CD</td>
+<td align="left">Level of offense: felony, misdemeanor, violation</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="even">
+<td align="left">SUSP_AGE_GROUP</td>
+<td align="left">Suspect’s Age Group</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="odd">
+<td align="left">SUSP_RACE</td>
+<td align="left">Suspect’s Race Description</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="even">
+<td align="left">SUSP_SEX</td>
+<td align="left">Suspect’s Sex Description</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="odd">
+<td align="left">Latitude</td>
+<td align="left">Midblock Latitude coordinate for Global Coordinate System, WGS 1984, decimal degrees (EPSG 4326)</td>
+<td align="left">Number</td>
+</tr>
+<tr class="even">
+<td align="left">Longitude</td>
+<td align="left">Midblock Longitude coordinate for Global Coordinate System, WGS 1984, decimal degrees (EPSG 4326)</td>
+<td align="left">Number</td>
+</tr>
+<tr class="odd">
+<td align="left">STATION_NAME</td>
+<td align="left">Transit station name</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="even">
+<td align="left">VIC_AGE_GROUP</td>
+<td align="left">Victim’s Age Group</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="odd">
+<td align="left">VIC_RACE</td>
+<td align="left">Victim’s Race Description</td>
+<td align="left">Plain Text</td>
+</tr>
+<tr class="even">
+<td align="left">VIC_SEX</td>
+<td align="left">Victim’s Sex Description</td>
+<td align="left">Plain Text</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="subway-passenger" class="section level3">
 <h3>Subway Passenger</h3>
@@ -450,14 +563,14 @@ div.tocify {
 </tr>
 <tr class="odd">
 <td>ENTRIES</td>
-<td>Intergar</td>
+<td>Interger</td>
 <td>&gt;0</td>
 <td>cumulative entries</td>
 <td></td>
 </tr>
 <tr class="even">
 <td>EXITS</td>
-<td>Intergar</td>
+<td>Interger</td>
 <td>&gt;0</td>
 <td>cumulative exits</td>
 <td></td>
@@ -780,7 +893,7 @@ df %&gt;%
 </div>
 <div id="model" class="section level1">
 <h1>Model</h1>
-<div id="introduction-1" class="section level2">
+<div id="introduction" class="section level2">
 <h2>Introduction</h2>
 </div>
 <div id="methodology" class="section level2">

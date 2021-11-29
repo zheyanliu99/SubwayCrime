@@ -45,8 +45,10 @@ options(
 scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 
+
 ```
 ![](images/Word_Cloud.png){width=60%}
+
 # Introduction
 
 New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pickpocketing, grand larceny, and assault. This closest place will trigger evil. 
@@ -63,6 +65,14 @@ As students who are living here in New York City, most of us will almost take th
 ### Subway Crime
 
 The orginal subway crime data has two parts.[The first one ](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243) contains all valid felony, misdemeanor, and violation crimes reported to the New York City Police Department--- [NYPD](https://www1.nyc.gov/site/nypd/index.page). The [second one](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i)  includes similar crimes. We join these two data frames and only analyze crimes which happen in subway, NYC.  
+
+The variables we use are(some useless variable's meaning can be found in the link above):
+
+``` {r, include=FALSE}
+variable_crime<-read_excel("data/variable explaination.xls")
+```
+
+`r variable_crime %>% knitr::kable()`
 
 ### Subway Passenger
 
@@ -83,15 +93,28 @@ The variables we use are:
 | LINENAME     | Character |       | lines in this station, there can be more than one lines in one station |   |
 | DATE         | Date      |  Year>2010     | format MM/DD/YYYY                                                      |   |
 | TIME         | Date      |       | format 00:00:00                                                        |   |
-| ENTRIES      | Intergar  |  >0    | cumulative entries                                                     |   |
-| EXITS        | Intergar  |  >0     | cumulative exits                                                       |   |
+| ENTRIES      | Interger  |  >0    | cumulative entries                                                     |   |
+| EXITS        | Interger  |  >0     | cumulative exits                                                       |   |
 
 
 ## Data Cleanning
 
 ### Subway Crime
 
+#### the Least Distance
+In order to compare crime and subway passengers' data, we find that we need to transfer to the same subway line and station name.(Different stations have different abbreviation.)</br>
+We use the crime data's latitude and longitude to match the subway's data. The station in the subway information closet to the each row of crime data will be matched. (which has information about all the station's name, line and location.) </br>
+Some crime data who have deviant longitude and latitude will be excluded. 
+
 ### Subway Passenger
+
+#### K-Means
+
+We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. The color of each circle is the Kmeans cluster they belong and the size is the total number of passengers in 2021.
+
+#### Imputation
+
+Some missing data from passenger's exit and enter count, we use former average number to impute them. 
 
 #### Google Map Api to find station coordinates
 

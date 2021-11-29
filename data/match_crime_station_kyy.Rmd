@@ -96,6 +96,32 @@ crime_df_new=crime_df %>%
 ```
 
 
+## match the passenger data with crime data frame
+
+```{r}
+passenger<-read.csv("data/passenger_imputed.csv") 
+
+passenger_station<-passenger %>% 
+  mutate(date=as.Date(date,format='%Y-%m-%d')) %>% 
+  filter(date>='2008-12-29',date<='2021-11-05') %>% 
+  drop_na(entry_diff_imputed,exit_diff_imputed) %>% 
+  group_by(station, linename) %>% 
+  summarise(
+    flow=sum(entry_diff_imputed+exit_diff_imputed)
+  )
+
+crime_df = read_csv('subwaycrime_with_station_new_2.csv')
+
+crime_df<-crime_df %>% 
+ mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format='%m/%d/%Y')) %>% 
+ filter(distance<=0.0001)%>% 
+ filter(cmplnt_to_dt>='2006-1-1')
+
+crime_summary<-crime_df %>% 
+  count(closest_line,closest_station)
+```
+
+
 check the efficiency of matching 
 
 ```{r}
