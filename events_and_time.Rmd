@@ -16,6 +16,7 @@ library(readxl)
 library(httr)
 library(lubridate)
 library(plotly)
+library(patchwork)
 ```
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
@@ -39,9 +40,9 @@ raw_sub_crime =
 
 ### Number of crime events each year
 
-For the most frequent crime events, they mainly happen in the afternoon, from 12:00 pm to 20:00 pm in the 9 months in 2021. Of these crime events, from 12:00 pm to 20:00 pm, crime mischief is the most frequent happening events. In New York City, criminal mischief includes intentionally damage, participation in the destruction of an abandoned building. 
+Overall,  the number of crime events showed an increasing trend from year 2006 to year 2021, and year 2013 is the watershed: the number of events before 2013 is generally lower than that after 2013. Sepcifically, the number of crime events is over 10,000 almost each year, for year 2016, 2017, 2018, and 2019, total number of crime events reached at 12,000. However, there is a sudden decrease from year 2019 to year 2020, the number of crime events reduced by a half, and that low quantity keeps in year 2021, updating to September, 2021. 
 
-```{r, 犯罪率!!!!}
+```{r}
 sub_crime_year = 
   raw_sub_crime %>% 
   select(start_date, start_time_hour, crime_event, law_cat) %>% 
@@ -50,21 +51,18 @@ sub_crime_year =
 plot_1 = 
   sub_crime_year %>% 
   group_by(start_date) %>% 
-  summarise(event_num = n()) %>% 
+  summarise(event_num = n() / 1000) %>% 
   plot_ly(
     x = ~start_date, y = ~event_num, type = "bar"
   )
 
-layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), yaxis = list(title = "Number of Crime Events"))
+layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), yaxis = list(title = "Number of Crime Events (K)"))
 ```
 
 ### Number of crime events each season
 
-With the degree to weeks, the highest number of crime events appears in the eleventh week, which in the March. It appears that there would be a locally maximum point for around every ten weeks, and there also would be a sudden increase and decrease at the beginning and end of the year, accordingly.
-
-The third degree of assault is the second frequent crime events in that time interval, which includes intention to cause physical injury to another person.
-
-In that time interval, of crime events, the second degree of harassment is the third frequently happening events, which includes the intention to harass, annoy or alarm some person and strike people in some manner or make physical contact with them. 
+Basically, the peak of crime events appeared on the first quarter for almost each year, the bottom point of the quantity of crime events appeared on the third or fourth quarter for nearly every year.
+The overall trend of quantity of events was increasing, and the overall quantity of events after the fourth quarter of 2013 is higher than that before the fourth quater of 2013.
 
 ```{r}
 sub_crime_season = 
@@ -98,22 +96,35 @@ Basically, the number of crime events in each month has the comparably same valu
 sub_crime_month = 
   raw_sub_crime %>% 
   select(start_date, start_time_hour, crime_event, law_cat) %>% 
-  mutate(start_date = substring(start_date, 1, 7)) 
+  separate(start_date, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(month = ifelse(month == "01", "January", ifelse(month == "02", "February", ifelse(month == "03", "March", ifelse(month == "04", "April", ifelse(month == "05", "May", ifelse(month == "06", "June", ifelse(month == "07", "July", ifelse(month == "08", "August", ifelse(month == "09", "September", ifelse(month == "10", "October", ifelse(month == "11", "November", "December")))))))))))) %>% 
+  mutate(month = ordered(month, level = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")))
   
 plot_3 = 
   sub_crime_month %>% 
-  group_by(start_date) %>% 
-  summarise(event_num = n()) %>% 
+  group_by(month, law_cat) %>% 
+  summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~start_date, y = ~event_num, type = "scatter"
+    x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat
   )
 
-layout(plot_3, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events"))
+layout(plot_3, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events (K)"))
+
+plot_4 = 
+  sub_crime_month %>% 
+  group_by(month) %>% 
+  summarise(event_num = n() / 1000) %>% 
+  plot_ly(
+    x = ~month, y = ~event_num, type = "scatter", mode = "points"
+  )
+
+layout(plot_4, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events (K)"))
+
 ```
 
 ## Degrees of crime event v.s. Occurrence time
 
-Among the top 10 frequent crime events, events with degree violation mainly occurs in the second degree of harassment, and there is basically no other degree events happened in this type of crimes; events with misdemeanor degree mainly happens in the third degree of assault and criminal mischief; and crime events with felony degree almost happen in each crime event among the top 10 most frequent crime events.
+Based on the heat map, it is easier to obtain that the quantity of misdemeanor events is the largest, the second largest is felony, and the least is violation. For misdemeanor crime events, it most happened in the afternoon, around 3:00 pm and 4:00 pm, as well as felony events happened most frequently from 1:00 to 6:00 pm.
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_degree = 
