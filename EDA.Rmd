@@ -1,5 +1,5 @@
 ---
-title: "EDA"
+title: "Crime-Space"
 author: "Zheyan"
 date: "11/9/2021"
 output: 
@@ -37,26 +37,14 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 
-```{r,include=FALSE}
-# df = read_csv('data/subwaycrime.csv') %>% 
-#   janitor::clean_names() %>% 
-# df %>% 
-#  mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format="％M/%D/%Y")) %>% 
-#   
-#   
-# 
-# df %>% 
-#   leaflet() %>% 
-#   addTiles() %>% 
-#   addCircleMarkers(~longitude, ~latitude,radius= 3, weight= 0.5,
-#                    fillColor=~(boro_nm))
+```{r read,include=FALSE}
 
 crime_df = read_csv('subwaycrime_with_station_new_2.csv')
 
 crime_df<-crime_df %>% 
  mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format='%m/%d/%Y')) %>% 
- filter(distance<=0.0001)##%>% 
-## filter(cmplnt_to_dt>='2021-1-1')
+ filter(distance<=0.0001)%>% 
+ filter(cmplnt_to_dt>='2006-1-1')
 
 ```
 
@@ -65,12 +53,12 @@ crime_df<-crime_df %>%
 New York City can be a dangerous place and crime from above ground will 
 often extend into the NYC Subway.</br>
 We mainly focus on the recent crime data on subway in NYC in this year, and 
-there are `r nrow(crime_df)` complaints in 2021. 
+there are `r nrow(crime_df)` complaints from 2006 to now. 
 
-## Heat Map of Subway Crime in NYC, 2021
+## Heat Map of Subway Crime in NYC, 2006-2021
 
 From this map, you can check where the crime happened frequently. 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
+```{r heatmap, echo = FALSE, message=FALSE, warning=FALSE}
 crime_df %>% 
   group_by(closest_station) %>% 
   summarise(Trend=n(),
@@ -83,12 +71,12 @@ crime_df %>%
 
 ```
 
-## Map of Subway Crime in NYC, 2021
+## Map of Subway Crime in NYC, 2006-2021
 
 From this map, you can check each crime's location, type, victim and suspects' 
 information and time. 
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
+```{r leaflet, echo = FALSE, message=FALSE, warning=FALSE}
 
 
 
@@ -121,9 +109,9 @@ leaflet(crime_df) %>%
 ## Distribution of crime in 7 Clusters
 
 When firstly scanning the map above, you can ambiguously know how many crimes 
-in each part of NYc, so let us check them in each ambiguously using bar chart.
+in each part of NYC, so let us check them in each ambiguously using bar chart.
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
+```{r barcluster, echo = FALSE, message=FALSE, warning=FALSE}
 
 crime_df %>% 
   count(cluster) %>% 
@@ -136,17 +124,12 @@ crime_df %>%
 
 ## Top 10 offense classification
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
-## crime_df = read_csv('data/subwaycrime_with_station.csv')
-
-```
 
 There are `r count(distinct(crime_df,ofns_desc))` kinds of crime occurring in the subway, there is the bar chart shows the wildest 10 crimes in the subway.
 
-The most frequent crime mainly consists of sexual assaults and thefts. The assualt
-has 869 cases, which is more than a quarter of the total crimes. 
+The most frequent crime mainly consists of grand larceny and assaults.
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
+```{r offense, echo = FALSE, message=FALSE, warning=FALSE}
 
 crime_df %>% 
   count(ofns_desc) %>% 
@@ -163,10 +146,9 @@ crime_df %>%
 
 ## Top 20 station where crime happens frequently
 
-From this chart, you can mainly check which station is the most dangerous station
-in 2021. 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
-crime_df = read_csv('data/subwaycrime_with_station.csv')
+From this chart, you can mainly check which station is the most dangerous station.
+```{r station, echo = FALSE, message=FALSE, warning=FALSE}
+
 crime_df %>% 
   count(closest_station) %>% 
   mutate(closest_station = fct_reorder(closest_station, n)) %>% 
@@ -180,21 +162,18 @@ crime_df %>%
 
 
 
-## Barchart by about suspects
 
-From this graph, you can check in each borough, which races more possibly 
-commit a crime in the subway. 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
-
-crime_df %>% 
-  drop_na(cluster,susp_race) %>% 
-  filter(susp_race!="UNKNOWN") %>% 
-  count(cluster,susp_race) %>% 
-  mutate(cluster = fct_reorder(cluster, n)) %>% 
-  plot_ly(x = ~cluster, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
-  layout(
-         yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'Area'))
+```{r suprace, echo = FALSE, message=FALSE, warning=FALSE}
+# 
+# crime_df %>% 
+#   drop_na(cluster,susp_race) %>% 
+#   filter(susp_race!="UNKNOWN") %>% 
+#   count(cluster,susp_race) %>% 
+#   mutate(cluster = fct_reorder(cluster, n)) %>% 
+#   plot_ly(x = ~cluster, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
+#   layout(
+#          yaxis = list(title = 'Number of Compliants'),
+#          xaxis = list(title = 'Area'))
 
 ```
 
@@ -203,56 +182,65 @@ crime_df %>%
 From this graph, you can check in each borough, which races more possibly 
 vulnerable in the subway. 
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
-crime_df %>% 
-  filter(vic_race!="UNKNOWN") %>% 
-  count(boro_nm,vic_race) %>% 
-  plot_ly(x = ~boro_nm, y = ~n, color = ~vic_race, type = "bar", colors = "viridis") %>% 
+As you can see, the proportion of African Americans in each cluster are stable; In Manhattan, where has the most crimes, white people(including white hispanic) are more vunlerable than African Americans in these places. 
+```{r vicrace, echo = FALSE, message=FALSE, warning=FALSE}
+crime_df %>%
+  filter(vic_race!="UNKNOWN") %>%
+  count(cluster,vic_race) %>%
+  mutate(cluster = fct_reorder(cluster, n)) %>% 
+  plot_ly(x = ~cluster, y = ~n, color = ~vic_race, type = "bar", colors = "viridis") %>%
   layout(
          yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'Area'))
+         xaxis = list(title = 'Cluster'))
 
 ```
 
-## 
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
-crime_df %>% 
-  filter(ofns_desc %in% c("SEX CRIMES","HARRASSMENT 2","ASSAULT 3 & RELATED OFFENSES")) %>% 
-  count(vic_age_group,vic_race) %>% 
-  plot_ly(x = ~vic_age_group, y = ~n, color = ~vic_race, type = "bar", colors = "viridis") %>% 
-  layout(
-         yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'Age Group'))
-  
-```
+## Gender Distrubution for popular crime types
 
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
-crime_df %>% 
-  filter(ofns_desc %in% c("ASSAULT 3 & RELATED OFFENSES")) %>% 
-  count(vic_age_group,vic_sex) %>% 
-  plot_ly(x = ~vic_age_group, y = ~n, color = ~vic_sex, type = "bar", colors = "viridis") %>% 
-  layout(
-         yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'Age Group'))
-  
+In this part, we want to know which gender are more possible to become potential victims. We choose several types of crime from the most frequent kinds of crimes:</br>
+ASSAULT 3 & RELATED OFFENSES,HARRASSMENT 2,GRAND LARCENY,FELONY ASSAULT,
+ROBBERY,PETIT LARCENY,SEX CRIMES.</br>
+We can find that crimes about sex crimes and harassment, female are more possible to be attacked. Crimes about regular theft, such as assault and larceny, male are potential victims comparing with female. 
 
-```
-
-```{r, echo = FALSE, message=FALSE, warning=FALSE}
+```{r gender, echo = FALSE, message=FALSE, warning=FALSE}
 crime_df %>% 
   filter(ofns_desc %in% c("ASSAULT 3 & RELATED OFFENSES",
                           "HARRASSMENT 2","GRAND LARCENY",
-                          "DANGEROUS DRUGS","FELONY ASSAULT",
-                          "ROBBERY","PETIT LARCENY","FORGERY",
+                          "FELONY ASSAULT",
+                          "ROBBERY","PETIT LARCENY",
                           "SEX CRIMES")
-  ) %>% count(ofns_desc,vic_sex) %>% 
-  
-    plot_ly(x = ~ofns_desc, y = ~n, color = ~vic_sex, type = "bar", colors = "viridis") %>% 
+  ) %>% 
+  filter(vic_sex %in% c("F","M")) %>% 
+  count(ofns_desc,vic_sex) %>% 
+  mutate(ofns_desc = fct_reorder(ofns_desc, n)) %>% 
+  plot_ly(x = ~ofns_desc, y = ~n, color = ~vic_sex, type = "bar", colors = "viridis") %>% 
   layout(
          yaxis = list(title = 'Number of Compliants'),
          xaxis = list(title = 'Age Group'))
   
                 
 
+```
+
+
+## Female Age Distribution for Sex Crimes 
+
+Let us talk more about age group for some specific crimes: SEX CRIMES and HARRASSMENT 2. </br>
+Most of the victims' age are in the age 25-44 interval. 
+
+
+
+```{r harrass, echo = FALSE, message=FALSE, warning=FALSE}
+crime_df %>% 
+  filter(ofns_desc %in% c("SEX CRIMES","HARRASSMENT 2")) %>% 
+  count(vic_age_group,vic_race) %>% 
+  filter(vic_age_group!="-59") %>% 
+  filter(vic_age_group!="UNKNOWN") %>%
+  filter(vic_race!="UNKNOWN") %>%
+  plot_ly(x = ~vic_age_group, y = ~n, color = ~vic_race, type = "bar", colors = "viridis") %>% 
+  layout(
+         yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Age Group-Female'))
+  
 ```
