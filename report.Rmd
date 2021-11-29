@@ -141,6 +141,9 @@ There are too many subway lines and some of them share most of the rails, theref
 
 
 #### Chaoqi:correct subway line?
+According to the New York City Subway instruction, there are several different transfer between lines. The first is the inside transfer, where you can transfer from one line to other line inside the station. For example, 14 St-Union Sq is a  station of Line LNQRW456. We don't need to some adjustment for these stations. 
+The second one is free subway transfer and free out-of-way-system. This transfer is different from the inside transfer, passengers need to move from one station to other station for transfer. The data of these transfers has some problems. For example, there are free subway transfer between Court ST-23 ST(EM) and Court Sq(G7). However, the dataset shows the station and line is Court ST-23 ST:EGM, Court Sq:EGM, Court Sq:7. To deal with problem like this, we reassigned the line of station with free subway transfer or free out-of-way-system according to the New York City Subway instruction. In this case, we only consider the insider transfer station.
+
 
 #### Outliers of entries and exits
 
