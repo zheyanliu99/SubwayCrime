@@ -42,7 +42,7 @@ raw_sub_crime =
 
 Overall,  the number of crime events showed an increasing trend from year 2006 to year 2021, and year 2013 is the watershed: the number of events before 2013 is generally lower than that after 2013. Sepcifically, the number of crime events is over 10,000 almost each year, for year 2016, 2017, 2018, and 2019, total number of crime events reached at 12,000. However, there is a sudden decrease from year 2019 to year 2020, the number of crime events reduced by a half, and that low quantity keeps in year 2021, updating to September, 2021. 
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 sub_crime_year = 
   raw_sub_crime %>% 
   select(start_date, start_time_hour, crime_event, law_cat) %>% 
@@ -64,7 +64,7 @@ layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), 
 Basically, the peak of crime events appeared on the first quarter for almost each year, the bottom point of the quantity of crime events appeared on the third or fourth quarter for nearly every year.
 The overall trend of quantity of events was increasing, and the overall quantity of events after the fourth quarter of 2013 is higher than that before the fourth quater of 2013.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 sub_crime_season = 
   raw_sub_crime %>% 
   select(start_date, start_time_hour, crime_event, law_cat) %>% 
@@ -85,12 +85,14 @@ plot_2 =
     x = ~event_quarter, y = ~event_num, type = "scatter", mode = "points"
   )
 
-layout(plot_2, title = "Crime events over quarter", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"))
+layout(plot_2, title = "Crime events over quarter", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"), width = 800)
 ```
 
 ### Number of cirime events each month
 
-Basically, the number of crime events in each month has the comparably same value. Specifically, March has the highest events number, whereas February has the lowest events number; there is a overall increasing number in the number of crime events along with months.
+The overall trend of the number of crime events in a year is decreasing, the peak of quantity appeared on January whereas the bottom of events number appeared on December. Generally, March, May, and October have comparatively high frequency of crime events whereas February, April, and July have comparatively low frequency of crime events.
+
+As for three degrees of crime, violation events showed a flat trend over a year, as for felony and misdemeanor events, the high quantity of them both appeared on January, which is consistent with the total crime events. However, for felony events, the lowest frequency of events number appeared on April.
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_month = 
@@ -108,18 +110,18 @@ plot_3 =
     x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat
   )
 
-layout(plot_3, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events (K)"))
 
 plot_4 = 
   sub_crime_month %>% 
   group_by(month) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~month, y = ~event_num, type = "scatter", mode = "points"
+    x = ~month, y = ~event_num, type = "scatter", mode = "lines"
   )
 
-layout(plot_4, title = "Crime events over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of Crime Events (K)"))
+subplot = subplot(plot_4, plot_3)
 
+layout(subplot, title = "Event number over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of crime events (K)"), width = 1000)
 ```
 
 ## Degrees of crime event v.s. Occurrence time
@@ -140,7 +142,7 @@ plot_5 =
   ) %>%
   colorbar(title = "Events Number", x = 1.1, y = 0.8) 
 
-layout(plot_5, title = "Crime frequency: Degree v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Degree"))
+layout(plot_5, title = "Crime frequency: Degree v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Degree"), width = 850, height = 400)
 ```
 
 ## Day of week v.s. Occurrence time
@@ -163,7 +165,7 @@ plot_6 =
   ) %>%
   colorbar(title = "Events Number", x = 1.1, y = 0.8) 
 
-layout(plot_6, title = "Crime frequency: Day v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Day of week")
+layout(plot_6, title = "Crime frequency: Day v.s. Hour", xaxis = list(title = "Hour"), yaxis = list(title = "Day of week"), width = 850, height = 430
     )
 ```
 
