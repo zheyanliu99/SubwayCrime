@@ -7,7 +7,11 @@ navbar:
     - text: 'Passenger'
       href: PassengerEDA.html
     - text: 'Crime'
-      href: events_and_time.html
+      menu:
+      - text: "Time"
+        href: events_and_time.html
+      - text: "Time"
+        href: EDA.html
     - text: 'Shiny App'
       href: https://zheyanliu.shinyapps.io/NYC_subway_findroute/
       
