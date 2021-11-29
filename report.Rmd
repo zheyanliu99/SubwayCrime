@@ -49,6 +49,11 @@ scale_fill_discrete = scale_fill_viridis_d
 ![](images/Word_Cloud.png){width=60%}
 # Introduction
 
+New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pickpocketing, grand larceny, and assault. This closest place will trigger evil. 
+
+On November 21, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety is tightly related to almost every citizen who is living, working, and studying in New York City. 
+
+As students who are living here in New York City, most of us will almost take the subway to the campus in the early morning and back to the apartment in the night on weekdays, and hang out with friends on weekends. However, some of my friends experienced uncompleted crimes. Keeping away from danger at subway stations is closely related to ourselves. We hope we are able to help citizens to find comparatively safe and reliable routes when taking subways.
 
 # Data
 
@@ -56,6 +61,8 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Data Introduction
 
 ### Subway Crime
+
+The orginal subway crime data has two parts.[The first one ](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243) contains all valid felony, misdemeanor, and violation crimes reported to the New York City Police Department--- [NYPD](https://www1.nyc.gov/site/nypd/index.page). The [second one](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i)  includes similar crimes. We join these two data frames and only analyze crimes which happen in subway, NYC.  
 
 ### Subway Passenger
 
