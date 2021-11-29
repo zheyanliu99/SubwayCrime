@@ -118,7 +118,15 @@ crime_df<-crime_df %>%
  filter(cmplnt_to_dt>='2006-1-1')
 
 crime_summary<-crime_df %>% 
-  count(closest_line,closest_station)
+  count(closest_line,closest_station) %>% 
+  mutate(linename=closest_line,station=closest_station) %>% 
+  select(linename,station,n)
+
+crime_rate_summary<-merge(passenger_station,crime_summary,
+                          by=c("linename","station")) %>% 
+  mutate(crime_rate=n/flow)
+
+
 ```
 
 
@@ -133,6 +141,7 @@ crime_df %>%
 fwrite(bigger_distance,"bigger_distance.csv")
 fwrite(crime_df_total,"subwaycrime_with_station_new.csv")
 fwrite(crime_df_new,"subwaycrime_with_station_new.csv")
+fwrite(crime_rate_summary,"crime_rate_station.csv")
 ##for (each in 1:nrow(crime_df)) {
 ##  crime_df[each,38]=croodinate_df %>% 
 ##                    mutate(lat_new=crime_df[each,]$latitude,

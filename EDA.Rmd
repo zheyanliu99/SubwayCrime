@@ -244,3 +244,16 @@ crime_df %>%
          xaxis = list(title = 'Age Group-Female'))
   
 ```
+
+## Crimr Rate Top 20
+Sometimes, we more care about the crime rates on subway rather than number of crimes, because we also care the possiblity that the people standing in front of us is suspective. 
+```{r crime_rate, echo = FALSE, message=FALSE, warning=FALSE}
+crime_rate_summary<-read.csv("data/crime_rate_station.csv")
+crime_rate_summary %>% 
+  mutate(crime=n) %>% 
+  select(-n) %>% 
+  relocate(linename,station,flow,crime) %>% 
+  slice_max(crime_rate,n=20) %>%
+  knitr::kable()
+  
+```
