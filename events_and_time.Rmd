@@ -16,7 +16,6 @@ library(readxl)
 library(httr)
 library(lubridate)
 library(plotly)
-library(patchwork)
 ```
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
