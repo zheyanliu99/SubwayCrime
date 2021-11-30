@@ -26,6 +26,8 @@ library(httr)
 library(lubridate)
 library(plotly)
 library(tigris) 
+##install.packages("leaflet.extras")
+library(leaflet.extras)
 set.seed(77)
 
 
