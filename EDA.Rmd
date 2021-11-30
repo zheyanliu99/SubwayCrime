@@ -39,7 +39,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 ```{r read,include=FALSE}
 
-crime_df = read_csv('subwaycrime_with_station_new_2.csv')
+crime_df = read_csv('data/subwaycrime_with_station_new.csv')
 
 crime_df<-crime_df %>% 
  mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format='%m/%d/%Y')) %>% 
