@@ -15,8 +15,7 @@ library(tidyverse)
 library(readxl)
 library(httr)
 library(lubridate)
-library(plotly)
-library(patchwork)
+library(plotly) 
 ```
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
