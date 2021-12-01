@@ -1,7 +1,5 @@
 ---
-title: "2021 Subway Passenger EDA"
-author: "Zheyan"
-date: "11/15/2021"
+title: "NYC Subway Passenger EDA"
 output: 
   html_document:
     toc: true
@@ -16,6 +14,10 @@ editor_options:
 
 
 ```{r setup, include=FALSE}
+
+# Author 'Zheyan'
+# Date:'11/15/2021'
+
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
@@ -138,7 +140,7 @@ df %>%
 
 There are patterns between station locations and total passenger flow. Big stations are mostly located in lower and middle Manhattan, and there are some sub center stations in other areas, such as *9th Street* station in Brooklyn and *FLUSHING-MAIN* station in Queen.
 
-## By sublocality
+## Total passengers in each sublocality(boro)
 
 ```{r}
 df %>% 
