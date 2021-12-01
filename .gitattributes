@@ -2,3 +2,4 @@
 'data/passenger_imputed.csv' filter=lfs diff=lfs merge=lfs -text
 '*.csv' filter=lfs diff=lfs merge=lfs -text
 'data/passenger_imputed.csv filter=lfs diff=lfs merge=lfs -text
+*.csv filter=lfs diff=lfs merge=lfs -text
