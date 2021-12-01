@@ -11,7 +11,7 @@ navbar:
       - text: "by Time"
         href: events_and_time.html
       - text: "by Location"
-        href: EDA.html
+        href: events_and_location.html
     - text: 'Shiny App'
       href: https://zheyanliu.shinyapps.io/NYC_subway_findroute/
       
