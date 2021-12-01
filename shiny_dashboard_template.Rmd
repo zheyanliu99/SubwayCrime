@@ -1,0 +1,195 @@
+---
+title: "Shiny Dashboard"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+
+library(tidyverse)
+library(viridis)
+library(p8105.datasets)
+library(plotly)
+library(leaflet)
+library(leaflet.extras)
+```
+
+```{r data_import}
+data("nyc_airbnb")
+
+nyc_airbnb = 
+  nyc_airbnb %>% 
+  mutate(stars = review_scores_location / 2) %>% 
+  select(
+    borough = neighbourhood_group, neighbourhood, stars, price, room_type, lat, long
+  ) %>% 
+  drop_na(stars)
+
+
+crime_df = read_csv('data/subwaycrime_with_station_new.csv')
+
+
+crime_df<-crime_df %>% 
+ mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format='%m/%d/%Y')) %>% 
+ filter(distance<=0.0001)%>% 
+ filter(cmplnt_to_dt>='2006-1-1')
+```
+
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+
+crime_choices = 
+  crime_df %>% 
+  count(ofns_desc) %>% 
+##  mutate(ofns_desc = fct_reorder(ofns_desc, n)) %>% 
+  slice_max(n,n=10) %>% 
+  distinct(ofns_desc) %>% 
+  pull() 
+  
+crime_choices<-c("All",crime_choices)
+
+
+selectInput(
+  "crime_choice",
+  label = h1("Select Crime"),
+  choices = crime_choices,
+  selected = "All")
+
+
+
+
+sliderInput(
+  "year",
+  label = h2("year range"),
+  min = 2006,
+  max = 2021,
+  value = c(2007, 2021)
+)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+renderLeaflet({ 
+  
+if(input[["crime_choice"]]!="All") {   
+   crime_df_adjusted<-  
+     crime_df %>% 
+        filter(cmplnt_to_dt>=
+             str_c(as.character(round(input[["year"]])),'-1-1')[1],
+               cmplnt_to_dt<=
+             str_c(as.character(round(input[["year"]])),'-12-1')[2],
+             ofns_desc==input[["crime_choice"]]) }
+else {crime_df_adjusted<-
+    crime_df %>% 
+    filter(cmplnt_to_dt>=
+             str_c(as.character(round(input[["year"]])),'-1-1')[1],
+           cmplnt_to_dt<=
+             str_c(as.character(round(input[["year"]])),'-12-1')[2]
+           ) }  
+  
+  crime_df_adjusted%>%
+    leaflet() %>%
+    addProviderTiles(providers$CartoDB.Positron) %>%
+    addMarkers(lat = ~latitude, lng = ~longitude,
+               # popup = paste("Offense Description:", crime_df$ofns_desc,       "<br>",
+               #               "Suspect's age:",crime_df$susp_age_group,"<br>",
+               #               "Suspect's race:", crime_df$susp_race,"<br>",
+               #               "Suspect's gender:",crime_df$susp_sex,"<br>",
+               #               "Victim's age:",crime_df$vic_age_group,"<br>",
+               #               "Victim's race:", crime_df$vic_race,"<br>",
+               #               "Victim's gender:",crime_df$vic_sex,"<br>",
+               #               "Time:",crime_df$cmplnt_to_dt),
+                  clusterOptions = markerClusterOptions())
+  
+})
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+
+
+renderPlotly({
+  if(input[["crime_choice"]]!="All") {   
+   crime_df_adjusted<-  
+     crime_df %>% 
+        filter(cmplnt_to_dt>=
+             str_c(as.character(round(input[["year"]])),'-1-1')[1],
+               cmplnt_to_dt<=
+             str_c(as.character(round(input[["year"]])),'-12-1')[2],
+             ofns_desc==input[["crime_choice"]]) }
+else {crime_df_adjusted<-
+    crime_df %>% 
+    filter(cmplnt_to_dt>=
+             str_c(as.character(round(input[["year"]])),'-1-1')[1],
+           cmplnt_to_dt<=
+             str_c(as.character(round(input[["year"]])),'-12-1')[2]
+    ) }
+
+crime_df_adjusted %>% 
+  count(cluster) %>% 
+  mutate(cluster = fct_reorder(cluster, n)) %>% 
+  slice_max(n,n=20) %>% 
+  plot_ly(x = ~cluster, y = ~n, color = ~cluster, type = "bar", colors = "viridis") %>% 
+  layout(yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'Cluster'))  
+
+  
+})
+
+
+
+```
+
+### Chart C
+
+```{r}
+renderPlotly({ 
+ 
+if(input[["crime_choice"]]!="All") {   
+   crime_df_adjusted<-  
+     crime_df %>% 
+        filter(cmplnt_to_dt>=
+             str_c(as.character(round(input[["year"]])),'-1-1')[1],
+               cmplnt_to_dt<=
+             str_c(as.character(round(input[["year"]])),'-12-1')[2],
+             ofns_desc==input[["crime_choice"]]) }
+else {crime_df_adjusted<-
+    crime_df %>% 
+    filter(cmplnt_to_dt>=
+             str_c(as.character(round(input[["year"]])),'-1-1')[1],
+           cmplnt_to_dt<=
+             str_c(as.character(round(input[["year"]])),'-12-1')[2]
+    ) } 
+crime_df_adjusted %>% 
+  count(service) %>% 
+  mutate(service = fct_reorder(service, n)) %>% 
+  slice_max(n,n=20) %>% 
+  plot_ly(x = ~service, y = ~n, color = ~service, type = "bar", colors = "viridis") %>% 
+  layout(yaxis = list(title = 'Number of Compliants'),
+         xaxis = list(title = 'service'))  
+  
+  
+
+  
+})
+
+```
+
