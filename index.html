@@ -311,36 +311,88 @@ $(document).ready(function () {
 </div>
 <div id="columbia-university-mailman-school-of-public-health" class="section level4">
 <h4>Columbia University, Mailman School of Public Health</h4>
-<br>
-<center>
-<p>Word Cloud Here</p>
-</center>
 <p><br></p>
 </div>
-<div id="introduction-yuan-kong" class="section level2">
-<h2>Introduction (Yuan, Kong)</h2>
-<div id="motivation" class="section level3">
-<h3>Motivation</h3>
-<p>New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pick pocketing, grand larceny and assault. This cloest place will trigger evil.</p>
-<p><img src="images/subway_crime.jpg" style="width:60.0%" /></p>
-<p>On November 21, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety tightly related to almost every citizen who are living, working and studying in New York City.</p>
+<div id="motivation" class="section level2">
+<h2>Motivation</h2>
+<p>New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pick pocketing, grand larceny and assault. The cloest train compartment can trigger cime and make victims harder to run.</p>
+<br>
+<center>
+<img src="images/subway_crime.jpg" style="width:60.0%" />
+</center>
+<p><br> 11/21/2021, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety tightly related to almost every citizen who are living, working and studying in New York City.</p>
 <p>As students who are living here in New York City, most of us will almost take subway to the campus in early morning and back to apartment in nights on weekdays, and hang out with friends on weekends. Keeping away from danger at subway stations is closely related to ourselves. We hope we are able to help citizens to find the comparatively safe and reliable routes when taking subways.</p>
-</div>
-<div id="in-this-web-you-can-find" class="section level3">
-<h3>In this web, you can find:</h3>
+<div id="in-this-website-you-can-find" class="section level3">
+<h3>In this website, you can find:</h3>
 <ul>
-<li>analysis of crimes occurring in subway by time</li>
-<li>analysis of crimes occurring in subway by location</li>
-<li>analysis of passengers flow of subway</li>
-<li>a convenient and safety way for us to use subway. (Use an app to give a safe route) *GNN model for predicting existence of subway crime</li>
+<li>Exploratory Data Analysis of subway crime with time (year, month, hour)</li>
+<li>Exploratory Data Analysis of subway crime with location (coordiante-based Kmeans cluster, subway line, station)</li>
+<li>Analysis of passengers flow of subway (time and location)</li>
+<li>An interactive Shiny Dashboard about subway crime, people can look up crime rate in each location, distribution of each crime type.</li>
+<li><a href="https://en.wikipedia.org/wiki/Graph_neural_network">GNN</a> model for predicting existence and severity of subway crime</li>
+<li>No-crime Navigation shiny app based on <a href="https://developers.google.com/maps">Google Maps Api</a> (give subway route), GNN model (predict crime existence) and historical passenger data (give crowdness).</li>
 </ul>
 </div>
 </div>
-<div id="outcomes" class="section level2">
-<h2>Outcomes</h2>
-</div>
 <div id="team-members" class="section level2">
 <h2>Team members</h2>
+<p><img src = "images/Zheyan.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Zheyan Liu</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:zheyan.liu@columbia.edu">zheyan.liu@columbia.edu</a></p>
+<p><a href="https://zheyanliu99.github.io/">Website</a>, <a href="https://www.linkedin.com/in/zheyanliu999/">Linkedin</a>, <a href="https://github.com/zheyanliu99?tab=repositories">Github</a></p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1 Cleaned and imputed subway passenger data; Built project website and orgnized final report</li>
+<li>2 Conduct EDA on subway passenger data&amp;location; Feature engineering on coordinates with K-means</li>
+<li>3 Built subway naviagtion app based on Google Maps Apis and adapted GNN into crime prediction on each route</li>
+</ul>
+<p><br></p>
+<p><img src = "images/Chaoqi.jfif" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Chaoqi Wu</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:zheyan.liu@columbia.edu">zheyan.liu@columbia.edu</a></p>
+<p>Website, Linkedin, Github</p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1</li>
+<li>2</li>
+<li>3</li>
+</ul>
+<p><img src = "images/Baode.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Baode Gao</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:zheyan.liu@columbia.edu">zheyan.liu@columbia.edu</a></p>
+<p>Website, Linkedin, Github</p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1 Cleaned and imputed subway passenger data; Built project website and orgnized final report</li>
+<li>2 Conduct EDA on subway passenger data&amp;location; Feature engineering on coordinates with K-means</li>
+<li>3 Built subway naviagtion app based on Google Maps Apis and adapted GNN into crime prediction on each route</li>
+</ul>
+<p><br></p>
+<p><img src = "images/Youyuan.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Youyuan Kong</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:zheyan.liu@columbia.edu">zheyan.liu@columbia.edu</a></p>
+<p>Website, Linkedin, Github</p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1 Clean and imputed subway passenger data; Build project website and partcipate in writing report</li>
+<li>2 Conduct EDA on subway passenger data&amp;location; Feature engineering on coordinates with K-means</li>
+<li>3 Build subway naviagtion app based on Google Maps Apis and adapted GNN into crime prediction on each route</li>
+</ul>
+<p><br></p>
+<p><img src = "images/Zexu.jfif" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Zexu Yuan</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:zheyan.liu@columbia.edu">zheyan.liu@columbia.edu</a></p>
+<p>Website, Linkedin, Github</p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1 Cleaned and imputed subway passenger data; Built project website and orgnized final report</li>
+<li>2 Conduct EDA on subway passenger data&amp;location; Feature engineering on coordinates with K-means</li>
+</ul>
 </div>
 
 
