@@ -9,12 +9,13 @@ runtime: shiny
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
-
+library(shiny)
 library(tidyverse)
 library(viridis)
 library(plotly)
 library(leaflet)
 library(leaflet.extras)
+library(rsconnect)
 ```
 
 ```{r data_import}
@@ -179,5 +180,4 @@ crime_df_adjusted %>%
 
   
 })
-
 ```
