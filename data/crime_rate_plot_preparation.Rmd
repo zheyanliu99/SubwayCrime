@@ -39,14 +39,14 @@ crime_df<-crime_df %>%
  filter(distance<=0.0001)%>% 
  filter(cmplnt_to_dt>='2006-1-1')
 
-passenger_df = read_csv('data/passenger_imputed.csv', show_col_types = FALSE)
+passenger_df = read_csv('passenger_imputed.csv', show_col_types = FALSE)
 
 
 
 
 # just use part of features
 location_df = 
-  read_csv('data/subway_info_final3.csv', show_col_types = FALSE) %>% 
+  read_csv('subway_info_final3.csv', show_col_types = FALSE) %>% 
   # only keep new york
   filter(administrative_area_level_1 == 'New York') %>% 
   select(station, linename, service, sublocality, postal_code, lat, long)
@@ -57,5 +57,15 @@ passenger_df =
   left_join(location_df, by = c('station', 'linename')) %>% 
   drop_na(sublocality) %>% 
   relocate(station, linename, service, sublocality, postal_code, lat, long)
+
+passenger_summary<-passenger_df %>% 
+  drop_na(entry_diff_imputed,exit_diff_imputed) %>%
+  group_by(postal_code,date) %>% 
+  summarise(flow=sum(entry_diff_imputed,exit_diff_imputed))
+
+crime_summary<-crime_df %>% 
+  group_by(postal_code,)
+  
+
 
 ```

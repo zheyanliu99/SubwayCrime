@@ -19,18 +19,10 @@ library(leaflet.extras)
 ```
 
 ```{r data_import}
-data("nyc_airbnb")
-
-nyc_airbnb = 
-  nyc_airbnb %>% 
-  mutate(stars = review_scores_location / 2) %>% 
-  select(
-    borough = neighbourhood_group, neighbourhood, stars, price, room_type, lat, long
-  ) %>% 
-  drop_na(stars)
 
 
-crime_df = read_csv('data/subwaycrime_with_station_new.csv')
+
+crime_df = read_csv('subwaycrime_with_station_new.csv')
 
 
 crime_df<-crime_df %>% 
