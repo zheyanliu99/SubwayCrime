@@ -12,17 +12,13 @@ library(flexdashboard)
 
 library(tidyverse)
 library(viridis)
-library(p8105.datasets)
 library(plotly)
 library(leaflet)
 library(leaflet.extras)
 ```
 
 ```{r data_import}
-
-
-
-crime_df = read_csv('subwaycrime_with_station_new.csv')
+crime_df = read_csv("subwaycrime_with_station_new.csv")
 
 
 crime_df<-crime_df %>% 
