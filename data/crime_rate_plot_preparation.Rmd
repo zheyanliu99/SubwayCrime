@@ -62,11 +62,11 @@ passenger_df =
 
 passenger_summary<-passenger_df %>% 
   drop_na(entry_diff_imputed,exit_diff_imputed) %>%
-  group_by(postal_code,date) %>% 
+  group_by(postal_code,date,linename, service) %>% 
   summarise(flow=sum(entry_diff_imputed,exit_diff_imputed))
 
 crime_summary<-crime_df %>% 
-  count(postal_code,cmplnt_fr_dt,law_cat_cd) %>% 
+  count(postal_code,cmplnt_fr_dt,law_cat_cd,linename, service) %>% 
   pivot_wider(
     names_from ="law_cat_cd" ,
     values_from = "n"
@@ -74,8 +74,9 @@ crime_summary<-crime_df %>%
 
 crime_rate_summary<-merge(x=passenger_summary,
                           y=crime_summary,
-                          by.x=c("postal_code","date"),
-                          by.y=c("postal_code","cmplnt_fr_dt"),
+                          by.x=c("postal_code","date","linename","service"),
+                          by.y=c("postal_code","cmplnt_fr_dt",
+                                 "linename","service"),
                           all.x=TRUE)
 crime_rate_summary<-crime_rate_summary %>% 
   replace(is.na(.), 0)
