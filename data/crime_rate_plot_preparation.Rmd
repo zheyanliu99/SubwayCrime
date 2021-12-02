@@ -34,7 +34,9 @@ scale_fill_discrete = scale_fill_viridis_d
 
 crime_df = read_csv('subwaycrime_with_station_new.csv')
 
+
 crime_df<-crime_df %>% 
+ mutate(cmplnt_fr_dt=as.Date(cmplnt_fr_dt,format='%m/%d/%Y')) %>% 
  mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format='%m/%d/%Y')) %>% 
  filter(distance<=0.0001)%>% 
  filter(cmplnt_to_dt>='2006-1-1')
@@ -64,7 +66,21 @@ passenger_summary<-passenger_df %>%
   summarise(flow=sum(entry_diff_imputed,exit_diff_imputed))
 
 crime_summary<-crime_df %>% 
-  group_by(postal_code,)
+  count(postal_code,cmplnt_fr_dt,law_cat_cd) %>% 
+  pivot_wider(
+    names_from ="law_cat_cd" ,
+    values_from = "n"
+  )
+
+crime_rate_summary<-merge(x=passenger_summary,
+                          y=crime_summary,
+                          by.x=c("postal_code","date"),
+                          by.y=c("postal_code","cmplnt_fr_dt"),
+                          all.x=TRUE)
+crime_rate_summary<-crime_rate_summary %>% 
+  replace(is.na(.), 0)
+
+fwrite(crime_rate_summary,"crime_rate.csv")
   
 
 
