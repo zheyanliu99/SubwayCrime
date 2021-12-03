@@ -114,13 +114,13 @@ Website, Linkedin, Github
 
 <br>
 
-<img src = "images/Zexu.jfif" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px">
+<img src = "images/pic.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px">
 
 **Zexu Yuan**
 
-[MS in Biostatistics at Columbia University](http://www.mailman.columbia.edu/academic-departments/biostatistics)  
+[MPH in Biostatistics at Columbia University](http://www.mailman.columbia.edu/academic-departments/biostatistics)  
 
-Email: [zheyan.liu@columbia.edu](mailto:zheyan.liu@columbia.edu)  
+Email: [zxyuan86@outlook.com](mailto:zxyuan86@outlook.com)  
 
 Website, Linkedin, Github
 
