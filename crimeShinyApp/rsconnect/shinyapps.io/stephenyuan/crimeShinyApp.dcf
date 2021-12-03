@@ -1,13 +1,13 @@
-name: crimeShinyApp
-title: crimeShinyApp
+name: CrimeShinyApp
+title: CrimeShinyApp
 username:
 account: stephenyuan
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
-appId: 5247102
-bundleId: 5316732
-url: https://stephenyuan.shinyapps.io/crimeShinyApp/
-when: 1638400696.81757
-lastSyncTime: 1638400696.81759
+appId: 5249025
+bundleId: 5324032
+url: https://stephenyuan.shinyapps.io/CrimeShinyApp/
+when: 1638548464.20526
+lastSyncTime: 1638548464.20527
 asMultiple: FALSE
 asStatic: FALSE

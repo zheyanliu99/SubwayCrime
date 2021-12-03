@@ -14,8 +14,8 @@ navbar:
         href: events_and_location.html
     - text: 'Shiny App'
       href: https://zheyanliu.shinyapps.io/NYC_subway_findroute/
-      
-  right:
+    - text: 'Crime Dashboard'
+      href: https://stephenyuan.shinyapps.io/CrimeShinyApp/
     # - text: "About"
     #   href: about.html
     # - text: "Plotly"
