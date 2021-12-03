@@ -504,7 +504,7 @@ server <- function(input, output) {
     
     crime_rate_df %>%
       plot_ly(x = ~service, y = ~crime_rate, color = ~service, type = "bar", colors = "viridis") %>%
-      layout(yaxis = list(title = 'Number of Compliants'),
+      layout(yaxis = list(title = 'Amout of crime rate'),
              xaxis = list(title = 'service'))
     
     
@@ -551,7 +551,7 @@ server <- function(input, output) {
     crime_rate_df %>%
       plot_ly(x = ~cluster, y = ~crime_rate, color = ~cluster,
               type = "bar", colors = "viridis") %>%
-      layout(yaxis = list(title = 'Number of Compliants'),
+      layout(yaxis = list(title = 'Amout of crime rate'),
              xaxis = list(title = 'cluster'))
     
     
