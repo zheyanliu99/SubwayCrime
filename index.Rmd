@@ -116,7 +116,7 @@ Website, Linkedin, Github
 
 <img src = "images/pic.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px">
 
-**Zexu Yuan**
+**Stephen (Zexu) Yuan**
 
 [MPH in Biostatistics at Columbia University](http://www.mailman.columbia.edu/academic-departments/biostatistics)  
 
