@@ -333,7 +333,20 @@ df %>%
 
 
 
-
+# # Output cluster centers
+# as_tibble(k2$centers) %>% 
+#   mutate(cluster = seq(1,8,1)) %>% 
+#     mutate(cluster = case_when(
+#     cluster == 1 ~ 'Queen',
+#     cluster == 2 ~ 'Upper Manhattan',
+#     cluster == 3 ~ 'Queen-Brooklyn',
+#     cluster == 4 ~ 'Middle Manhattan',
+#     cluster == 5 ~ 'Bronx',
+#     cluster == 6 ~ 'Brooklyn',
+#     cluster == 7 ~ 'Lower Manhattan',
+#     cluster == 8 ~ 'Rockaway Beach',
+#   )) %>% write.csv('data/Kmeans_centers.csv')
+  
 ```
 
 
