@@ -30,7 +30,7 @@ library(lubridate)
 
 
 
-crime_df = read_csv('crime_rate.csv') %>% 
+crime_df2 = read_csv('crime_rate.csv') %>% 
   filter(postal_code!="None") %>% 
   janitor::clean_names()
 
@@ -98,7 +98,7 @@ renderLeaflet({
   
 if(input[["crime type"]]==1)  
 {
-  crime_rate_df<-crime_df %>% 
+  crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(postal_code) %>% 
@@ -106,7 +106,7 @@ if(input[["crime type"]]==1)
 }
   else if(input[["crime type"]]==2)
   {
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(postal_code) %>% 
@@ -114,14 +114,14 @@ if(input[["crime type"]]==1)
   }
     else if(input[["crime type"]]==3)
     {
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(postal_code) %>% 
     summarise(crime_rate=sum(violation)/sum(flow))
     }
     else{
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(postal_code) %>% 
@@ -191,7 +191,7 @@ Column {data-width=350}
 renderPlotly({
   if(input[["crime type"]]==1)  
 {
-  crime_rate_df<-crime_df %>% 
+  crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(service) %>% 
@@ -199,7 +199,7 @@ renderPlotly({
 }
   else if(input[["crime type"]]==2)
   {
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(service) %>% 
@@ -207,14 +207,14 @@ renderPlotly({
   }
     else if(input[["crime type"]]==3)
     {
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(service) %>% 
     summarise(crime_rate=sum(violation)/sum(flow))
     }
     else{
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(service) %>% 
@@ -241,7 +241,7 @@ crime_rate_df %>%
 renderPlotly({
   if(input[["crime type"]]==1)  
 {
-  crime_rate_df<-crime_df %>% 
+  crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(cluster) %>% 
@@ -249,7 +249,7 @@ renderPlotly({
 }
   else if(input[["crime type"]]==2)
   {
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(cluster) %>% 
@@ -257,14 +257,14 @@ renderPlotly({
   }
     else if(input[["crime type"]]==3)
     {
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(cluster) %>% 
     summarise(crime_rate=sum(violation)/sum(flow))
     }
     else{
-    crime_rate_df<-crime_df %>% 
+    crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
     group_by(cluster) %>% 

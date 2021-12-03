@@ -14,8 +14,17 @@ library(leaflet)
 library(leaflet.extras)
 library(shinydashboard)
 library(brochure)
+##install.packages("shinythemes")
+library(shinythemes)
 #remotes::install_github("ColinFay/brochure")
 ##install.packages("shinydashboard")
+library(flexdashboard)
+library(tigris)
+library(RColorBrewer)
+library(data.table)
+library(rvest)
+library(httr)
+library(lubridate)
 
 ## ui.R ##
 
@@ -37,43 +46,147 @@ crime_choice =
   distinct(ofns_desc) %>% 
   pull() 
 
+
+## prepare for tab 2
+
+crime_df2 = read_csv('crime_rate.csv') %>% 
+  filter(postal_code!="None") %>% 
+  janitor::clean_names()
+
+
+
+
+
+options(tigris_use_cache = TRUE)
+
+
+# get zip boundaries that start with 282
+char_zips = zctas(cb = TRUE)
+char_zips = 
+  char_zips %>% 
+  rename(postal_code = GEOID10)
+
 ####################
 # User Interface   #
 ####################
 
 
-ui <-dashboardPage(
-  dashboardHeader(title = "My Dashboard"),
-  dashboardSidebar(fluidPage(
-    
-    
-    selectInput(
-      "crime_choice",
-      label = h2("Select Crime"),
-      choices = c("All",crime_choice),
-      selected = "All"),
-    
-    sliderInput(
-      "year",
-      label = h2("Year Range"),
-      min = 2006,
-      max = 2021,
-      value = c(2007, 2021)
-    )
-    
-  )),
-  
-  dashboardBody(     ## splitLayout(style = "border: 1px solid silver;",
-    ##             cellArgs = list(style = "padding: 6px"),
-    box(leafletOutput(outputId = "bubble_map"),
-        width=12  ),
-    box(plotlyOutput(outputId = "hist_cluster"),
-        width=6),
-    box(plotlyOutput(outputId = "hist_service"),
-        width=6
-        #                          )
-    ))
+ui = navbarPage("Dashboard", theme = shinytheme("flatly"),
+                tabPanel("Crime",
+                         sidebarLayout(
+                           sidebarPanel(fluidPage(
+                             
+                             
+                             selectInput(
+                               "crime_choice",
+                               label = h2("Select Crime"),
+                               choices = c("All",crime_choice),
+                               selected = "All"),
+                             
+                             sliderInput(
+                               "year",
+                               label = h2("Year Range"),
+                               min = 2006,
+                               max = 2021,
+                               value = c(2007, 2021)
+                             )
+                             
+                           )
+                             
+                           ),
+                           mainPanel(
+                             box(leafletOutput(outputId = "bubble_map"),
+                                 width=12  ),
+                             box(plotlyOutput(outputId = "hist_cluster"),
+                                 width=6),
+                             box(plotlyOutput(outputId = "hist_service"),
+                                 width=6
+                                 #                          )
+                             )
+                           )
+                         )
+                ),
+                tabPanel("Crime rate",
+                         sidebarLayout(
+                           sidebarPanel(fluidPage(
+                             
+                             
+                             selectInput(
+                               "crime type",
+                               label = h3("select crime type"),
+                               choices = list("Felony" = 1,
+                                              "Misdemeanor" = 2,
+                                              "Violation" = 3,
+                                              "All"=4),
+                               selected = 1
+                             ),
+
+                             dateRangeInput(
+                               "time",
+                               label=h3("Choose time"),
+                               start = "2018-12-29",
+                               end = "2021-11-05",
+                               min = "2018-12-29",
+                               max = "2021-11-05",
+                               format = "yyyy-mm-dd",
+                               startview = "month",
+                               weekstart = 0,
+                               language = "en",
+                             )
+                             
+                           )
+                           
+                           ),
+                            mainPanel(
+                             box(leafletOutput(outputId = "zip_code_map"),
+                                 width=12),
+                              box(plotlyOutput(outputId = "hist_cluster2"),
+                                  width=6),
+                              box(plotlyOutput(outputId = "hist_service2"),
+                                 width=6 )
+                           )
+                         )
+                )
 )
+
+
+
+
+
+
+
+# ui <-dashboardPage(
+#   dashboardHeader(title = "My Dashboard"),
+#   dashboardSidebar(fluidPage(
+#     
+#     
+#     selectInput(
+#       "crime_choice",
+#       label = h2("Select Crime"),
+#       choices = c("All",crime_choice),
+#       selected = "All"),
+#     
+#     sliderInput(
+#       "year",
+#       label = h2("Year Range"),
+#       min = 2006,
+#       max = 2021,
+#       value = c(2007, 2021)
+#     )
+#     
+#   )),
+#   
+#   dashboardBody(     ## splitLayout(style = "border: 1px solid silver;",
+#     ##             cellArgs = list(style = "padding: 6px"),
+#     box(leafletOutput(outputId = "bubble_map"),
+#         width=12  ),
+#     box(plotlyOutput(outputId = "hist_cluster"),
+#         width=6),
+#     box(plotlyOutput(outputId = "hist_service"),
+#         width=6
+#         #                          )
+#     ))
+# )
 
 
 # ui <- fluidPage(
@@ -264,6 +377,193 @@ server <- function(input, output) {
       
       
     })
+  
+  output$zip_code_map <-     
+    renderLeaflet({
+      if(input[["crime type"]]==1)  
+      {
+        crime_rate_df<-crime_df2 %>% 
+          filter(date>=input[["time"]][1],
+                 date<=input[["time"]][2]) %>% 
+          group_by(postal_code) %>% 
+          summarise(crime_rate=sum(felony)/sum(flow))
+      }
+      else if(input[["crime type"]]==2)
+      {
+        crime_rate_df<-crime_df2 %>% 
+          filter(date>=input[["time"]][1],
+                 date<=input[["time"]][2]) %>% 
+          group_by(postal_code) %>% 
+          summarise(crime_rate=sum(misdemeanor)/sum(flow))
+      }
+      else if(input[["crime type"]]==3)
+      {
+        crime_rate_df<-crime_df2 %>% 
+          filter(date>=input[["time"]][1],
+                 date<=input[["time"]][2]) %>% 
+          group_by(postal_code) %>% 
+          summarise(crime_rate=sum(violation)/sum(flow))
+      }
+      else{
+        crime_rate_df<-crime_df2 %>% 
+          filter(date>=input[["time"]][1],
+                 date<=input[["time"]][2]) %>% 
+          group_by(postal_code) %>% 
+          summarise(crime_rate=sum(violation+misdemeanor+felony)/sum(flow))
+        
+      }
+      
+      
+      
+      crime_rate_df<- merge(char_zips, crime_rate_df , 
+                            by = "postal_code") 
+      
+      
+      
+      pal <- colorNumeric(
+        palette = "Greens",
+        domain = crime_rate_df$crime_rate,
+        na.color = "white")
+      
+      
+      labels <- 
+        paste0(
+          "Zip Code: ",
+          crime_rate_df$postal_code, "<br/>",
+          "Flow of Passengers: ",
+          crime_rate_df$crime_rate) %>%
+        lapply(htmltools::HTML)
+      
+      
+      crime_rate_df %>%  
+        mutate(postal_code_int = as.integer(postal_code)) %>% 
+        filter(postal_code_int >= 10000 & postal_code_int < 14900) %>% 
+        leaflet() %>%
+        addProviderTiles(providers$CartoDB.Positron) %>% 
+        addPolygons(
+          fillColor = ~pal(crime_rate),
+          weight = 2,
+          opacity = 1,
+          color = "white",
+          dashArray = "3",
+          fillOpacity = 0.7,
+          highlight = highlightOptions(weight = 2,
+                                       color = "#666",
+                                       dashArray = "",
+                                       fillOpacity = 0.7,
+                                       bringToFront = TRUE),
+          label = labels) %>% 
+        # addLegend(pal = pal, 
+        #           values = ~crime_rate*100, 
+        #           opacity = 0.01, 
+        #           title = htmltools::HTML("Total Passengers 2021"),
+        #           position = "bottomright") %>% 
+        setView(-73.8399986, 40.746739, zoom = 10)
+      
+      
+      
+    })
+  
+  
+  output$hist_cluster2<-renderPlotly({
+    if(input[["crime type"]]==1)  
+    {
+      crime_rate_df<-crime_df2 %>% 
+        filter(date>=input[["time"]][1],
+               date<=input[["time"]][2]) %>% 
+        group_by(service) %>% 
+        summarise(crime_rate=sum(felony)/sum(flow))
+    }
+    else if(input[["crime type"]]==2)
+    {
+      crime_rate_df<-crime_df2 %>% 
+        filter(date>=input[["time"]][1],
+               date<=input[["time"]][2]) %>% 
+        group_by(service) %>% 
+        summarise(crime_rate=sum(misdemeanor)/sum(flow))
+    }
+    else if(input[["crime type"]]==3)
+    {
+      crime_rate_df<-crime_df2 %>% 
+        filter(date>=input[["time"]][1],
+               date<=input[["time"]][2]) %>% 
+        group_by(service) %>% 
+        summarise(crime_rate=sum(violation)/sum(flow))
+    }
+    else{
+      crime_rate_df<-crime_df2 %>% 
+        filter(date>=input[["time"]][1],
+               date<=input[["time"]][2]) %>% 
+        group_by(service) %>% 
+        summarise(crime_rate=sum(violation+misdemeanor+felony)/sum(flow))
+      
+    }
+    
+    
+    
+    
+    crime_rate_df %>%
+      plot_ly(x = ~service, y = ~crime_rate, color = ~service, type = "bar", colors = "viridis") %>%
+      layout(yaxis = list(title = 'Number of Compliants'),
+             xaxis = list(title = 'service'))
+    
+    
+  })
+  
+  
+  output$hist_service2<-renderPlotly({
+    if(input[["crime type"]]==1)  
+    {
+      crime_rate_df<-crime_df2 %>% 
+        filter(date>=input[["time"]][1],
+               date<=input[["time"]][2]) %>% 
+        group_by(cluster) %>% 
+        summarise(crime_rate=sum(felony)/sum(flow))
+    }
+    else if(input[["crime type"]]==2)
+    {
+      crime_rate_df<-crime_df2 %>% 
+        filter(date>=input[["time"]][1],
+               date<=input[["time"]][2]) %>% 
+        group_by(cluster) %>% 
+        summarise(crime_rate=sum(misdemeanor)/sum(flow))
+    }
+    else if(input[["crime type"]]==3)
+    {
+      crime_rate_df<-crime_df2 %>% 
+        filter(date>=input[["time"]][1],
+               date<=input[["time"]][2]) %>% 
+        group_by(cluster) %>% 
+        summarise(crime_rate=sum(violation)/sum(flow))
+    }
+    else{
+      crime_rate_df<-crime_df2 %>% 
+        filter(date>=input[["time"]][1],
+               date<=input[["time"]][2]) %>% 
+        group_by(cluster) %>% 
+        summarise(crime_rate=sum(violation+misdemeanor+felony)/sum(flow))
+      
+    }
+    
+    
+    
+    
+    crime_rate_df %>%
+      plot_ly(x = ~cluster, y = ~crime_rate, color = ~cluster,
+              type = "bar", colors = "viridis") %>%
+      layout(yaxis = list(title = 'Number of Compliants'),
+             xaxis = list(title = 'cluster'))
+    
+    
+    
+    
+    
+    
+    
+  })
+  
+  
+  
   
   
   # output$summary <- renderPrint({
