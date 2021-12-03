@@ -42,7 +42,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```{r echo=FALSE,tidy=TRUE,message=FALSE}
 # read passgenger data, create unique variable for each station(station_line),get the start and end time of each oberservation
 passenger_df <- 
-  read_csv("passenger_imputed.csv") %>% 
+  read_csv("data/passenger_imputed.csv") %>% 
   janitor::clean_names() %>% 
   mutate(
     station_line = str_c(station,linename,sep = " line:"),

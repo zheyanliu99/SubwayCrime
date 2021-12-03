@@ -86,21 +86,15 @@ The orginal [Subway passenger data](http://web.mta.info/developers/turnstile.htm
 
 The variables we use are:
 
-* STATION: Station name 
-* LINENAME: Lines in this station, there can be more than one lines in one station
-* DATE: Format MM/DD/YYYY
-* TIME: Format 00:00:00
-* ENTRIES:Cumulative entries
-* EXITS: Cumulative exits 
 
-| variablename | type      | range | note                                                                   |   |
-|--------------|-----------|-------|------------------------------------------------------------------------|---|
-| STATION      | Character |       | station name                                                           |   |
-| LINENAME     | Character |       | lines in this station, there can be more than one lines in one station |   |
-| DATE         | Date      |  Year>2010     | format MM/DD/YYYY                                                      |   |
-| TIME         | Date      |       | format 00:00:00                                                        |   |
-| ENTRIES      | Interger  |  >0    | cumulative entries                                                     |   |
-| EXITS        | Interger  |  >0     | cumulative exits                                                       |   |
+| colum name | description                                                            | type      |   |   |
+|------------|------------------------------------------------------------------------|-----------|---|---|
+| STATION    | station name                                                           | Character |   |   |
+| LINENAME   | lines in this station, there can be more than one lines in one station | Character |   |   |
+| DATE       | format MM/DD/YYYY                                                      | Date      |   |   |
+| TIME       | format HH:MM:SS                                                        | Date      |   |   |
+| ENTRIES    | cumulative entries                                                     | Intergar  |   |   |
+| EXITS      | cumulative exits                                                       | Intergar  |   |   |
 
 
 ## Data Cleanning
@@ -116,7 +110,7 @@ Some crime data who have deviant longitude and latitude will be excluded.
 
 #### K-Means
 
-We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. The color of each circle is the Kmeans cluster they belong and the size is the total number of passengers in 2021.
+We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. After K-means we have 8 clusters of locations instead of the original 4 boro, making it closer to reality (for instance we have lower, middle and upper Manhatten in the clusters)and better for model classification.
 
 #### Imputation
 
@@ -146,7 +140,7 @@ There are too many subway lines and some of them share most of the rails, theref
 
 
 
-#### Chaoqi:correct subway line?
+#### Correct subway line
 According to the New York City Subway instruction, there are several different transfer between lines. The first is the inside transfer, where you can transfer from one line to other line inside the station. For example, 14 St-Union Sq is a  station of Line LNQRW456. We don't need to some adjustment for these stations. 
 The second one is free subway transfer and free out-of-way-system. This transfer is different from the inside transfer, passengers need to move from one station to other station for transfer. The data of these transfers has some problems. For example, there are free subway transfer between Court ST-23 ST(EM) and Court Sq(G7). However, the dataset shows the station and line is Court ST-23 ST:EGM, Court Sq:EGM, Court Sq:7. To deal with problem like this, we reassigned the line of station with free subway transfer or free out-of-way-system according to the New York City Subway instruction. In this case, we only consider the insider transfer station.
 
@@ -158,9 +152,7 @@ For each station and given time, We got the actual entries and exits by calculat
 
 # Exploratory Data Analysis
 
-## Subway Crime
-
-### Crime by Location
+We conduct EDA to find the trends of data and provide insights for model.
 
 ```{r read,include=FALSE}
 
@@ -173,13 +165,17 @@ crime_df<-crime_df %>%
 
 ```
 
-
-#### Where is crime?
+## Subway Crime
 
 New York City can be a dangerous place and crime from above ground will 
 often extend into the NYC Subway.</br>
 We mainly focus on the recent crime data on subway in NYC in this year, and 
 there are `r nrow(crime_df)` complaints from 2006 to now. 
+
+### Crime by Location
+
+
+
 
 #### Heat Map of Subway Crime in NYC, 2006-2021
 

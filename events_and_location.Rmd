@@ -4,9 +4,13 @@ output:
   html_document:
     toc: true
     toc_float: true
-    code_folding: hide 
-
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
 ---
+
+<link rel="stylesheet" href="academicons.css"/>
+<link rel="stylesheet" href="styles.css" type="text/css">
 
 ```{r setup, include=FALSE}
 
