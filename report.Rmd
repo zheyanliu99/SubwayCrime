@@ -110,11 +110,11 @@ Some crime data who have deviant longitude and latitude will be excluded.
 
 #### K-Means
 
-We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. After K-means we have 8 clusters of locations instead of the original 4 boro, making it closer to reality (for instance we have lower, middle and upper Manhatten in the clusters)and better for model classification.
+We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. After K-means we have 8 clusters of locations instead of the original 4 boro, making it closer to reality (for instance we have lower, middle and upper Manhatten in the clusters)and better for model classification. The kmeans code is in [PassengerEDA.Rmd](https://github.com/zheyanliu99/SubwayCrime/blob/main/PassengerEDA.Rmd)
 
 #### Imputation
 
-Some missing data from passenger's exit and enter count, we use former average number to impute them. 
+Some missing data from passenger's exit and enter count, we use mean of former values to impute them. The imputation code we use is [FutherCleanPassenger.py](https://github.com/zheyanliu99/SubwayCrime/blob/main/data/FutherCleanPassenger.py)
 
 #### Google Map Api to find station coordinates
 
