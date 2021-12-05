@@ -49,16 +49,17 @@ scale_fill_discrete = scale_fill_viridis_d
 
 
 ```
-<center>
 
-
-</center>
 
 # Introduction
 
 New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pickpocketing, grand larceny, and assault. This closest place will trigger evil. 
 
-![Wordcloud using victims description](images/Word_Cloud.png){width=65%}
+<center>
+
+![Wordcloud using victims description](images/Word_Cloud.png){width=75%}
+
+</center>
 
 On November 21, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety is tightly related to almost every citizen who is living, working, and studying in New York City. 
 
@@ -435,7 +436,7 @@ plot_1 =
 layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), yaxis = list(title = "Number of Crime Events (K)"))
 ```
 
-### Number of events each quarter
+#### Number of events each quarter
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_season = 
@@ -461,7 +462,7 @@ plot_2 =
 layout(plot_2, title = "Crime events over quarter", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"), width = 800)
 ```
 
-### Number of events each month
+#### Number of events each month
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_month = 
