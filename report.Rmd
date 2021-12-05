@@ -712,16 +712,48 @@ When user input their infomation click on the submit button several candidates r
 
 ## Interactive route map
 
-Users can click on each row in the routes dataframe to show the detail of this route in the map. Users can select multiple lines.
-
+Users can click on each row in the routes dataframe to show the detail of this route in the map. Users can select multiple lines. 
 
 
 # Summary
 
-1.Discussion
-2.Results
-3.Distribution
-4.Limitations
-5.Acknowledgement
-6.Reference
-7.Appendix
+## Results
+
+## Limitations
+
+### Data limitations
+
+The crime data is merged by two dataset, one from 2006-2020 and the other from 2021 to 2022. Although they have similar columns and both contains all the variables we interested in, the defination of crime and collection of data still have differences.
+
+Original passenger data only contains cumulative entries and exits. When taking difference from entries and exits, the diff contains negative and unreasonably large values. We imputed the erroneous.
+
+Another problem is that station names in the crime data and original data cannot match. We matched them based on external data source (Google Map Api). We use Api to get exact coordinates of station and category crime data to a station. Mismatch can happen in this case.
+
+### Model limitations
+
+## Acknowledgement
+
+## Reference
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
