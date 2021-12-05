@@ -31,9 +31,10 @@ New York subway, one of the main public transportations for New Yorkers, provide
 As students who are living here in New York City, most of us will almost take subway to the campus in early morning and back to apartment in nights on weekdays, and hang out with friends on weekends. Keeping away from danger at subway stations is closely related to ourselves. We hope we are able to help citizens to find the comparatively safe and reliable routes when taking subways.
 
 ### In this website, you can find:
-  * Exploratory Data Analysis of subway crime with time (year, month, hour)
-  * Exploratory Data Analysis of subway crime with location (coordiante-based Kmeans cluster, subway line, station)
-  * Analysis of passengers flow of subway (time and location)
+  * Exploratory Data Analysis of subway crime with [time](events_and_time.html) (year, month, hour)
+  * Exploratory Data Analysis of subway crime with [location](events_and_location.html) (coordiante-based Kmeans cluster, subway line, station)
+  * Build a crime Dashboard about crime rate and crime events in different station and clusters
+  * Analysis of [passengers flow](PassengerEDA.html) of subway and its relationship with the location; How we use Kmeans based on this analysis. 
   * An interactive Shiny Dashboard about subway crime, people can look up crime rate in each location, distribution of each crime type.
   * [GNN](https://en.wikipedia.org/wiki/Graph_neural_network) model for predicting existence and severity of subway crime
   * No-crime Navigation shiny app based on [Google Maps Api](https://developers.google.com/maps) (give subway route), GNN model (predict crime existence) and historical passenger data (give crowdness).

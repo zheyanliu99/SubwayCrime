@@ -354,8 +354,6 @@ Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Man
 
 
 
-
-
 ```{r output cluster data, include=FALSE}
 
 df_join = 

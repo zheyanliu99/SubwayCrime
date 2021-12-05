@@ -54,8 +54,6 @@ crime_df<-crime_df %>%
 
 ```
 
-## Where crime?
-
 New York City can be a dangerous place and crime from above ground will 
 often extend into the NYC Subway.</br>
 We mainly focus on the recent crime data on subway in NYC in this year, and 
