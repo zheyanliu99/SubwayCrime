@@ -20,7 +20,7 @@ library(plotly)
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 raw_sub_crime = 
-  read_csv("./data/subwaycrime_with_station_new.csv") %>% 
+  read_csv("./data/subwaycrime_with_station_new_1.csv") %>% 
   janitor::clean_names() %>% 
   rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "law_cat" = "law_cat_cd", "crime_event" = "ofns_desc", "crime_desc" = "pd_desc") %>% 
   mutate(law_cat = ordered(law_cat, level = c("VIOLATION", "MISDEMEANOR", "FELONY"))) %>% 
@@ -61,7 +61,7 @@ layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), 
 ### Number of crime events each season
 
 Basically, the peak of crime events appeared on the first quarter for almost each year, the bottom point of the quantity of crime events appeared on the third or fourth quarter for nearly every year.
-The overall trend of quantity of events was increasing, and the overall quantity of events after the fourth quarter of 2013 is higher than that before the fourth quater of 2013.
+The overall trend of quantity of events was increasing, and the overall quantity of events after the fourth quarter of 2013 is higher than that before the fourth quarter of 2013.
 
 ```{r, message=FALSE, warning=FALSE}
 sub_crime_season = 
@@ -170,9 +170,9 @@ layout(plot_6, title = "Crime frequency: Day v.s. Hour", xaxis = list(title = "H
 
 ## Proceeding time
 
-For the proceeding time, the overall relationship between proceeding time and degrees of crime events if that the median proceeding time depcreases along with the degree of events increase. Excluding some extreme outliers, felony crime events have the largest median proceeding time so the difficulty of dealing with this type of events for official workers may increase the proceeding time; it also has the largest range of proceeding time, it may depend on the specific cases of this type of events; 
+When it comes to the proceeding time of three **degrees** of events, we can see that the median proceeding time between misdemeanor and violation events are not so different, whereas median time for felony events is slightly higher than the other two so misdemeanor and violation events may be easier to handle with, excluding some extreme outliers.
 
-For the violation degree of crime events, it has the lowest median proceeding time, so it may be much easier to be delt with for official workers.
+Generally, the range of the proceeding time for misdemeanor events is comparably less than the other two, and the maximum proceeding time for misdemeanor events is approximately 5 minutes less than felony events and violation events.
 
 ```{r, message=FALSE, warning=FALSE}
 crime_prcd_time = 
