@@ -733,7 +733,10 @@ Another problem is that station names in the crime data and original data cannot
 
 ## Acknowledgement
 
+We would like to thank Zhuohui Liang, who gives us suggestions about this project. In addition, we want to thank team 'Police Violence and Protest' last year. Their interactive map gives us the idea of building a interactive crime map. Moreover, we would like to thank Rebekah Hughes in this team for her answering our question about Shiny Dashboard Navbar. Finally, we want to thank the (Google Map Api team)[https://github.com/googlemaps/google-maps-services-python] for their open-source code and free to use api, the No (crime Navigation App)[https://zheyanliu.shinyapps.io/NYC_subway_findroute/] will not be possible without their contributions. 
+
 ## Reference
+
 
 
 
