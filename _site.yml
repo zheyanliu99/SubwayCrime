@@ -13,7 +13,7 @@ navbar:
       - text: "by Location"
         href: events_and_location.html
       - text: 'Crime Dashboard'
-        href: https://stephenyuan.shinyapps.io/CrimeShinyApp/
+        href: https://stephenyuan.shinyapps.io/CrimeMapShiny/
     - text: 'No Crime Navigation'
       href: https://zheyanliu.shinyapps.io/NYC_subway_findroute
 
