@@ -51,13 +51,14 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 <center>
 
-![](images/Word_Cloud.png){width=60%}
 
 </center>
 
 # Introduction
 
 New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pickpocketing, grand larceny, and assault. This closest place will trigger evil. 
+
+![Wordcloud using victims description](images/Word_Cloud.png){width=65%}
 
 On November 21, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety is tightly related to almost every citizen who is living, working, and studying in New York City. 
 
@@ -689,8 +690,31 @@ Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Man
 
 # Model Application
 
-1.Google Api
-2.How to use
+We build the (No crime Navigation)[https://zheyanliu.shinyapps.io/NYC_subway_findroute/] APP based on [Google Maps Api](https://developers.google.com/maps) and GNN model. 
+
+## Input parameters
+
+In the left panel, users can select their infomation and typed in their current location and destination. This include:
+
+* Who are you: gender, age and race
+* When you leave: date and time
+* Where to go: your location and destination
+
+## Routes
+
+When user input their infomation click on the submit button several candidates routes will be displayed in the right table. The table shows several infomation of the route including:
+
+* time:time to get to the destination from start location
+* walking distance: walking distance in this route
+* crime score:the likelihood of being the victim of crime events
+* crowdness score:crowdness on the route
+* line[stops]:brief introduction to this route, take how many stops in each line
+
+## Interactive route map
+
+Users can click on each row in the routes dataframe to show the detail of this route in the map. Users can select multiple lines.
+
+
 
 # Summary
 
