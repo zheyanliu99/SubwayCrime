@@ -49,17 +49,16 @@ scale_fill_discrete = scale_fill_viridis_d
 
 
 ```
+<center>
 
 
+</center>
 
 # Introduction
 
-New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pickpocketing, grand larceny, and assault. This closest place will trigger evil. Below is a wordcloud using description of victims.
+New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pickpocketing, grand larceny, and assault. This closest place will trigger evil. 
 
-<center>
-
-![Wordcloud using victims description](images/Word_Cloud.png){width=90%}
-</center>
+![Wordcloud using victims description](images/Word_Cloud.png){width=65%}
 
 On November 21, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety is tightly related to almost every citizen who is living, working, and studying in New York City. 
 
@@ -385,6 +384,114 @@ crime_rate_summary %>%
 
 
 ### Crime by Time
+
+We already had a general picture about stations that are comparably dangerous, and types of crime events that happened frequently in last several years.
+
+Now Let's dig into the relationship between **time** and the occurrence of various **crime events**.
+
+In the next few plots, we may try to explore questions like...
+
+* Which year is along with the highest frequency of various crime events? 
+
+* Which season is along with the highest frequency of various crime events? 
+
+* Which time points in a day are along with more crime events? 
+
+```{r, include = FALSE, echo = FALSE, message=FALSE, warning=FALSE}
+raw_sub_crime = 
+  read_csv("data/subwaycrime_with_station_new_1.csv") %>% 
+  janitor::clean_names() %>% 
+  rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "law_cat" = "law_cat_cd", "crime_event" = "ofns_desc", "crime_desc" = "pd_desc") %>% 
+  mutate(law_cat = ordered(law_cat, level = c("VIOLATION", "MISDEMEANOR", "FELONY"))) %>% 
+  mutate(start_date = as.Date(start_date, "%m/%d/%Y"), 
+         end_date = as.Date(end_date, "%m/%d/%Y")) %>% 
+  mutate(start = as.POSIXct(paste(start_date, start_time), format = "%Y-%m-%d %H:%M:%S"), 
+         end = as.POSIXct(paste(end_date, end_time), format = "%Y-%m-%d %H:%M:%S")) %>% 
+  mutate(crime_event = tolower(crime_event),
+         law_cat = tolower(law_cat),
+         crime_desc = tolower(crime_desc)) %>% 
+  drop_na(start_time) %>% 
+  separate(start_time, into = c("start_time_hour", "event_minute", "event_second"), sep = ":") %>% 
+  select(start_date, start_time_hour, end_date, end_time, law_cat, crime_event, crime_desc, start, end) %>% 
+  filter(start_date > "2005-12-31")
+```
+
+#### Number of events each year
+
+```{r, message=FALSE, warning=FALSE}
+sub_crime_year = 
+  raw_sub_crime %>% 
+  select(start_date, start_time_hour, crime_event, law_cat) %>% 
+  mutate(start_date = substring(start_date, 1, 4))
+
+plot_1 = 
+  sub_crime_year %>% 
+  group_by(start_date) %>% 
+  summarise(event_num = n() / 1000) %>% 
+  plot_ly(
+    x = ~start_date, y = ~event_num, type = "bar"
+  )
+
+layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), yaxis = list(title = "Number of Crime Events (K)"))
+```
+
+### Number of events each quarter
+
+```{r, message=FALSE, warning=FALSE}
+sub_crime_season = 
+  raw_sub_crime %>% 
+  select(start_date, start_time_hour, crime_event, law_cat) %>% 
+  separate(start_date, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(season = case_when(
+    month %in% c("01","02","03") ~ "Q1",
+    month %in% c("04","05","06") ~ "Q2",
+    month %in% c("07","08","09") ~ "Q3",
+    month %in% c("10","11","12") ~ "Q4"
+  )) %>% 
+  mutate(event_quarter = paste(year, season, sep = "-"))
+  
+plot_2 = 
+  sub_crime_season %>% 
+  group_by(event_quarter) %>% 
+  summarise(event_num = n()) %>% 
+  plot_ly(
+    x = ~event_quarter, y = ~event_num, type = "scatter", mode = "points"
+  )
+
+layout(plot_2, title = "Crime events over quarter", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"), width = 800)
+```
+
+### Number of events each month
+
+```{r, message=FALSE, warning=FALSE}
+sub_crime_month = 
+  raw_sub_crime %>% 
+  select(start_date, start_time_hour, crime_event, law_cat) %>% 
+  separate(start_date, into = c("year", "month", "day"), sep = "-") %>% 
+  mutate(month = ifelse(month == "01", "January", ifelse(month == "02", "February", ifelse(month == "03", "March", ifelse(month == "04", "April", ifelse(month == "05", "May", ifelse(month == "06", "June", ifelse(month == "07", "July", ifelse(month == "08", "August", ifelse(month == "09", "September", ifelse(month == "10", "October", ifelse(month == "11", "November", "December")))))))))))) %>% 
+  mutate(month = ordered(month, level = c("January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December")))
+  
+plot_3 = 
+  sub_crime_month %>% 
+  group_by(month, law_cat) %>% 
+  summarise(event_num = n() / 1000) %>% 
+  plot_ly(
+    x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat
+  )
+
+
+plot_4 = 
+  sub_crime_month %>% 
+  group_by(month) %>% 
+  summarise(event_num = n() / 1000) %>% 
+  plot_ly(
+    x = ~month, y = ~event_num, type = "scatter", mode = "lines"
+  )
+
+subplot = subplot(plot_4, plot_3)
+
+layout(subplot, title = "Event number over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of crime events (K)"), width = 1000)
+```
 
 
 ## Subway Passenger
@@ -720,7 +827,11 @@ Users can click on each row in the routes dataframe to show the detail of this r
 
 ## Results
 
+As for the part regarding relationship between crime events and occurrence time including year, quarter, month, day of week and time points, we exploring the association between crime and events, and we show the specific relationship between the outcome of interest - crime events and variable time, for instance, which year may be the most frequent for crime events, by this, we may try to further investigate the reason for variation among years; or which time point on with day of week will be the most dangerous time for people hanging out, also by this, it may guide citizens to try to avoid these time points for outdoor activities.
+
 ## Limitations
+
+The records of some original data is not quite reasonable, for instance, the proceeding time of some violation or misdemeanor cases last for more than several years, it is not clear whether that case really takes such a long period or not, so that leads to extremely unreasonable outliers. Second, There would be some censoring data in the original data set for specific year, for example, only several days in January and February of 2020 were recorded in the data set, so it may become hard to explore the true situation regarding crime events in this period of time. 
 
 ### Data limitations
 
