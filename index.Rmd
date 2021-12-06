@@ -130,11 +130,13 @@ Email: [yk2960@columbia.edu](mailto:yk2960@columbia.edu)
 
 Email: [zy2392@columbia.edu](mailto:zy2392@columbia.edu)  
 
-Website, Linkedin, Github
+[Website](https://zexuyuan.github.io/Stephen_Yuan.github.io/), 
+[Linkedin](https://www.linkedin.com/in/zexuyuan/), 
+[Github](https://github.com/ZexuYuan)
 
 *Contributions*
 
-* 1 
-* 2 
+* 1 Conducted exploratory data analysis regarding the relationship between occurrence of crime events and time
+* 2 Contributed to establishment of shiny dashboard with regard to crime events map
 
 
