@@ -184,10 +184,6 @@ crime_df_new <-
 
 
 
-
-
-
-
 ##for (each in 1:nrow(crime_df)) {
 ##  crime_df[each,38]=croodinate_df %>% 
 ##                    mutate(lat_new=crime_df[each,]$latitude,
