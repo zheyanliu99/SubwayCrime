@@ -1,5 +1,5 @@
 ---
-title: "2021 Subway Passenger EDA"
+title: "Subway Crime Analysis"
 output: 
   html_document:
     toc: true
@@ -154,7 +154,7 @@ For each station and given time, We got the actual entries and exits by calculat
 
 # Exploratory Data Analysis
 
-We conduct EDA to find the trends of data and provide insights for model.
+We conduct EDA to find the trends of data and provide insights for model. In the first section, we analyze subway crime data and produce an [interactive Shiny Dashboard](https://stephenyuan.shinyapps.io/CrimeMapShiny/) about subway crime, people can look up crime rate in each location, distribution of each crime type. For the other one, we analyze passenger data and create a new variable *cluster* using Kmeans. Additionally, we build a shiny app for [Subway passenger flow animation and info lookup](https://chaoqiwu0324.shinyapps.io/subway_passenger/) and a more detailed app on each [line](https://chaoqiwu0324.shinyapps.io/line_passenger/)
 
 ```{r read,include=FALSE}
 
@@ -170,8 +170,7 @@ crime_df<-crime_df %>%
 ## Subway Crime
 
 New York City can be a dangerous place and crime from above ground will 
-often extend into the NYC Subway.</br>
-We mainly focus on the recent crime data on subway in NYC in this year, and 
+often extend into the NYC Subway. We mainly focus on the recent crime data on subway in NYC in this year, and 
 there are `r nrow(crime_df)` complaints from 2006 to now. 
 
 ### Crime by Location
@@ -856,11 +855,9 @@ Users can click on each row in the routes dataframe to show the detail of this r
 
 ## Results
 
-As for the part regarding relationship between crime events and occurrence time including year, quarter, month, day of week and time points, we exploring the association between crime and events, and we show the specific relationship between the outcome of interest - crime events and variable time, for instance, which year may be the most frequent for crime events, by this, we may try to further investigate the reason for variation among years; or which time point on with day of week will be the most dangerous time for people hanging out, also by this, it may guide citizens to try to avoid these time points for outdoor activities.
 
 ## Limitations
 
-The records of some original data is not quite reasonable, for instance, the proceeding time of some violation or misdemeanor cases last for more than several years, it is not clear whether that case really takes such a long period or not, so that leads to extremely unreasonable outliers. Second, There would be some censoring data in the original data set for specific year, for example, only several days in January and February of 2020 were recorded in the data set, so it may become hard to explore the true situation regarding crime events in this period of time. 
 
 ### Data limitations
 
@@ -870,17 +867,25 @@ Original passenger data only contains cumulative entries and exits. When taking 
 
 Another problem is that station names in the crime data and original data cannot match. We matched them based on external data source (Google Map Api). We use Api to get exact coordinates of station and category crime data to a station. Mismatch can happen in this case.
 
+### Analysis limitations
+
+As for the part regarding relationship between crime events and occurrence time including year, quarter, month, day of week and time points, we exploring the association between crime and events, and we show the specific relationship between the outcome of interest - crime events and variable time, for instance, which year may be the most frequent for crime events, by this, we may try to further investigate the reason for variation among years; or which time point on with day of week will be the most dangerous time for people hanging out, also by this, it may guide citizens to try to avoid these time points for outdoor activities.
+
 ### Model limitations
 
 Considering computation cost, group analysis is relative fast and accurate. If computing power can be strengthened, the model will be stronger. In addition, due to a number of missing values, the results can be better when a 'healthier' data are given. The decoder we utilized is default,inner product, and it can be specially designed for this task.
 
 ## Acknowledgement
 
-We would like to thank Zhuohui Liang, who gives us suggestions about this project. In addition, we want to thank team 'Police Violence and Protest' last year. Their interactive map gives us the idea of building a interactive crime map. Moreover, we would like to thank Rebekah Hughes in this team for her answering our question about Shiny Dashboard Navbar. Finally, we want to thank the (Google Map Api team)[https://github.com/googlemaps/google-maps-services-python] for their open-source code and free to use api, the No (crime Navigation App)[https://zheyanliu.shinyapps.io/NYC_subway_findroute/] will not be possible without their contributions. 
+We would like to thank Zhuohui Liang, who gives us suggestions about this project. In addition, we want to thank team 'Police Violence and Protest' last year. Their interactive map gives us the idea of building a interactive crime map. Moreover, we would like to thank Rebekah Hughes in this team for her answering our question about Shiny Dashboard Navbar. Finally, we want to thank the [Google Map Api team](https://github.com/googlemaps/google-maps-services-python) for their open-source code and free to use api, the [No crime Navigation App](https://zheyanliu.shinyapps.io/NYC_subway_findroute/) will not be possible without their contributions. 
 
 # Reference
 
+[1] Daigavane, et al., "Understanding Convolutions on Graphs", Distill, 2021.
 
+[2] Thomas N. Kipf and Max Welling. 2016. Variational Graph Auto-Encoders. NIPS Bayesian Deep Learning Workshop (2016).
+
+[3] Berg, Rianne van den, Thomas N. Kipf, and Max Welling. "Graph convolutional matrix completion." arXiv preprint arXiv:1706.02263 (2017).
 
 
 
