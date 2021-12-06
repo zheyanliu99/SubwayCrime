@@ -29,7 +29,11 @@
        h6 {font-size: 12px;}
        code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
        pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 <link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
@@ -227,7 +231,73 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
 
 
 
@@ -237,6 +307,16 @@ $(document).ready(function () {
 
 
 <div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -253,8 +333,23 @@ $(document).ready(function () {
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li>
-  <a href="PassengerEDA.html">Passenger</a>
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Passenger
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="PassengerEDA.html">Passenger flow with location based Kmeans</a>
+    </li>
+    <li>
+      <a href="https://chaoqiwu0324.shinyapps.io/subway_passenger/">Subway Passenger Animation and Crime Lookup App</a>
+    </li>
+    <li>
+      <a href="https://chaoqiwu0324.shinyapps.io/line_passenger/">Subway Passenger Line Animation App</a>
+    </li>
+  </ul>
 </li>
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -264,10 +359,10 @@ $(document).ready(function () {
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="events_and_time.html">by Time</a>
+      <a href="events_and_time.html">Analysis by Time</a>
     </li>
     <li>
-      <a href="events_and_location.html">by Location</a>
+      <a href="events_and_location.html">Analysis by Location</a>
     </li>
     <li>
       <a href="https://stephenyuan.shinyapps.io/CrimeMapShiny/">Crime Dashboard</a>
@@ -275,7 +370,10 @@ $(document).ready(function () {
   </ul>
 </li>
 <li>
-  <a href="https://zheyanliu.shinyapps.io/NYC_subway_findroute">No Crime Navigation</a>
+  <a href="model/report_model.html">GNN model</a>
+</li>
+<li>
+  <a href="https://zheyanliu.shinyapps.io/NYC_subway_findroute">No Crime Navigation App</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -301,6 +399,14 @@ $(document).ready(function () {
 
 <div id="header">
 
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
 
 
 <h1 class="title toc-ignore">NYC subway crime</h1>
@@ -325,18 +431,18 @@ $(document).ready(function () {
 </center>
 <p><br> 11/21/2021, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety tightly related to almost every citizen who are living, working and studying in New York City.</p>
 <p>As students who are living here in New York City, most of us will almost take subway to the campus in early morning and back to apartment in nights on weekdays, and hang out with friends on weekends. Keeping away from danger at subway stations is closely related to ourselves. We hope we are able to help citizens to find the comparatively safe and reliable routes when taking subways.</p>
-<div id="in-this-website-you-can-find" class="section level3">
-<h3>In this website, you can find:</h3>
+</div>
+<div id="what-you-can-find-in-this-website" class="section level2">
+<h2>What you can find in this website</h2>
 <ul>
 <li>Exploratory Data Analysis of subway crime with <a href="events_and_time.html">time</a> (year, month, hour)</li>
 <li>Exploratory Data Analysis of subway crime with <a href="events_and_location.html">location</a> (coordiante-based Kmeans cluster, subway line, station)</li>
-<li>Build a crime Dashboard about crime rate and crime events in different station and clusters</li>
-<li>Analysis of <a href="PassengerEDA.html">passengers flow</a> of subway and its relationship with the location; How we use Kmeans based on this analysis.</li>
-<li>An interactive Shiny Dashboard about subway crime, people can look up crime rate in each location, distribution of each crime type.</li>
-<li><a href="https://en.wikipedia.org/wiki/Graph_neural_network">GNN</a> model for predicting existence and severity of subway crime</li>
-<li>No-crime Navigation shiny app based on <a href="https://developers.google.com/maps">Google Maps Api</a> (give subway route), GNN model (predict crime existence) and historical passenger data (give crowdness).</li>
+<li><a href="PassengerEDA.html">Analysis of passengers flow</a> of subway and its relationship with the location; How we use coordinates-based Kmeans on this analysis.</li>
+<li>An <a href="https://stephenyuan.shinyapps.io/CrimeMapShiny/">interactive Shiny Dashboard</a> about subway crime, people can look up crime rate in each location, distribution of each crime type.</li>
+<li>A shiny app for <a href="https://chaoqiwu0324.shinyapps.io/subway_passenger/">Subway passenger flow animation and info lookup</a> and a more detailed app on each <a href="https://chaoqiwu0324.shinyapps.io/line_passenger/">line</a></li>
+<li>A <a href="https://en.wikipedia.org/wiki/Graph_neural_network">GNN</a> model for predicting existence and severity of subway crime</li>
+<li><a href="https://zheyanliu.shinyapps.io/NYC_subway_findroute">No-crime Navigation shiny app</a> based on <a href="https://developers.google.com/maps">Google Maps Api</a> (give subway route), GNN model (predict crime existence) and historical passenger data (give crowdness of a route).</li>
 </ul>
-</div>
 </div>
 <div id="team-members" class="section level2">
 <h2>Team members</h2>
@@ -370,9 +476,9 @@ $(document).ready(function () {
 <p><a href="https://buddgao.github.io/Baode_Gao.github.io/">Website</a>, <a href="https://www.linkedin.com/in/baode-gao-389249176/">Linkedin</a>, <a href="https://github.com/BuddGao?tab=repositories">Github</a></p>
 <p><em>Contributions</em></p>
 <ul>
-<li>1 Cleaned and imputed subway passenger data; Built project website and organized final report</li>
-<li>2 Conduct EDA on subway passenger data&amp;location; Feature engineering on coordinates with K-means</li>
-<li>3 Built subway navigation app based on Google Maps Apis and adapted GNN into crime prediction on each route</li>
+<li>1</li>
+<li>2</li>
+<li>3</li>
 </ul>
 <p><br></p>
 <p><img src = "images/Youyuan.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
@@ -393,13 +499,15 @@ $(document).ready(function () {
 <p>Website, Linkedin, Github</p>
 <p><em>Contributions</em></p>
 <ul>
-<li>1 Cleaned and imputed subway passenger data; Built project website and orgnized final report</li>
-<li>2 Conduct EDA on subway passenger data&amp;location; Feature engineering on coordinates with K-means</li>
+<li>1</li>
+<li>2</li>
 </ul>
 </div>
 
 
 
+</div>
+</div>
 
 </div>
 
@@ -431,7 +539,41 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>

@@ -4,6 +4,11 @@ output:
   html_document:
     includes:
        in_header: ga_script.html
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
 ---
 
 <link rel="stylesheet" href="academicons.css"/>
@@ -30,14 +35,14 @@ New York subway, one of the main public transportations for New Yorkers, provide
 
 As students who are living here in New York City, most of us will almost take subway to the campus in early morning and back to apartment in nights on weekdays, and hang out with friends on weekends. Keeping away from danger at subway stations is closely related to ourselves. We hope we are able to help citizens to find the comparatively safe and reliable routes when taking subways.
 
-### In this website, you can find:
+## What you can find in this website
   * Exploratory Data Analysis of subway crime with [time](events_and_time.html) (year, month, hour)
   * Exploratory Data Analysis of subway crime with [location](events_and_location.html) (coordiante-based Kmeans cluster, subway line, station)
-  * Build a crime Dashboard about crime rate and crime events in different station and clusters
-  * Analysis of [passengers flow](PassengerEDA.html) of subway and its relationship with the location; How we use Kmeans based on this analysis. 
-  * An interactive Shiny Dashboard about subway crime, people can look up crime rate in each location, distribution of each crime type.
-  * [GNN](https://en.wikipedia.org/wiki/Graph_neural_network) model for predicting existence and severity of subway crime
-  * No-crime Navigation shiny app based on [Google Maps Api](https://developers.google.com/maps) (give subway route), GNN model (predict crime existence) and historical passenger data (give crowdness).
+  * [Analysis of passengers flow](PassengerEDA.html) of subway and its relationship with the location; How we use coordinates-based Kmeans on this analysis. 
+  * An [interactive Shiny Dashboard](https://stephenyuan.shinyapps.io/CrimeMapShiny/) about subway crime, people can look up crime rate in each location, distribution of each crime type.
+  * A shiny app for [Subway passenger flow animation and info lookup](https://chaoqiwu0324.shinyapps.io/subway_passenger/) and a more detailed app on each [line](https://chaoqiwu0324.shinyapps.io/line_passenger/)
+  * A [GNN](https://en.wikipedia.org/wiki/Graph_neural_network) model for predicting existence and severity of subway crime
+  * [No-crime Navigation shiny app](https://zheyanliu.shinyapps.io/NYC_subway_findroute) based on [Google Maps Api](https://developers.google.com/maps) (give subway route), GNN model (predict crime existence) and historical passenger data (give crowdness of a route).
 
 
 
@@ -91,9 +96,9 @@ Email: [bg2715@cumc.columbia.edu](mailto:bg2715@cumc.columbia.edu)
 
 *Contributions*
 
-* 1 Cleaned and imputed subway passenger data; Built project website and organized final report
-* 2 Conduct EDA on subway passenger data&location; Feature engineering on coordinates with K-means
-* 3 Built subway navigation app based on Google Maps Apis and adapted GNN into crime prediction on each route
+* 1 
+* 2 
+* 3 
 
 <br>
 
@@ -128,7 +133,7 @@ Website, Linkedin, Github
 
 *Contributions*
 
-* 1 Cleaned and imputed subway passenger data; Built project website and orgnized final report
-* 2 Conduct EDA on subway passenger data&location; Feature engineering on coordinates with K-means
+* 1 
+* 2 
 
 

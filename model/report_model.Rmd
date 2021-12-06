@@ -1,6 +1,12 @@
 ---
-title: "report_model"
-output: html_document
+title: "GNN Model"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
 ---
 
 By exploratory data analysis, we found the crime was related to the victim, time and space. While producing the most precisely individual level analysis has high computation, it is relative fast and accurate for group/class analysis. Therefore, we intend to do a group analysis of crime and these independent variables. The data can be considered as a graph naturally, which represents the relations (crime) between entities (times and victims at different certain spaces). In addition, because the data graph was permutation invariant, we used graph neural networks (GNN) to solve this link prediction task.
