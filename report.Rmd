@@ -375,7 +375,7 @@ In the next few plots, we may try to explore questions like...
 
 ```{r, include = FALSE, echo = FALSE, message=FALSE, warning=FALSE}
 raw_sub_crime = 
-  read_csv("data/subwaycrime_with_station_new_1.csv") %>% 
+  read_csv("data/subwaycrime_with_station_new.csv") %>% 
   janitor::clean_names() %>% 
   rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "law_cat" = "law_cat_cd", "crime_event" = "ofns_desc", "crime_desc" = "pd_desc") %>% 
   mutate(law_cat = ordered(law_cat, level = c("VIOLATION", "MISDEMEANOR", "FELONY"))) %>% 
