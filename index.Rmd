@@ -91,9 +91,9 @@ Email: [bg2715@cumc.columbia.edu](mailto:bg2715@cumc.columbia.edu)
 
 *Contributions*
 
-* 1 Cleaned and imputed subway passenger data; Built project website and orgnized final report
+* 1 Cleaned and imputed subway passenger data; Built project website and organized final report
 * 2 Conduct EDA on subway passenger data&location; Feature engineering on coordinates with K-means
-* 3 Built subway naviagtion app based on Google Maps Apis and adapted GNN into crime prediction on each route
+* 3 Built subway navigation app based on Google Maps Apis and adapted GNN into crime prediction on each route
 
 <br>
 
@@ -105,13 +105,14 @@ Email: [bg2715@cumc.columbia.edu](mailto:bg2715@cumc.columbia.edu)
 
 Email: [yk2960@columbia.edu](mailto:yk2960@columbia.edu)  
 
-Website, Linkedin, Github
+[Website](https://keviant.github.io/p8105_hw4_yk2960.github.io/#Dashboard), 
+[Linkedin](https://www.linkedin.com/in/youyuan-kong-a983b91b2/),
+[Github](https://github.com/Keviant?tab=repositories)
 
 *Contributions*
 
-* 1 Clean and imputed crime by location data;create a crime rate  shiny dashboard, build project website and participate in writing report
-* 2 Conduct EDA on subway passenger data&location; Feature engineering on coordinates with K-means
-* 3 Build subway navigation app based on Google Maps Apis and adapted GNN into crime prediction on each route
+* 1 Clean and imputed crime by location data;create a crime rate  shiny dashboard, and participate in writing report
+* 2 Conduct EDA on subway passenger data&location
 
 <br>
 
