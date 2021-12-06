@@ -78,8 +78,9 @@ cri %>%
   group_by(year(as.Date(cmplnt_fr_dt, format = "%Y-%m-%d"))) %>%
   summarise(n=n())
 
-cri %>%
-  group_by(vic_age_group) %>%
+cri  %>%
+  filter(prem_typ_desc == "TRANSIT - NYC SUBWAY") %>% 
+  group_by(vic_sex) %>%
   summarise(n=n())
 
 ```
@@ -135,6 +136,73 @@ print(sum(as.numeric(pred == test$lev_off))/nrow(test))
 
 ```
 
+# GNN data processing
+
+import
+```{r}
+df = read_csv('data/subwaycrime_with_station_new.csv') %>% 
+  janitor::clean_names()
+
+df %>%
+  group_by(race) %>%
+  summarise(n=n())
+```
+cleaning (station 338, line 81, cluster 8) 164 60   365*h
+```{r}
+df_cleaned = df %>% 
+  filter(prem_typ_desc == "TRANSIT - NYC SUBWAY",
+         vic_age_group %in% c("<18","18-24","25-44","45-64","65+"),
+         vic_race %in% c("AMERICAN INDIAN/ALASKAN NATIVE",
+                         "ASIAN / PACIFIC ISLANDER","BLACK","BLACK HISPANIC",
+                         "WHITE","WHITE HISPANIC"),
+         vic_sex %in% c("F","M"),
+         year(as.Date(cmplnt_fr_dt, format = "%m/%d/%Y")) > 2005
+         ) %>%
+  select(cmplnt_fr_dt,cmplnt_fr_tm,vic_age_group, 
+         vic_race, vic_sex, service, cluster) %>%
+  mutate(cmplnt_fr_dt = as.Date(cmplnt_fr_dt,format("%m/%d/%Y"))) %>%
+  na.omit()
+```
+
+```{r}
+df_cleaned %>%
+  group_by(cluster,service) %>%
+  summarise(n=n())
+```
+
+time to time intervals
+date to yday
+```{r}
+df_train_test = df_cleaned %>% 
+  rename(date = cmplnt_fr_dt) %>%
+  mutate(time = hour(df_cleaned$cmplnt_fr_tm),
+         time = as.character(time),
+         time = recode(time, '0' = 0,'1' = 0,'2' = 0,'3' = 0,
+                       '4' = 4,'5' = 4,'6' = 4,'7' = 4,
+                       '8' = 8,'9' = 8,'10' = 8,'11' = 8,
+                       '12' = 12,'13' = 12,'14' = 12,'15' = 12,
+                       '16' = 16,'17' = 16,'18' = 16,'19' = 16,
+                       '20' = 20,'21' = 20,'22' = 20,'23' = 20),
+         yday = yday(as.Date(date)))
+```
+df_train_val
+```{r}
+df_train_val = df_train_test %>%
+  select(yday,time,vic_age_group, 
+         vic_race, vic_sex, service, cluster)
+  
+fwrite(df_train_val, 'df_train_val06.csv')
+```
+df_test
+```{r}
+df_test = df_train_test %>% 
+  filter(year(as.Date(date, format = "%m/%d/%Y")) > 2020
+         ) %>% 
+  select(yday,time,vic_age_group, 
+         vic_race, vic_sex, service, cluster)
+  
+#fwrite(df_test, 'df_test.csv')
+```
 
 
 
