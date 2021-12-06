@@ -476,7 +476,7 @@ plot_3 =
   group_by(month, law_cat) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat
+    x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat, colors = "viridis"
   )
 
 
@@ -485,7 +485,7 @@ plot_4 =
   group_by(month) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~month, y = ~event_num, type = "scatter", mode = "lines"
+    x = ~month, y = ~event_num, type = "scatter", mode = "points", color="TotalNumber", colors = "#2171B5"
   )
 
 subplot = subplot(plot_4, plot_3)
