@@ -831,25 +831,32 @@ Users can click on each row in the routes dataframe to show the detail of this r
 
 ## Results
 
+### Event and Location
+
+We explored which stations are the dangerous stations that have the most crimes( or highest crime rate) during these years, check the crime distribution by cluster, type of offenses. Furthermore, we get some information that which age groups, gender, or races are more possible to be assaulted using bar charts. 
+
+### Event and time
+
+As for the part regarding the relationship between crime events and occurrence time including year, quarter, month, day of the week, and time points, we explore the association between crime and events, and we show the specific relationship between the outcome of interest - crime events and variable time, for instance, which year may be the most frequent for crime events, by this, we may try to further investigate the reason for variation among years; or which time point on with a day of the week will be the most dangerous time for people hanging out, also by this, it may guide citizens to try to avoid these time points for outdoor activities.
 
 ## Limitations
 
 
 ### Data limitations
 
-The crime data is merged by two dataset, one from 2006-2020 and the other from 2021 to 2022. Although they have similar columns and both contains all the variables we interested in, the defination of crime and collection of data still have differences.
+The crime data is merged by two datasets, one from 2006-2020 and the other from 2021 to 2022. Although they have similar columns and both contain all the variables we are interested in, the definition of crime and collection of data still have differences.
 
-Original passenger data only contains cumulative entries and exits. When taking difference from entries and exits, the diff contains negative and unreasonably large values. We imputed the erroneous.
+The records of some original data are not quite reasonable, for instance, the proceeding time of some violation or misdemeanor cases last for more than several years, it is not clear whether that case really takes such a long period or not, so that leads to extremely unreasonable outliers. Second, there would be some censoring data in the original data set for a specific year, for example, only several days in January and February of 2020 were recorded in the data set, so it may become hard to explore the true situation regarding crime events in this period of time. 
 
-Another problem is that station names in the crime data and original data cannot match. We matched them based on external data source (Google Map Api). We use Api to get exact coordinates of station and category crime data to a station. Mismatch can happen in this case.
+Original passenger data only contains cumulative entries and exits. When taking differences from entries and exits, the diff contains negative and unreasonably large values. We imputed the erroneous.
 
-### Analysis limitations
+Another problem is that station names in the crime data and original data cannot match. We matched them based on an external data source (Google Map Api). We use Api to get the exact coordinates of the station and category crime data to a station. A mismatch can happen in this case. For some crime locations, whose distance to the closest station is less than 0.0001 is removed from the crime dataset. Furthermore, some of the crime data have no information about latitude or longitude, and some else have the wrong location which is in Canada.
 
-As for the part regarding relationship between crime events and occurrence time including year, quarter, month, day of week and time points, we exploring the association between crime and events, and we show the specific relationship between the outcome of interest - crime events and variable time, for instance, which year may be the most frequent for crime events, by this, we may try to further investigate the reason for variation among years; or which time point on with day of week will be the most dangerous time for people hanging out, also by this, it may guide citizens to try to avoid these time points for outdoor activities.
+
 
 ### Model limitations
 
-Considering computation cost, group analysis is relative fast and accurate. If computing power can be strengthened, the model will be stronger. In addition, due to a number of missing values, the results can be better when a 'healthier' data are given. The decoder we utilized is default,inner product, and it can be specially designed for this task.
+Considering computation cost, group analysis is relatively fast and accurate. If computing power can be strengthened, the model will be stronger. In addition, due to a number of missing values, the results can be better when a 'healthier' data are given. The decoder we utilized is the default, inner product, and it can be specially designed for this task.
 
 ## Acknowledgement
 
