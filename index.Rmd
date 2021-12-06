@@ -103,15 +103,15 @@ Email: [bg2715@cumc.columbia.edu](mailto:bg2715@cumc.columbia.edu)
 
 [MS in Biostatistics at Columbia University](http://www.mailman.columbia.edu/academic-departments/biostatistics)  
 
-Email: [zheyan.liu@columbia.edu](mailto:zheyan.liu@columbia.edu)  
+Email: [yk2960@columbia.edu](mailto:yk2960@columbia.edu)  
 
 Website, Linkedin, Github
 
 *Contributions*
 
-* 1 Clean and imputed subway passenger data; Build project website and partcipate in writing report
+* 1 Clean and imputed crime by location data;create a crime rate  shiny dashboard, build project website and participate in writing report
 * 2 Conduct EDA on subway passenger data&location; Feature engineering on coordinates with K-means
-* 3 Build subway naviagtion app based on Google Maps Apis and adapted GNN into crime prediction on each route
+* 3 Build subway navigation app based on Google Maps Apis and adapted GNN into crime prediction on each route
 
 <br>
 
