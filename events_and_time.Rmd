@@ -16,6 +16,9 @@ library(readxl)
 library(httr)
 library(lubridate)
 library(plotly) 
+library(RColorBrewer)
+#cols <- brewer.pal(9,"Blues")
+
 ```
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
@@ -52,7 +55,7 @@ plot_1 =
   group_by(start_date) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~start_date, y = ~event_num, type = "bar"
+    x = ~start_date, y = ~event_num, type = "bar", colors = "#2171B5"
   )
 
 layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), yaxis = list(title = "Number of Crime Events (K)"))
@@ -81,7 +84,7 @@ plot_2 =
   group_by(event_quarter) %>% 
   summarise(event_num = n()) %>% 
   plot_ly(
-    x = ~event_quarter, y = ~event_num, type = "scatter", mode = "points"
+    x = ~event_quarter, y = ~event_num, type = "scatter", mode = "points", colors = "#2171B5"
   )
 
 layout(plot_2, title = "Crime events over quarter", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"), width = 800)
@@ -106,7 +109,7 @@ plot_3 =
   group_by(month, law_cat) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat
+    x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat, colors = "viridis"
   )
 
 
@@ -115,7 +118,7 @@ plot_4 =
   group_by(month) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~month, y = ~event_num, type = "scatter", mode = "points", color="TotalNumber"
+    x = ~month, y = ~event_num, type = "scatter", mode = "points", color="TotalNumber", colors = "#2171B5"
   )
 
 subplot = subplot(plot_4, plot_3)
