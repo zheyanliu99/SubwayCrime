@@ -472,7 +472,7 @@ layout(subplot, title = "Event number over month", xaxis = list(title = "Month")
 
 ## EDA Application-Crime Map
 
-On the shiny dashboard, two tabs are designed(click [here]("https://stephenyuan.shinyapps.io/CrimeMapShiny/") ). The first tab shows crime data, which includes a cluster map and bar charts by the service and cluster. In this tab, the users can control the crime type and time period to check the plots in different scenarios. The second tab shows the crime rate mainly, which contains a zipcode map and bar charts by the service and cluster. Users can choose the time period detailed to days and type of the crime's degree. 
+On the shiny dashboard, two tabs are designed(click [here](https://stephenyuan.shinyapps.io/CrimeMapShiny/)). The first tab shows crime data, which includes a cluster map and bar charts by the service and cluster. In this tab, the users can control the crime type and time period to check the plots in different scenarios. The second tab shows the crime rate mainly, which contains a zipcode map and bar charts by the service and cluster. Users can choose the time period detailed to days and type of the crime's degree. 
 
 ## Subway Passenger
 
