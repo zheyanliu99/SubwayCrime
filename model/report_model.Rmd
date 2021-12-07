@@ -19,9 +19,9 @@ Graph neural networks can extract features and make predictions about entities a
 
 #### Data Processing
  
-Data sources have been mentioned earlier. In terms of time, we considered variables of date and time for events. Age, race and sex were selected as variables of victims. In the degree of space, we used service of subway lines and cluster of neighborhoods mentioned before. Considering the computing cost, we grouped subway crime data from 2006 to 2021, as shown in table 1. In order to transform our data into GNN acceptable, we set different (date, time) pair as item nodes and different (age, race, sex, service, cluster) vector as user nodes, and link prediction task appeared between user and item nodes. Finally, there were 1612 user nodes, 2196 item nodes and 28126 edges between them.
+Data sources have been mentioned earlier. In terms of time, we considered variables of date and time for events. Age, race and sex were selected as variables of victims. In the degree of space, we used service of subway lines and cluster of neighborhoods mentioned before. Considering the computing cost, we grouped subway crime data from 2006 to 2021, as shown in table. In order to transform our data into GNN acceptable, we set different (date, time) pair as item nodes and different (age, race, sex, service, cluster) vector as user nodes, and link prediction task appeared between user and item nodes. Finally, there were 1612 user nodes, 2196 item nodes and 28126 edges between them.
 
-|         | after grouped                                 |
+|         |                                               |
 |---------|-----------------------------------------------|
 | date    | 366 days of the year                          |
 | time    | 6 time intervals with a length of 4 hours     |
