@@ -111,6 +111,7 @@ Some crime data who have deviant longitude and latitude will be excluded.
 ### Subway Passenger
 
 #### K-Means
+The reason why we do not want to use the orignal boro (Manhatten, Brooklyn, Queens and Bronx) is that there is too few categories [based on our analysis on crime rate](https://stephenyuan.shinyapps.io/CrimeMapShiny/), making the model to be less predictive. We want to use Kmeans to produce more boros/clusters so that it better shows the pattern of the crime distribution. For instance, crime rate in upper Manatten > mid Manatten> lower Manatten. And we use Kmeans to better seperate these parts so that we can have a better model.
 
 We set the number of clusters to be 8 and use Kmeans to cluster latitudes and longitudes. After K-means we have 8 clusters of locations instead of the original 4 boro, making it closer to reality (for instance we have lower, middle and upper Manhatten in the clusters)and better for model classification. The kmeans code is in [PassengerEDA.Rmd](https://github.com/zheyanliu99/SubwayCrime/blob/main/PassengerEDA.Rmd)
 
@@ -848,9 +849,11 @@ The crime data is merged by two datasets, one from 2006-2020 and the other from 
 
 The records of some original data are not quite reasonable, for instance, the proceeding time of some violation or misdemeanor cases last for more than several years, it is not clear whether that case really takes such a long period or not, so that leads to extremely unreasonable outliers. Second, there would be some censoring data in the original data set for a specific year, for example, only several days in January and February of 2020 were recorded in the data set, so it may become hard to explore the true situation regarding crime events in this period of time. 
 
-Original passenger data only contains cumulative entries and exits. When taking differences from entries and exits, the diff contains negative and unreasonably large values. We imputed the erroneous.
+Original passenger data only contains cumulative entries and exits. When taking differences from entries and exits, the diff contains negative and unreasonably large values. We imputed the erroneous. 
 
 Another problem is that station names in the crime data and original data cannot match. We matched them based on an external data source (Google Map Api). We use Api to get the exact coordinates of the station and category crime data to a station. A mismatch can happen in this case. For some crime locations, whose distance to the closest station is less than 0.0001 is removed from the crime dataset. Furthermore, some of the crime data have no information about latitude or longitude, and some else have the wrong location which is in Canada.
+
+Finally, When there are several different lines in one station, we have to divide the total passenger by all the lines because we don't know the passenger of each line, which will cause some error.
 
 
 

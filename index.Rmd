@@ -40,7 +40,7 @@ As students who are living here in New York City, most of us will almost take su
   * Exploratory Data Analysis of subway crime with [location](events_and_location.html) (coordiante-based Kmeans cluster, subway line, station)
   * [Analysis of passengers flow](PassengerEDA.html) of subway and its relationship with the location; How we use coordinates-based Kmeans on this analysis. 
   * An [interactive Shiny Dashboard](https://stephenyuan.shinyapps.io/CrimeMapShiny/) about subway crime, people can look up crime rate in each location, distribution of each crime type.
-  * A shiny app for [Subway passenger flow animation and info lookup](https://chaoqiwu0324.shinyapps.io/subway_passenger/) and a more detailed app on each [line](https://chaoqiwu0324.shinyapps.io/line_passenger/)
+  * A shiny app for [Subway passenger flow animation and info lookup on each line](https://chaoqiwu0324.shinyapps.io/subway_passenger/)
   * A [GNN](https://en.wikipedia.org/wiki/Graph_neural_network) model for predicting existence and severity of subway crime
   * [No-crime Navigation shiny app](https://zheyanliu.shinyapps.io/NYC_subway_findroute) based on [Google Maps Api](https://developers.google.com/maps) (give subway route), GNN model (predict crime existence) and historical passenger data (give crowdness of a route).
 
@@ -48,7 +48,7 @@ As students who are living here in New York City, most of us will almost take su
 
 
 ## Team members
-<img src = "images/Zheyan.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px">
+<img src = "images/Zheyan2.jpg" style = "width:26%; float:left; padding-right:25px; padding-bottom:25px">
 
 **Zheyan Liu**
 
@@ -66,25 +66,26 @@ Email: [zheyan.liu@columbia.edu](mailto:zheyan.liu@columbia.edu)
 
 
 <br>
-
-<img src = "images/Chaoqi.jfif" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px">
+<br>
+<br>
+<img src = "images/Chaoqi.jfif" style = "width:26%; float:left; padding-right:25px; padding-bottom:25px">
 
 **Chaoqi Wu**
 
 [MS in Biostatistics at Columbia University](http://www.mailman.columbia.edu/academic-departments/biostatistics)  
 
-Email: [zheyan.liu@columbia.edu](mailto:zheyan.liu@columbia.edu)  
+Email: [cw3370@cumc.columbia.edu](mailto:cw3370@cumc.columbia.edu)  
 
-Website, Linkedin, Github
+[Website](https://chaoqiw0324.github.io/Chaoqi-Wu.github.io/), [Linkedin](https://www.linkedin.com/in/%E8%B6%85%E7%A5%BA-%E5%90%B4-52426a222/), [Github](https://github.com/chaoqiw0324)
 
 *Contributions*
 
-* 1 
-* 2 
-* 3 
+* 1 Cleaned the subway passenger data, clarify the relation between station and lines.
+* 2 Conduct EDA on subway passenger data, analyze the relationship among passenger, line and time 
+* 3 Built subway passenger app providing search function based on line and time.
 
-
-<img src = "images/Baode.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px">
+<br>
+<img src = "images/Baode.jpg" style = "width:26%; float:left; padding-right:25px; padding-bottom:25px">
 
 **Baode Gao**
 
@@ -102,7 +103,7 @@ Email: [bg2715@cumc.columbia.edu](mailto:bg2715@cumc.columbia.edu)
 
 <br>
 
-<img src = "images/Youyuan.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px">
+<img src = "images/Youyuan.jpg" style = "width:26%; float:left; padding-right:25px; padding-bottom:25px">
 
 **Youyuan Kong**
 
@@ -121,8 +122,11 @@ Email: [yk2960@columbia.edu](mailto:yk2960@columbia.edu)
 
 <br>
 <br>
+<br>
+<br>
 
-<img src = "images/pic.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px">
+
+<img src = "images/pic.jpg" style = "width:26%; float:left; padding-right:25px; padding-bottom:25px">
 
 **Zexu Yuan**
 

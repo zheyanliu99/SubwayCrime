@@ -10,8 +10,7 @@ navbar:
         href: PassengerEDA.html
       - text: 'Subway Passenger Animation and Crime Lookup App'
         href: https://chaoqiwu0324.shinyapps.io/subway_passenger/
-      - text: 'Subway Passenger Line Animation App'
-        href: https://chaoqiwu0324.shinyapps.io/line_passenger/
+
     - text: 'Crime'
       menu:
       - text: "Analysis by Time"
@@ -21,7 +20,7 @@ navbar:
       - text: 'Crime Dashboard'
         href: https://stephenyuan.shinyapps.io/CrimeMapShiny/
     - text: 'GNN model'
-      href: model/report_model.html
+      href: report_model.html
     - text: 'No Crime Navigation App'
       href: https://zheyanliu.shinyapps.io/NYC_subway_findroute
 
