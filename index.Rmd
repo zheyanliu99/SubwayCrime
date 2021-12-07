@@ -35,6 +35,17 @@ New York subway, one of the main public transportations for New Yorkers, provide
 
 As students who are living here in New York City, most of us will almost take subway to the campus in early morning and back to apartment in nights on weekdays, and hang out with friends on weekends. Keeping away from danger at subway stations is closely related to ourselves. We hope we are able to help citizens to find the comparatively safe and reliable routes when taking subways.
 
+## Data
+
+
+### Subway Crime
+
+The orginal subway crime data has two parts.[The first one ](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Current-Year-To-Date-/5uac-w243) contains all valid felony, misdemeanor, and violation crimes reported to the New York City Police Department--- [NYPD](https://www1.nyc.gov/site/nypd/index.page). The [second one](https://data.cityofnewyork.us/Public-Safety/NYPD-Complaint-Data-Historic/qgea-i56i)  includes similar crimes. We join these two data frames and only analyze crimes which happen in subway, NYC.
+
+### Subway Passenger
+
+The orginal [Subway passenger data](http://web.mta.info/developers/turnstile.html) is from [MTA](https://new.mta.info/)(Metropolitan Transportation Authority). The orginal data contains total entries and exits in each station in every 4 hours from 2010 to now.
+
 ## What you can find in this website
   * Exploratory Data Analysis of subway crime with [time](events_and_time.html) (year, month, hour)
   * Exploratory Data Analysis of subway crime with [location](events_and_location.html) (coordiante-based Kmeans cluster, subway line, station)
