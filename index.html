@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>NYC subway crime</title>
+
+<script src="site_libs/header-attrs-2.11/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/lumen.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-119400399-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-119400399-1');
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Passenger
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="PassengerEDA.html">Passenger flow with location based Kmeans</a>
+    </li>
+    <li>
+      <a href="https://chaoqiwu0324.shinyapps.io/subway_passenger/">Subway Passenger Animation and Crime Lookup App</a>
+    </li>
+    <li>
+      <a href="https://chaoqiwu0324.shinyapps.io/line_passenger/">Subway Passenger Line Animation App</a>
+    </li>
+  </ul>
+</li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Crime
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="events_and_time.html">Analysis by Time</a>
+    </li>
+    <li>
+      <a href="events_and_location.html">Analysis by Location</a>
+    </li>
+    <li>
+      <a href="https://stephenyuan.shinyapps.io/CrimeMapShiny/">Crime Dashboard</a>
+    </li>
+  </ul>
+</li>
+<li>
+  <a href="model/report_model.html">GNN model</a>
+</li>
+<li>
+  <a href="https://zheyanliu.shinyapps.io/NYC_subway_findroute">No Crime Navigation App</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="report.html">Report</a>
+</li>
+<li>
+  <a href="mailto:&lt;zheyan.liu@columbia.edu&gt;">
+    <span class="fa fa-envelope fa-lg"></span>
+     
+  </a>
+</li>
+<li>
+  <a href="https://github.com/zheyanliu99/SubwayCrime.git">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+<div class="btn-group pull-right float-right">
+<button type="button" class="btn btn-default btn-xs btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu dropdown-menu-right" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">NYC subway crime</h1>
+
+</div>
+
+
+<p><link rel="stylesheet" href="academicons.css"/> <link rel="stylesheet" href="styles.css" type="text/css"></p>
+<div id="zheyan-liu-chaoqi-wu-baode-gao-youyuan-kong-zexu-yuan" class="section level4">
+<h4>Zheyan Liu, Chaoqi Wu, Baode Gao, Youyuan Kong, Zexu Yuan</h4>
+</div>
+<div id="columbia-university-mailman-school-of-public-health" class="section level4">
+<h4>Columbia University, Mailman School of Public Health</h4>
+<p><br></p>
+</div>
+<div id="motivation" class="section level2">
+<h2>Motivation</h2>
+<p>New York subway, one of the main public transportations for New Yorkers, provides super convenience for local citizens, at the same time, brings potential danger to passengers, where criminals are attracted to busier subway stations for certain kinds of crime like pick pocketing, grand larceny and assault. The cloest train compartment can trigger cime and make victims harder to run.</p>
+<br>
+<center>
+<img src="images/subway_crime.jpg" style="width:60.0%" />
+</center>
+<p><br> 11/21/2021, around 12:00 AM, at 34th Street-Penn Station in Manhattan, Alkeem Loney, a 32-year-old male, was stabbed in the neck during an unprovoked attack and was pronounced dead later as NYPD stated. The deadly incident is the latest in a pate of violence underground that comes as the MTA tries to get commuters back on mass transit. The horrible crime event raised lots of public concern about the safety at subway stations, the safety tightly related to almost every citizen who are living, working and studying in New York City.</p>
+<p>As students who are living here in New York City, most of us will almost take subway to the campus in early morning and back to apartment in nights on weekdays, and hang out with friends on weekends. Keeping away from danger at subway stations is closely related to ourselves. We hope we are able to help citizens to find the comparatively safe and reliable routes when taking subways.</p>
+</div>
+<div id="what-you-can-find-in-this-website" class="section level2">
+<h2>What you can find in this website</h2>
+<ul>
+<li>Exploratory Data Analysis of subway crime with <a href="events_and_time.html">time</a> (year, month, hour)</li>
+<li>Exploratory Data Analysis of subway crime with <a href="events_and_location.html">location</a> (coordiante-based Kmeans cluster, subway line, station)</li>
+<li><a href="PassengerEDA.html">Analysis of passengers flow</a> of subway and its relationship with the location; How we use coordinates-based Kmeans on this analysis.</li>
+<li>An <a href="https://stephenyuan.shinyapps.io/CrimeMapShiny/">interactive Shiny Dashboard</a> about subway crime, people can look up crime rate in each location, distribution of each crime type.</li>
+<li>A shiny app for <a href="https://chaoqiwu0324.shinyapps.io/subway_passenger/">Subway passenger flow animation and info lookup</a> and a more detailed app on each <a href="https://chaoqiwu0324.shinyapps.io/line_passenger/">line</a></li>
+<li>A <a href="https://en.wikipedia.org/wiki/Graph_neural_network">GNN</a> model for predicting existence and severity of subway crime</li>
+<li><a href="https://zheyanliu.shinyapps.io/NYC_subway_findroute">No-crime Navigation shiny app</a> based on <a href="https://developers.google.com/maps">Google Maps Api</a> (give subway route), GNN model (predict crime existence) and historical passenger data (give crowdness of a route).</li>
+</ul>
+</div>
+<div id="team-members" class="section level2">
+<h2>Team members</h2>
+<p><img src = "images/Zheyan.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Zheyan Liu</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:zheyan.liu@columbia.edu">zheyan.liu@columbia.edu</a></p>
+<p><a href="https://zheyanliu99.github.io/">Website</a>, <a href="https://www.linkedin.com/in/zheyanliu999/">Linkedin</a>, <a href="https://github.com/zheyanliu99?tab=repositories">Github</a></p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1 Cleaned and imputed subway passenger data; Built project website and orgnized final report</li>
+<li>2 Conduct EDA on subway passenger data&amp;location; Feature engineering on coordinates with K-means</li>
+<li>3 Built subway naviagtion app based on Google Maps Apis and adapted GNN into crime prediction on each route</li>
+</ul>
+<p><br></p>
+<p><img src = "images/Chaoqi.jfif" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Chaoqi Wu</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:zheyan.liu@columbia.edu">zheyan.liu@columbia.edu</a></p>
+<p>Website, Linkedin, Github</p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1</li>
+<li>2</li>
+<li>3</li>
+</ul>
+<p><img src = "images/Baode.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Baode Gao</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:bg2715@cumc.columbia.edu">bg2715@cumc.columbia.edu</a></p>
+<p><a href="https://buddgao.github.io/Baode_Gao.github.io/">Website</a>, <a href="https://www.linkedin.com/in/baode-gao-389249176/">Linkedin</a>, <a href="https://github.com/BuddGao?tab=repositories">Github</a></p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1 Cleaned, grouped and transformed data to the form GNN accepted;</li>
+<li>2 Implemented graph auto encoder to our data, evaluated it and adapted it into crime prediction on each route;</li>
+<li>3 Contributed in model report in web.</li>
+</ul>
+<p><br></p>
+<p><img src = "images/Youyuan.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Youyuan Kong</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MS in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:yk2960@columbia.edu">yk2960@columbia.edu</a></p>
+<p><a href="https://keviant.github.io/p8105_hw4_yk2960.github.io/#Dashboard">Website</a>, <a href="https://www.linkedin.com/in/youyuan-kong-a983b91b2/">Linkedin</a>, <a href="https://github.com/Keviant?tab=repositories">Github</a></p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1 Clean and imputed crime by location data;create a crime rate shiny dashboard, and participate in writing report</li>
+<li>2 Conduct EDA on subway passenger data&amp;location</li>
+</ul>
+<p><br> <br></p>
+<p><img src = "images/pic.jpg" style = "width:20%; float:left; padding-right:25px; padding-bottom:25px"></p>
+<p><strong>Zexu Yuan</strong></p>
+<p><a href="http://www.mailman.columbia.edu/academic-departments/biostatistics">MPH in Biostatistics at Columbia University</a></p>
+<p>Email: <a href="mailto:zy2392@columbia.edu">zy2392@columbia.edu</a></p>
+<p><a href="https://zexuyuan.github.io/Stephen_Yuan.github.io/">Website</a>, <a href="https://www.linkedin.com/in/zexuyuan/">Linkedin</a>, <a href="https://github.com/ZexuYuan">Github</a></p>
+<p><em>Contributions</em></p>
+<ul>
+<li>1 Conducted exploratory data analysis regarding the relationship between occurrence of crime events and time</li>
+<li>2 Contributed to establishment of shiny dashboard with regard to crime events map</li>
+</ul>
+</div>
+
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
