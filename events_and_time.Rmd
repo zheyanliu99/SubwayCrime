@@ -16,11 +16,14 @@ library(readxl)
 library(httr)
 library(lubridate)
 library(plotly) 
+library(RColorBrewer)
+#cols <- brewer.pal(9,"Blues")
+
 ```
 
 ```{r, echo = FALSE, message=FALSE, warning=FALSE}
 raw_sub_crime = 
-  read_csv("./data/subwaycrime_with_station_new_1.csv") %>% 
+  read_csv("./data/subwaycrime_with_station_new.csv") %>% 
   janitor::clean_names() %>% 
   rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "law_cat" = "law_cat_cd", "crime_event" = "ofns_desc", "crime_desc" = "pd_desc") %>% 
   mutate(law_cat = ordered(law_cat, level = c("VIOLATION", "MISDEMEANOR", "FELONY"))) %>% 
@@ -52,7 +55,7 @@ plot_1 =
   group_by(start_date) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~start_date, y = ~event_num, type = "bar"
+    x = ~start_date, y = ~event_num, type = "bar", colors = "#2171B5"
   )
 
 layout(plot_1, title = "Crime events over years", xaxis = list(title = "Year"), yaxis = list(title = "Number of Crime Events (K)"))
@@ -81,7 +84,7 @@ plot_2 =
   group_by(event_quarter) %>% 
   summarise(event_num = n()) %>% 
   plot_ly(
-    x = ~event_quarter, y = ~event_num, type = "scatter", mode = "points"
+    x = ~event_quarter, y = ~event_num, type = "scatter", mode = "points", colors = "#2171B5"
   )
 
 layout(plot_2, title = "Crime events over quarter", xaxis = list(title = "Quarter"), yaxis = list(title = "Number of Crime Events"), width = 800)
@@ -106,7 +109,7 @@ plot_3 =
   group_by(month, law_cat) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat
+    x = ~month, y = ~event_num, type = "scatter", mode = "points", color = ~law_cat, colors = "viridis"
   )
 
 
@@ -115,7 +118,7 @@ plot_4 =
   group_by(month) %>% 
   summarise(event_num = n() / 1000) %>% 
   plot_ly(
-    x = ~month, y = ~event_num, type = "scatter", mode = "lines"
+    x = ~month, y = ~event_num, type = "scatter", mode = "points", color="TotalNumber", colors = "#2171B5"
   )
 
 subplot = subplot(plot_4, plot_3)

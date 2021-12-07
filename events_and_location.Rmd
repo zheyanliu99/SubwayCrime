@@ -54,14 +54,15 @@ crime_df<-crime_df %>%
 
 ```
 
-New York City can be a dangerous place and crime from above ground will 
+New York City can be a dangerous place and crime from the above-ground will 
 often extend into the NYC Subway.</br>
-We mainly focus on the recent crime data on subway in NYC in this year, and 
+We mainly focus on the recent crime data on the subway in NYC this year, and 
 there are `r nrow(crime_df)` complaints from 2006 to now. 
 
 ## Heat Map of Subway Crime in NYC, 2006-2021
 
-From this map, you can check where the crime happened frequently. 
+From this map, you can check where the crime happened frequently.
+
 ```{r heatmap, echo = FALSE, message=FALSE, warning=FALSE}
 crime_df %>% 
   group_by(closest_station) %>% 
@@ -77,12 +78,12 @@ crime_df %>%
 
 ## Map of Subway Crime in NYC, 2006-2021
 
-From this map, you can check each crime's location, type, victim and suspects' 
+From this map, you can check each crime's location, type, victim, and suspects' 
 information and time. 
 
 ```{r leaflet, echo = FALSE, message=FALSE, warning=FALSE}
 
-
+## cluster map
 
 leaflet(crime_df) %>%
   addProviderTiles(providers$CartoDB.Positron) %>% 
@@ -96,24 +97,13 @@ leaflet(crime_df) %>%
                            "Victim's gender:",crime_df$vic_sex,"<br>",
                            "Time:",crime_df$cmplnt_to_dt),
                 clusterOptions = markerClusterOptions())
-  
 
-
-# "Offense Description:", crime_df$ofns_desc, "<br>",
-# "<br>", 
-#                 
-#                 "Suspect Information", c(crime_df$susp_age_group,
-#                                          crime_df$susp_race,
-#                                          crime_df$susp_sex), "<br>",
-#                 "Victim Information:", c(crime_df$vic_age_group,
-#                                          crime_df$vic_race,
-#                                          crime_df$vic_sex), 
 ```
 
 ## Distribution of crime in 7 Clusters
 
 When firstly scanning the map above, you can ambiguously know how many crimes 
-in each part of NYC, so let us check them in each ambiguously using bar chart.
+in each part of NYC, so let us check them in each ambiguously using a bar chart.
 
 ```{r barcluster, echo = FALSE, message=FALSE, warning=FALSE}
 
@@ -148,7 +138,7 @@ crime_df %>%
 
 ```
 
-## Top 20 station where crime happens frequently
+## Top 20 stations where crime happens frequently
 
 From this chart, you can mainly check which station is the most dangerous station.
 ```{r station, echo = FALSE, message=FALSE, warning=FALSE}
@@ -165,28 +155,12 @@ crime_df %>%
 ```
 
 
-
-
-```{r suprace, echo = FALSE, message=FALSE, warning=FALSE}
-# 
-# crime_df %>% 
-#   drop_na(cluster,susp_race) %>% 
-#   filter(susp_race!="UNKNOWN") %>% 
-#   count(cluster,susp_race) %>% 
-#   mutate(cluster = fct_reorder(cluster, n)) %>% 
-#   plot_ly(x = ~cluster, y = ~n, color = ~susp_race, type = "bar", colors = "viridis") %>% 
-#   layout(
-#          yaxis = list(title = 'Number of Compliants'),
-#          xaxis = list(title = 'Area'))
-
-```
-
 ## Barchart by each Borough about Victims
 
 From this graph, you can check in each borough, which races more possibly 
 vulnerable in the subway. 
 
-As you can see, the proportion of African Americans in each cluster are stable; In Manhattan, where has the most crimes, white people(including white hispanic) are more vunlerable than African Americans in these places. 
+As you can see, the proportion of African Americans in each cluster are stable; In Manhattan, where has the most crimes, white people(including white Hispanics) are more vulnerable than African Americans in these places. 
 ```{r vicrace, echo = FALSE, message=FALSE, warning=FALSE}
 crime_df %>%
   filter(vic_race!="UNKNOWN") %>%
@@ -200,12 +174,12 @@ crime_df %>%
 ```
 
 
-## Gender Distrubution for popular crime types
+## Gender Distribution for popular crime types
 
 In this part, we want to know which gender are more possible to become potential victims. We choose several types of crime from the most frequent kinds of crimes:</br>
 ASSAULT 3 & RELATED OFFENSES,HARRASSMENT 2,GRAND LARCENY,FELONY ASSAULT,
 ROBBERY,PETIT LARCENY,SEX CRIMES.</br>
-We can find that crimes about sex crimes and harassment, female are more possible to be attacked. Crimes about regular theft, such as assault and larceny, male are potential victims comparing with female. 
+We can find that crimes about sex crimes and harassment, females are more possible to be attacked. Crimes about regular theft, such as assault and larceny, male are potential victims compared with females. 
 
 ```{r gender, echo = FALSE, message=FALSE, warning=FALSE}
 crime_df %>% 
@@ -230,8 +204,8 @@ crime_df %>%
 
 ## Female Age Distribution for Sex Crimes 
 
-Let us talk more about age group for some specific crimes: SEX CRIMES and HARRASSMENT 2. </br>
-Most of the victims' age are in the age 25-44 interval. 
+Let us talk more about age groups for some specific crimes: SEX CRIMES and HARASSMENT 2. </br>
+Most of the victims' age is in the age 25-44 interval. 
 
 
 
@@ -249,8 +223,9 @@ crime_df %>%
   
 ```
 
-## Crimr Rate Top 20
-Sometimes, we more care about the crime rates on subway rather than number of crimes, because we also care the possiblity that the people standing in front of us is suspective. 
+## Crime Rate Top 20
+
+Sometimes, we more care about the crime rates on the subway rather than the number of crimes, because we also care about the possibility that the people standing in front of us is suspective. 
 ```{r crime_rate, echo = FALSE, message=FALSE, warning=FALSE}
 crime_rate_summary<-read.csv("data/crime_rate_station.csv")
 crime_rate_summary %>% 

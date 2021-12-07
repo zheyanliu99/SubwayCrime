@@ -5,16 +5,24 @@ navbar:
   
   left:
     - text: 'Passenger'
-      href: PassengerEDA.html
+      menu:
+      - text: 'Passenger flow with location based Kmeans'
+        href: PassengerEDA.html
+      - text: 'Subway Passenger Animation and Crime Lookup App'
+        href: https://chaoqiwu0324.shinyapps.io/subway_passenger/
+      - text: 'Subway Passenger Line Animation App'
+        href: https://chaoqiwu0324.shinyapps.io/line_passenger/
     - text: 'Crime'
       menu:
-      - text: "by Time"
+      - text: "Analysis by Time"
         href: events_and_time.html
-      - text: "by Location"
+      - text: "Analysis by Location"
         href: events_and_location.html
       - text: 'Crime Dashboard'
         href: https://stephenyuan.shinyapps.io/CrimeMapShiny/
-    - text: 'No Crime Navigation'
+    - text: 'GNN model'
+      href: model/report_model.html
+    - text: 'No Crime Navigation App'
       href: https://zheyanliu.shinyapps.io/NYC_subway_findroute
 
     # - text: "About"
