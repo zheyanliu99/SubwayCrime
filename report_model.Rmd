@@ -4,7 +4,7 @@ output:
   html_document:
     toc: true
     toc_float: true
-    code_folding: hide
+    
 editor_options: 
   chunk_output_type: console
 ---
@@ -45,6 +45,10 @@ The AUC was utilized to evaluate this model. As shown in plot, although there we
 ### Application
 
 In crime prediction task, we though highly of recall more than precision, because FN is more serious than FP and we wouldn’t take that risk. Therefore, we took threshold as 0.45 and predicted as positive (crime occurring) if outcome was greater than it.
+
+### Model Reproduction
+
+See 'README.txt' file in github model folder.
 
 ### Reference
 [1] Daigavane, et al., "Understanding Convolutions on Graphs", Distill, 2021.
