@@ -763,8 +763,8 @@ df %>%
 
 Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Manhattan and upper Manhattan. Brooklyn and Queens shares 3 cluster. Also, there is a cluster for Bronx. We think the Kmeans result is easier to interpret than that of zipcode or sublocality and it can partly represent the relationship between passenger flow and location. Therefore, we use Kmeans result as the location variable in our model.
 
-
-
+## EDA Application-Passenger Info Search
+On the shiny app, we support two kind of info search(click [here]( https://chaoqiwu0324.shinyapps.io/subway_passenger/)). The first is searching based on the specific line,time and date. Users can get the information of passenger flow during that period of time in the line they are interested in. The second is searching based on the specific line and date range. Users can get the daily passenger flow and top 10 busiest station during that in the line they choose. The detail of this app can be found on the app [main page](https://chaoqiwu0324.shinyapps.io/subway_passenger/?_ga=2.75822421.1758708988.1638843374-1568766748.1638133594)
 
 # Model
 
