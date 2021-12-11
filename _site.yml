@@ -48,6 +48,8 @@ navbar:
         href: https://github.com/zheyanliu99/SubwayCrime.git/
       - text: No-crime Navigation App 
         href: https://github.com/zheyanliu99/NYC_subway_findroute/
+      - text: Subway Passenger App
+        href: https://github.com/chaoqiw0324/subway_app
         
       
 output:

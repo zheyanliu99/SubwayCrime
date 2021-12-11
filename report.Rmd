@@ -470,7 +470,7 @@ subplot = subplot(plot_4, plot_3)
 layout(subplot, title = "Event number over month", xaxis = list(title = "Month"), yaxis = list(title = "Number of crime events (K)"), width = 1000)
 ```
 
-## EDA Application-Crime Map
+##Application-Crime Map
 
 On the shiny dashboard, two tabs are designed(click [here](https://stephenyuan.shinyapps.io/CrimeMapShiny/)). The first tab shows crime data, which includes a cluster map and bar charts by the service and cluster. In this tab, the users can control the crime type and time period to check the plots in different scenarios. The second tab shows the crime rate mainly, which contains a zipcode map and bar charts by the service and cluster. Users can choose the time period detailed to days and type of the crime's degree. 
 
@@ -763,7 +763,7 @@ df %>%
 
 Kmeans algorithm cluster Manhattan into three parts: lower Manhattan, middle Manhattan and upper Manhattan. Brooklyn and Queens shares 3 cluster. Also, there is a cluster for Bronx. We think the Kmeans result is easier to interpret than that of zipcode or sublocality and it can partly represent the relationship between passenger flow and location. Therefore, we use Kmeans result as the location variable in our model.
 
-## EDA Application-Passenger Info Search
+## Application-Passenger Info Search
 On the shiny app, we support two kind of info search(click [here]( https://chaoqiwu0324.shinyapps.io/subway_passenger/)). The first is searching based on the specific line,time and date. Users can get the information of passenger flow during that period of time in the line they are interested in. The second is searching based on the specific line and date range. Users can get the daily passenger flow and top 10 busiest station during that in the line they choose. The detail of this app can be found on the app [main page](https://chaoqiwu0324.shinyapps.io/subway_passenger/?_ga=2.75822421.1758708988.1638843374-1568766748.1638133594)
 
 # Model
@@ -806,11 +806,11 @@ In crime prediction task, we though highly of recall more than precision, becaus
 
 ### Model Reproduction
 
-See 'README.txt' file in github model folder.
+See [README.txt](model/README.txt) file in github model folder.
 
 # Model Application
 
-We build the (No crime Navigation)[https://zheyanliu.shinyapps.io/NYC_subway_findroute/] APP based on [Google Maps Api](https://developers.google.com/maps) and GNN model. 
+We build the [No crime Navigation](https://zheyanliu.shinyapps.io/NYC_subway_findroute/) APP based on [Google Maps Api](https://developers.google.com/maps) and GNN model. 
 
 ## Input parameters
 
@@ -846,6 +846,10 @@ We explored which stations are the dangerous stations that have the most crimes(
 ### Event and time
 
 As for the part regarding the relationship between crime events and occurrence time including year, quarter, month, day of the week, and time points, we explore the association between crime and events, and we show the specific relationship between the outcome of interest - crime events and variable time, for instance, which year may be the most frequent for crime events, by this, we may try to further investigate the reason for variation among years; or which time point on with a day of the week will be the most dangerous time for people hanging out, also by this, it may guide citizens to try to avoid these time points for outdoor activities.
+
+### Subway Passenger 
+
+Subway passenger flow and subway station are not evenly distributed in NYC. Most stations and passengers are in the middle and lower Manhatten. Therefore, we use K-means to better demonstrate the distribution of the subway stations. We also build an [App]( https://chaoqiwu0324.shinyapps.io/subway_passenger/) for users to look up details of the subway info.
 
 ## Limitations
 
