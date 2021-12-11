@@ -42,9 +42,25 @@ crime_df<-read_csv('data/subwaycrime.csv') %>%
   mutate(cmplnt_fr_tm=as.character(cmplnt_fr_tm))%>% 
   select(-new_georeferenced_column) 
 
+##x<-read.csv("data/subwaycrime_with_station_new.csv")
+kmeans_df<-read_csv("data/Kmeans_centers.csv")
 
 
 crime_df_total<-bind_rows(crime_df,crime_df2)
+```
+
+```{r}
+crime_df<-read_csv('data/subway.csv') %>% 
+  janitor::clean_names() %>% 
+  mutate(cmplnt_fr_tm=as.character(cmplnt_fr_tm),
+         cmplnt_to_tm=as.character(cmplnt_to_tm))
+crime_df2<-read_csv('data/subway_newest.csv') %>% 
+  janitor::clean_names() %>% 
+  mutate(cmplnt_fr_tm=as.character(cmplnt_fr_tm),
+         cmplnt_to_tm=as.character(cmplnt_to_tm))%>% 
+  select(-new_georeferenced_column) 
+
+
 ```
 
 ## 将crime里其中一行的数据粘贴到croodinate，然后依次计算distance
@@ -69,7 +85,9 @@ crime_df_total<-crime_df_total %>%
          closest_line="",
          cluster="",
          postal_code="",
-         distance=0)
+         distance=0,
+         service="",
+         state="")
 a<-c()
 for (each in 1:nrow(crime_df_total)){
   a<-a %>% 
@@ -81,18 +99,54 @@ for (each in 1:nrow(crime_df_total)){
  crime_df_total[,39]= a%>% pull(cluster)
  crime_df_total[,40]= a%>% pull(postal_code)
  crime_df_total[,41]= a%>% pull(distance)
+ crime_df_total[,42]= a%>% pull(service)
+ crime_df_total[,43]= a%>% pull(administrative_area_level_1)
 crime_df_total %>% 
   distinct(cluster)
 
-bigger_distance<-crime_df %>% 
-  filter(distance>=.0001) %>% 
-  relocate(distance,station_name,closest_station,closest_line,latitude,longitude)
-
-crime_df_new=crime_df %>% 
-  mutate(cmplnt_fr_tm=crime_df_total$cmplnt_fr_tm)
+# bigger_distance<-crime_df_total %>% 
+#   filter(distance>=.0001) %>% 
+#   relocate(distance,station_name,closest_station,closest_line,latitude,longitude)
+# 
+# crime_df_new=crime_df %>% 
+#   mutate(cmplnt_fr_tm=crime_df_total$cmplnt_fr_tm)
 ```
 
+```{r}
+kmeans_df_compare<-function(each){
+  closet_row<-
+    kmeans_df %>% 
+    mutate(lat_new=crime_df_total[each,]$latitude,
+         long_new=crime_df_total[each,]$longitude) %>% 
+    mutate(distance=(lat_new-lat)^2+(long_new-long)^2) %>% 
+    slice_min(distance,n=1) %>% 
+    head(1)
+  closet_row
+}
+crime_df_total<-crime_df_total %>% 
+  drop_na(latitude,longitude)
 
+crime_df_total<-crime_df_total %>% 
+  mutate(cluster="")
+b<-c()
+for (each in 1:nrow(crime_df_total)){
+  b<-b %>% 
+    bind_rows(kmeans_df_compare(each))
+ 
+}
+
+crime_df_total %>% 
+  distinct(state)
+
+crime_df_total<-crime_df_total %>% 
+  mutate(cluster=b$cluster) %>% 
+  mutate()
+
+crime_df_ny<-crime_df_total %>% 
+  filter(state=="New York")
+## all is new york????
+
+```
 ## match the passenger data with crime data frame
 
 ```{r}
@@ -114,7 +168,7 @@ crime_df<-crime_df %>%
  filter(distance<=0.0001)%>% 
  filter(cmplnt_to_dt>='2006-1-1')
 
-crime_summary<-crime_df %>% 
+crime_summary<-crime_df_total %>% 
   count(closest_line,closest_station) %>% 
   mutate(linename=closest_line,station=closest_station) %>% 
   select(linename,station,n)
@@ -166,11 +220,13 @@ crime_df %>%
   view()
 
 crime_df_new <-
-  crime_df %>% 
-    mutate(closest_station=station,
-           closest_linename=linename,
-           closest_line=linename) ##%>% 
-##  select(-x1)
+  crime_df_total %>% 
+    mutate(station=closest_station,
+           closest_linename=closest_line,
+           linename=closest_line) %>% 
+  select(-x1) 
+  
+
 
 
 
@@ -178,7 +234,7 @@ crime_df_new <-
 
 # fwrite(bigger_distance,"bigger_distance.csv")
 # fwrite(crime_df_total,"subwaycrime_with_station_new.csv")
-# fwrite(crime_df_new,"subwaycrime_with_station_new.csv")
+ fwrite(crime_df_new,"subwaycrime_with_station_new.csv")
 # fwrite(crime_rate_summary,"crime_rate_station.csv")
 # fwrite(crime_rate_121,"crime_rate_dashboard.csv")
 

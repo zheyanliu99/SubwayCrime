@@ -5,6 +5,8 @@ output:
     toc: true
     toc_float: true
     code_folding: hide
+editor_options: 
+  chunk_output_type: console
 ---
 
 <link rel="stylesheet" href="academicons.css"/>
@@ -25,6 +27,7 @@ library(RColorBrewer)
 raw_sub_crime = 
   read_csv("./data/subwaycrime_with_station_new.csv") %>% 
   janitor::clean_names() %>% 
+  mutate(cmplnt_to_tm=as.character(cmplnt_to_tm)) %>% 
   rename("start_date" = "cmplnt_fr_dt", "start_time" = "cmplnt_fr_tm", "end_date" = "cmplnt_to_dt", "end_time" = "cmplnt_to_tm", "law_cat" = "law_cat_cd", "crime_event" = "ofns_desc", "crime_desc" = "pd_desc") %>% 
   mutate(law_cat = ordered(law_cat, level = c("VIOLATION", "MISDEMEANOR", "FELONY"))) %>% 
   mutate(start_date = as.Date(start_date, "%m/%d/%Y"), 
