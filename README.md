@@ -14,7 +14,10 @@ Research proposal:https://docs.google.com/document/d/1FYCJ67KAfVTEc409zKc8O1eL-f
 
 <br>
 Other repo:
+
 No-crime Navigation:https://github.com/zheyanliu99/NYC_subway_findroute/
+
+Subway Passenger APP:https://github.com/chaoqiw0324/subway_app
 
 <br>
 Other useful links
