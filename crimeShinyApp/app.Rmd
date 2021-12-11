@@ -29,13 +29,19 @@ crime_df = read_csv("subwaycrime_with_station_new.csv")
 crime_df<-crime_df %>% 
  mutate(cmplnt_to_dt=as.Date(cmplnt_to_dt,format='%m/%d/%Y')) %>% 
  filter(distance<=0.0001)%>% 
- filter(cmplnt_to_dt>='2006-1-1')
+ filter(cmplnt_to_dt>='2006-1-1') %>% 
+  mutate(service=recode(service,
+                        "Brooklyn-Queens Crosstown(G)"="BrooklynQueens(G)"))
+
 
 
 
 crime_df2 = read_csv('crime_rate.csv') %>% 
   filter(postal_code!="None") %>% 
-  janitor::clean_names()
+  janitor::clean_names() %>% 
+  filter(cluster!="0") %>% 
+  mutate(service=recode(service,
+                        "Brooklyn-Queens Crosstown(G)"="BrooklynQueens(G)"))
 
 
 
@@ -50,7 +56,6 @@ char_zips =
   char_zips %>% 
   rename(postal_code = GEOID10)
 ```
-
 
 
 Crimes 
@@ -73,6 +78,8 @@ crime_choices =
 crime_choices<-c("All",crime_choices)
 
 
+
+
 selectInput(
   "crime_choice",
   label = h1("Select Crime"),
@@ -89,12 +96,16 @@ sliderInput(
   max = 2021,
   value = c(2007, 2021)
 )
+
+
+
+
 ```
 
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+### Cluster map of crimes
 
 ```{r}
 renderLeaflet({ 
@@ -137,7 +148,7 @@ else {crime_df_adjusted<-
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### crimes by cluster
 
 ```{r}
 
@@ -175,7 +186,7 @@ crime_df_adjusted %>%
 
 ```
 
-### Chart C
+### Crimes by Service
 
 ```{r}
 renderPlotly({ 
@@ -261,7 +272,7 @@ dateRangeInput(
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+### Crime Rate by Zipcode
 
 ```{r}
 renderLeaflet({ 
@@ -354,7 +365,7 @@ if(input[["crime type"]]==1)
 Column {data-width=350}
 -----------------------------------------------------------------------
 
-### Chart B
+### Crime Rate by Cluster
 
 ```{r}
 
@@ -364,7 +375,7 @@ renderPlotly({
   crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
-    group_by(service) %>% 
+    group_by(cluster) %>% 
     summarise(crime_rate=sum(felony)/sum(flow))
 }
   else if(input[["crime type"]]==2)
@@ -372,7 +383,7 @@ renderPlotly({
     crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
-    group_by(service) %>% 
+    group_by(cluster) %>% 
     summarise(crime_rate=sum(misdemeanor)/sum(flow))
   }
     else if(input[["crime type"]]==3)
@@ -380,32 +391,29 @@ renderPlotly({
     crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
-    group_by(service) %>% 
+    group_by(cluster) %>% 
     summarise(crime_rate=sum(violation)/sum(flow))
     }
     else{
     crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
-    group_by(service) %>% 
+    group_by(cluster) %>% 
     summarise(crime_rate=sum(violation+misdemeanor+felony)/sum(flow))
       
     }
 
-
-
-
-crime_rate_df %>%
-  plot_ly(x = ~service, y = ~crime_rate, color = ~service, type = "bar", colors = "viridis") %>%
-  layout(yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'service'))
-
+ crime_rate_df %>%
+  mutate(cluster = fct_reorder(cluster, crime_rate)) %>%
+  plot_ly(x = ~cluster, y = ~crime_rate, color = ~cluster, type = "bar", colors = "viridis") %>%
+  layout(yaxis = list(title = 'Amount of crime rate'),
+         xaxis = list(title = 'cluster'))
 
  })
 
 ```
 
-### Chart C
+### Crime Rate by Service
 
 ```{r}
 renderPlotly({
@@ -414,7 +422,7 @@ renderPlotly({
   crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
-    group_by(cluster) %>% 
+    group_by(service) %>% 
     summarise(crime_rate=sum(felony)/sum(flow))
 }
   else if(input[["crime type"]]==2)
@@ -422,7 +430,7 @@ renderPlotly({
     crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
-    group_by(cluster) %>% 
+    group_by(service) %>% 
     summarise(crime_rate=sum(misdemeanor)/sum(flow))
   }
     else if(input[["crime type"]]==3)
@@ -430,28 +438,27 @@ renderPlotly({
     crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
-    group_by(cluster) %>% 
+    group_by(service) %>% 
     summarise(crime_rate=sum(violation)/sum(flow))
     }
     else{
     crime_rate_df<-crime_df2 %>% 
     filter(date>=input[["time"]][1],
            date<=input[["time"]][2]) %>% 
-    group_by(cluster) %>% 
+    group_by(service) %>% 
     summarise(crime_rate=sum(violation+misdemeanor+felony)/sum(flow))
       
     }
 
 
 
-
+  
+  
 crime_rate_df %>%
-  plot_ly(x = ~cluster, y = ~crime_rate, color = ~cluster, type = "bar", colors = "viridis") %>%
-  layout(yaxis = list(title = 'Number of Compliants'),
-         xaxis = list(title = 'cluster'))
-  
-  
-  
+  mutate(service = fct_reorder(service, crime_rate)) %>%
+  plot_ly(x = ~service, y = ~crime_rate, color = ~service, type = "bar", colors = "viridis") %>%
+  layout(yaxis = list(title = 'Amount of crime rate'),
+         xaxis = list(title = 'service'))  
  
 
 
