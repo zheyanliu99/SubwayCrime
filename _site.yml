@@ -40,8 +40,14 @@ navbar:
     #   href: ./resources/Liu.Zheyan.Resume.pdf
     # - icon: fa-linkedin fa-lg
     #   href: https://www.linkedin.com/in/zheyanliu999/
+    - icon: fa-youtube
+      href: https://www.youtube.com/watch?v=7Sk-PvxaoZc
     - icon: fa-github fa-lg
-      href: https://github.com/zheyanliu99/SubwayCrime.git
+      menu:
+      - text: Website
+        href: https://github.com/zheyanliu99/SubwayCrime.git/
+      - text: No-crime Navigation App 
+        href: https://github.com/zheyanliu99/NYC_subway_findroute/
         
       
 output:
