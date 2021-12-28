@@ -21,7 +21,7 @@ navbar:
         href: https://stephenyuan.shinyapps.io/CrimeMapShiny/
     - text: 'GNN model'
       href: report_model.html
-    - text: 'No Crime Navigation App'
+    - text: 'Crime-free Subway Route Identification'
       href: https://zheyanliu.shinyapps.io/NYC_subway_findroute
 
     # - text: "About"
